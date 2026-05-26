@@ -1,5 +1,4 @@
 import { useState } from 'react'
-import BilingualLabel from '../BilingualLabel'
 import { L } from '../../i18n/labels'
 import { saveJson, storageKeys } from '../../utils/appPersistence'
 import { newId } from '../../utils/newId'
@@ -9,6 +8,13 @@ import {
 } from '../../utils/parseShipmentScheduleExcel'
 import '../logistics/ops.css'
 import './pages.css'
+import './InTransitPage.css'
+
+/** 한글(English) 단일 라인 라벨 */
+function koEn(label) {
+  if (!label?.ko) return ''
+  return label.en ? `${label.ko}(${label.en})` : label.ko
+}
 
 function emptyRow() {
   return {
@@ -24,8 +30,6 @@ function emptyRow() {
     deliveryLocation: '',
     remark: '',
     arrived: false,
-    forwarder: '',
-    hbl: '',
     tcTechNo: '',
   }
 }
@@ -35,7 +39,7 @@ export default function InTransitPage({ inTransit, setInTransit, setMasterItems 
   const [uploadError, setUploadError] = useState('')
 
   function flashSaved() {
-    setSaveHint('Saved to browser storage')
+    setSaveHint('브라우저 저장소에 반영됨(Saved to browser storage)')
     setTimeout(() => setSaveHint(''), 2500)
   }
 
@@ -89,7 +93,9 @@ export default function InTransitPage({ inTransit, setInTransit, setMasterItems 
       const buffer = await file.arrayBuffer()
       const { rows, sheetName } = parseShipmentScheduleExcel(buffer)
       setInTransit((prev) => [...prev, ...rows])
-      setSaveHint(`Loaded ${rows.length} row(s) from “${sheetName}”`)
+      setSaveHint(
+        `“${sheetName}” 시트에서 ${rows.length}행 로드됨(Loaded ${rows.length} row(s))`,
+      )
       setTimeout(() => setSaveHint(''), 4000)
     } catch (err) {
       setUploadError(
@@ -101,29 +107,33 @@ export default function InTransitPage({ inTransit, setInTransit, setMasterItems 
   }
 
   return (
-    <div className="page page--wide">
+    <div className="page page--transit-compact">
       <header className="page__header">
-        <h1>In-Transit</h1>
-        <p className="page__desc">
-          해상/항만 운송 중 컨테이너 라인을 편집합니다. Shipment Schedule Excel 시트{' '}
-          <strong>ML and Redmond</strong>를 업로드해 일괄 반영할 수 있습니다.
-        </p>
-        <div className="page__actions">
-          <label className="btn btn--ghost" style={{ cursor: 'pointer' }}>
-            Shipment Schedule Upload
-            <input
-              type="file"
-              accept=".xlsx,.xls"
-              style={{ display: 'none' }}
-              onChange={handleShipmentFile}
-            />
-          </label>
-          <button type="button" className="btn btn--ghost" onClick={handleAdd}>
-            Add Row
-          </button>
-          <button type="button" className="btn btn--primary" onClick={handleSave}>
-            Save
-          </button>
+        <div className="page__header--row">
+          <div>
+            <h1>{koEn({ ko: '운송중', en: 'In-Transit' })}</h1>
+            <p className="page__desc">
+              선적·항만 운송 라인 편집. Excel 시트 <strong>ML and Redmond</strong> 업로드로
+              일괄 반영(Edit lines · bulk import via Shipment Schedule).
+            </p>
+          </div>
+          <div className="page__actions">
+            <label className="btn btn--ghost" style={{ cursor: 'pointer' }}>
+              {koEn({ ko: '선적 일정 업로드', en: 'Shipment upload' })}
+              <input
+                type="file"
+                accept=".xlsx,.xls"
+                style={{ display: 'none' }}
+                onChange={handleShipmentFile}
+              />
+            </label>
+            <button type="button" className="btn btn--ghost" onClick={handleAdd}>
+              {koEn({ ko: '행 추가', en: 'Add row' })}
+            </button>
+            <button type="button" className="btn btn--primary" onClick={handleSave}>
+              {koEn({ ko: '저장', en: 'Save' })}
+            </button>
+          </div>
         </div>
         {saveHint && (
           <p className="page__hint" role="status">
@@ -137,53 +147,38 @@ export default function InTransitPage({ inTransit, setInTransit, setMasterItems 
         )}
       </header>
 
-      <div className="table-wrap page__table">
-        <table className="ops-table ops-table--transit">
+      <div className="transit-page__table-wrap page__table">
+        <table className="transit-page__table">
+          <colgroup>
+            <col className="transit-page__col--container" />
+            <col className="transit-page__col--model" />
+            <col className="transit-page__col--part" />
+            <col className="transit-page__col--qty" />
+            <col className="transit-page__col--date" />
+            <col className="transit-page__col--date" />
+            <col className="transit-page__col--date" />
+            <col className="transit-page__col--eta-wh" />
+            <col className="transit-page__col--delivery" />
+            <col className="transit-page__col--arrived" />
+            <col className="transit-page__col--remark" />
+            <col className="transit-page__col--tctech" />
+            <col className="transit-page__col--actions" />
+          </colgroup>
           <thead>
             <tr>
-              <th>
-                <BilingualLabel label={L.containerNo} />
-              </th>
-              <th>
-                <BilingualLabel label={L.model} />
-              </th>
-              <th>
-                <BilingualLabel label={L.partNo} />
-              </th>
-              <th>
-                <BilingualLabel label={L.qty} />
-              </th>
-              <th>
-                <BilingualLabel label={L.etdTcTech} />
-              </th>
-              <th>
-                <BilingualLabel label={L.etdPort} />
-              </th>
-              <th>
-                <BilingualLabel label={L.etaPort} />
-              </th>
-              <th>
-                <BilingualLabel label={L.etaWh} />
-              </th>
-              <th>
-                <BilingualLabel label={L.deliveryLocation} />
-              </th>
-              <th>
-                <BilingualLabel label={L.arrived} />
-              </th>
-              <th>
-                <BilingualLabel label={L.remark} />
-              </th>
-              <th>
-                <BilingualLabel label={L.forwarder} />
-              </th>
-              <th>
-                <BilingualLabel label={L.hbl} />
-              </th>
-              <th>
-                <BilingualLabel label={L.tcTechNo} />
-              </th>
-              <th />
+              <th>{koEn(L.containerNo)}</th>
+              <th>{koEn(L.model)}</th>
+              <th>{koEn(L.partNo)}</th>
+              <th>{koEn(L.qty)}</th>
+              <th>{koEn(L.etdTcTech)}</th>
+              <th>{koEn(L.etdPort)}</th>
+              <th>{koEn(L.etaPort)}</th>
+              <th>{koEn(L.etaWh)}</th>
+              <th>{koEn(L.deliveryLocation)}</th>
+              <th>{koEn(L.arrived)}</th>
+              <th>{koEn(L.remark)}</th>
+              <th>{koEn(L.tcTechNo)}</th>
+              <th>{koEn({ ko: '작업', en: 'Act' })}</th>
             </tr>
           </thead>
           <tbody>
@@ -220,7 +215,7 @@ export default function InTransitPage({ inTransit, setInTransit, setMasterItems 
                 </td>
                 <td>
                   <input
-                    className="cell-input"
+                    className="cell-input cell-input--date"
                     type="date"
                     value={row.etdTcTech || ''}
                     onChange={(e) => updateRow(row.id, { etdTcTech: e.target.value })}
@@ -228,7 +223,7 @@ export default function InTransitPage({ inTransit, setInTransit, setMasterItems 
                 </td>
                 <td>
                   <input
-                    className="cell-input"
+                    className="cell-input cell-input--date"
                     type="date"
                     value={row.etdPort || ''}
                     onChange={(e) => updateRow(row.id, { etdPort: e.target.value })}
@@ -236,7 +231,7 @@ export default function InTransitPage({ inTransit, setInTransit, setMasterItems 
                 </td>
                 <td>
                   <input
-                    className="cell-input"
+                    className="cell-input cell-input--date"
                     type="date"
                     value={row.etaPort || ''}
                     onChange={(e) => updateRow(row.id, { etaPort: e.target.value })}
@@ -264,7 +259,7 @@ export default function InTransitPage({ inTransit, setInTransit, setMasterItems 
                     type="checkbox"
                     checked={!!row.arrived}
                     onChange={(e) => updateRow(row.id, { arrived: e.target.checked })}
-                    title="입고 완료 시 체크 후 Save — Master 재고 반영 후 목록에서 제거"
+                    title="입고 완료 후 저장 시 Master 재고 반영·행 제거"
                   />
                 </td>
                 <td>
@@ -277,20 +272,6 @@ export default function InTransitPage({ inTransit, setInTransit, setMasterItems 
                 <td>
                   <input
                     className="cell-input"
-                    value={row.forwarder ?? ''}
-                    onChange={(e) => updateRow(row.id, { forwarder: e.target.value })}
-                  />
-                </td>
-                <td>
-                  <input
-                    className="cell-input"
-                    value={row.hbl ?? ''}
-                    onChange={(e) => updateRow(row.id, { hbl: e.target.value })}
-                  />
-                </td>
-                <td>
-                  <input
-                    className="cell-input"
                     value={row.tcTechNo ?? ''}
                     onChange={(e) => updateRow(row.id, { tcTechNo: e.target.value })}
                   />
@@ -298,10 +279,10 @@ export default function InTransitPage({ inTransit, setInTransit, setMasterItems 
                 <td>
                   <button
                     type="button"
-                    className="btn btn--ghost btn--sm"
+                    className="btn btn--ghost transit-page__btn-del"
                     onClick={() => handleDelete(row.id)}
                   >
-                    Delete
+                    {koEn({ ko: '삭제', en: 'Del' })}
                   </button>
                 </td>
               </tr>

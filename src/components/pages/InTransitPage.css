@@ -1,0 +1,183 @@
+/* In-Transit — 고밀도 SCM 편집 화면 (가로 스크롤 최소화) */
+
+.page--transit-compact {
+  max-width: none;
+  width: 100%;
+  margin: 0 auto;
+  padding: 0.55rem 0.85rem 1.25rem;
+  box-sizing: border-box;
+}
+
+.page--transit-compact .page__header {
+  margin-bottom: 0.45rem;
+}
+
+.page--transit-compact .page__header h1 {
+  margin: 0 0 0.15rem;
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.page--transit-compact .page__desc {
+  margin: 0 0 0.4rem;
+  font-size: 0.7rem;
+  line-height: 1.35;
+  color: var(--muted);
+}
+
+.page--transit-compact .page__actions {
+  gap: 0.35rem;
+}
+
+.page--transit-compact .page__actions .btn {
+  padding: 0.28rem 0.55rem;
+  font-size: 0.7rem;
+  border-radius: 4px;
+}
+
+.page--transit-compact .page__hint {
+  margin-top: 0.35rem;
+  font-size: 0.68rem;
+}
+
+.page--transit-compact .page__header--row {
+  align-items: flex-start;
+  gap: 0.5rem 1rem;
+}
+
+.page--transit-compact .page__header--row .page__actions {
+  flex-shrink: 0;
+  align-self: center;
+}
+
+.transit-page__table-wrap {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+  margin-top: 0.35rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg, #fff);
+}
+
+.transit-page__table {
+  table-layout: fixed;
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.7rem;
+}
+
+.transit-page__table th,
+.transit-page__table td {
+  padding: 0.18rem 0.22rem;
+  border-bottom: 1px solid var(--border);
+  vertical-align: middle;
+  line-height: 1.2;
+}
+
+.transit-page__table thead th {
+  font-size: 0.65rem;
+  font-weight: 600;
+  color: var(--muted);
+  background: rgba(0, 0, 0, 0.03);
+  white-space: normal;
+  line-height: 1.15;
+  letter-spacing: -0.01em;
+}
+
+.transit-page__table tbody tr:hover td {
+  background: rgba(37, 99, 235, 0.05);
+}
+
+.transit-page__table .cell-input {
+  width: 100%;
+  min-width: 0;
+  padding: 0.16rem 0.22rem;
+  font-size: 0.7rem;
+  border-radius: 3px;
+  line-height: 1.15;
+}
+
+.transit-page__table .cell-input--num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.transit-page__table .cell-input--date {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+.transit-page__table .cell--center {
+  text-align: center;
+  width: 2.25rem;
+  padding-left: 0.1rem;
+  padding-right: 0.1rem;
+}
+
+.transit-page__table .cell--center input[type='checkbox'] {
+  width: 0.85rem;
+  height: 0.85rem;
+  margin: 0;
+  cursor: pointer;
+}
+
+.transit-page__table .transit-page__btn-del {
+  padding: 0.12rem 0.28rem;
+  font-size: 0.65rem;
+  line-height: 1.1;
+  white-space: nowrap;
+}
+
+/* colgroup — % 합계 ~100% (액션 열 고정) */
+.transit-page__col--container {
+  width: 9.5%;
+}
+
+.transit-page__col--model {
+  width: 6.25%;
+}
+
+.transit-page__col--part {
+  width: 10.5%;
+}
+
+.transit-page__col--qty {
+  width: 4.25%;
+}
+
+.transit-page__col--arrived {
+  width: 2.75%;
+}
+
+.transit-page__col--date {
+  width: 5.4%;
+}
+
+.transit-page__col--eta-wh {
+  width: 5.25%;
+}
+
+.transit-page__col--delivery {
+  width: 7.5%;
+}
+
+.transit-page__col--remark {
+  width: 24%;
+}
+
+.transit-page__col--tctech {
+  width: 6.5%;
+}
+
+.transit-page__col--actions {
+  width: 3.25%;
+}
+
+.transit-page__table td .cell-input {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}

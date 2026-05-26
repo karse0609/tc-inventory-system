@@ -78,8 +78,6 @@ function buildRowFromCells(cells, idx) {
     deliveryLocation: String(v(idx.delivery) ?? '').trim(),
     remark: String(v(idx.remark) ?? '').trim(),
     arrived: false,
-    forwarder: String(v(idx.forwarder) ?? '').trim(),
-    hbl: String(v(idx.hbl) ?? '').trim(),
     tcTechNo: String(v(idx.tcTech) ?? '').trim(),
   }
 }
@@ -133,8 +131,6 @@ export function parseShipmentScheduleExcel(buffer) {
     ]),
     delivery: findCol(headers, ['delivery location', 'delivery', /^delivery location/]),
     remark: findCol(headers, ['remark', '비고', /^remark/, /^비고/]),
-    forwarder: findCol(headers, ['forwarder', /^forwarder/]),
-    hbl: findCol(headers, ['hbl #', 'hbl', /^hbl/]),
     tcTech: findCol(headers, ['tc tech no.', 'tc tech no', 'tc techno', /^tc tech/]),
   }
 

@@ -330,8 +330,6 @@ export const inTransitContainers = [
     deliveryLocation: 'Redmond W/H',
     remark: '',
     arrived: false,
-    forwarder: 'OEI',
-    hbl: 'HBL-1001',
     tcTechNo: 'TT-001',
   },
   {
@@ -346,8 +344,6 @@ export const inTransitContainers = [
     deliveryLocation: 'ML',
     remark: 'Port congestion',
     arrived: false,
-    forwarder: 'OEI',
-    hbl: 'HBL-1002',
     tcTechNo: 'TT-002',
   },
   {
@@ -362,8 +358,6 @@ export const inTransitContainers = [
     deliveryLocation: 'Warehouse',
     remark: '',
     arrived: false,
-    forwarder: '',
-    hbl: '',
     tcTechNo: '',
   },
   {
@@ -378,8 +372,6 @@ export const inTransitContainers = [
     deliveryLocation: 'OEI',
     remark: 'Customs inspection',
     arrived: false,
-    forwarder: '',
-    hbl: 'HBL-1004',
     tcTechNo: 'TT-004',
   },
   {
@@ -394,8 +386,6 @@ export const inTransitContainers = [
     deliveryLocation: 'Redmond',
     remark: '',
     arrived: false,
-    forwarder: '',
-    hbl: '',
     tcTechNo: '',
   },
   {
@@ -410,8 +400,6 @@ export const inTransitContainers = [
     deliveryLocation: 'ML',
     remark: '',
     arrived: false,
-    forwarder: '',
-    hbl: '',
     tcTechNo: '',
   },
 ]

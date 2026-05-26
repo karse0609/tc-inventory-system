@@ -29,6 +29,8 @@ export function migrateInTransitRow(row) {
     status,
     delayed: _delayed,
     delayReason,
+    forwarder: _forwarder,
+    hbl: _hbl,
     ...rest
   } = row
 
