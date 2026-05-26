@@ -26,6 +26,10 @@
   color: var(--muted);
 }
 
+.page--transit-compact .page__desc-line {
+  display: block;
+}
+
 .page--transit-compact .page__actions {
   gap: 0.35rem;
 }
@@ -140,51 +144,58 @@
 }
 
 /*
- * colgroup — 합계 100% (1920 기준)
- * Container·배송지·TC TECH 축소 → 비고(Remark) 확대 (긴 문구 줄바꿈 표시)
+ * colgroup — ETA 우선, 단가·금액 열 포함 (합계 ~100%)
  */
+.transit-page__col--eta-wh {
+  width: 6.2%;
+}
+
 .transit-page__col--container {
-  width: 11%;
+  width: 9%;
 }
 
 .transit-page__col--model {
-  width: 8.5%;
+  width: 7.5%;
 }
 
 .transit-page__col--part {
-  width: 5.8%;
+  width: 5.5%;
 }
 
 .transit-page__col--qty {
-  width: 3.8%;
+  width: 3.6%;
+}
+
+.transit-page__col--unitprice {
+  width: 5%;
+}
+
+.transit-page__col--value {
+  width: 5.8%;
 }
 
 .transit-page__col--arrived {
-  width: 2.5%;
+  width: 2.4%;
 }
 
 .transit-page__col--date {
-  width: 6.6%;
-}
-
-.transit-page__col--eta-wh {
-  width: 6%;
+  width: 6.2%;
 }
 
 .transit-page__col--delivery {
-  width: 8.5%;
+  width: 7.5%;
 }
 
 .transit-page__col--remark {
-  width: 25%;
+  width: 22%;
 }
 
 .transit-page__col--tctech {
-  width: 4.5%;
+  width: 4.2%;
 }
 
 .transit-page__col--actions {
-  width: 4.6%;
+  width: 4.5%;
 }
 
 .transit-page__table td .cell-input {

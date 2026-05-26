@@ -1,6 +1,8 @@
-import { useState } from 'react'
-import { L } from '../../i18n/labels'
+import { useMemo, useState } from 'react'
+import { operationsMeta } from '../../data/logisticsSampleData'
+import { L, formatKoEn } from '../../i18n/labels'
 import { saveJson, storageKeys } from '../../utils/appPersistence'
+import { isInTransitRowDelayed } from '../../utils/logisticsMetrics'
 import { newId } from '../../utils/newId'
 import {
   parseShipmentScheduleExcel,
@@ -34,12 +36,38 @@ function emptyRow() {
   }
 }
 
-export default function InTransitPage({ inTransit, setInTransit, setMasterItems }) {
+function formatInvValue(n, currency = 'USD') {
+  return new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency,
+    maximumFractionDigits: 0,
+  }).format(Math.round(n) || 0)
+}
+
+function buildUnitPriceMap(masterItems) {
+  const m = new Map()
+  for (const it of masterItems || []) {
+    m.set(`${it.modelName}\t${it.partNo}`, Number(it.unitPrice) || 0)
+  }
+  return m
+}
+
+export default function InTransitPage({
+  inTransit,
+  setInTransit,
+  setMasterItems,
+  masterItems = [],
+  opsMeta,
+}) {
+  const asOfDate = opsMeta?.asOfDate ?? operationsMeta.asOfDate
+  const currency = opsMeta?.currency ?? operationsMeta.currency
   const [saveHint, setSaveHint] = useState('')
   const [uploadError, setUploadError] = useState('')
 
+  const unitPriceBySku = useMemo(() => buildUnitPriceMap(masterItems), [masterItems])
+
   function flashSaved() {
-    setSaveHint('브라우저 저장소에 반영됨(Saved to browser storage)')
+    setSaveHint(formatKoEn(L.savedToBrowserStorage))
     setTimeout(() => setSaveHint(''), 2500)
   }
 
@@ -111,10 +139,13 @@ export default function InTransitPage({ inTransit, setInTransit, setMasterItems 
       <header className="page__header">
         <div className="page__header--row">
           <div>
-            <h1>{koEn({ ko: '운송중', en: 'In-Transit' })}</h1>
+            <h1>{koEn(L.inTransitInventoryScreen)}</h1>
             <p className="page__desc">
-              선적·항만 운송 라인 편집. Excel 시트 <strong>ML and Redmond</strong> 업로드로
-              일괄 반영(Edit lines · bulk import via Shipment Schedule).
+              <span className="page__desc-line">{koEn(L.inTransitSubtitle)}</span>{' '}
+              <span className="page__desc-line">
+                ETA 지연 행은 강조됩니다. Excel 시트 <strong>ML and Redmond</strong> 업로드로 일괄
+                반영할 수 있습니다.
+              </span>
             </p>
           </div>
           <div className="page__actions">
@@ -150,14 +181,16 @@ export default function InTransitPage({ inTransit, setInTransit, setMasterItems 
       <div className="transit-page__table-wrap page__table">
         <table className="transit-page__table">
           <colgroup>
+            <col className="transit-page__col--eta-wh" />
             <col className="transit-page__col--container" />
             <col className="transit-page__col--model" />
             <col className="transit-page__col--part" />
             <col className="transit-page__col--qty" />
+            <col className="transit-page__col--unitprice" />
+            <col className="transit-page__col--value" />
             <col className="transit-page__col--date" />
             <col className="transit-page__col--date" />
             <col className="transit-page__col--date" />
-            <col className="transit-page__col--eta-wh" />
             <col className="transit-page__col--delivery" />
             <col className="transit-page__col--arrived" />
             <col className="transit-page__col--remark" />
@@ -166,14 +199,16 @@ export default function InTransitPage({ inTransit, setInTransit, setMasterItems 
           </colgroup>
           <thead>
             <tr>
+              <th className="transit-page__th--en">ETA W/H</th>
               <th>{koEn(L.containerNo)}</th>
               <th>{koEn(L.model)}</th>
               <th>{koEn(L.partNo)}</th>
               <th>{koEn(L.qty)}</th>
+              <th>{koEn(L.colUnitPrice)}</th>
+              <th>{koEn(L.inventoryValue)}</th>
               <th className="transit-page__th--en">ETD TC TECH</th>
               <th className="transit-page__th--en">ETD Port</th>
               <th className="transit-page__th--en">ETA Port</th>
-              <th className="transit-page__th--en">ETA W/H</th>
               <th>{koEn(L.deliveryLocation)}</th>
               <th>{koEn(L.arrived)}</th>
               <th>{koEn(L.remark)}</th>
@@ -182,111 +217,129 @@ export default function InTransitPage({ inTransit, setInTransit, setMasterItems 
             </tr>
           </thead>
           <tbody>
-            {inTransit.map((row) => (
-              <tr key={row.id}>
-                <td>
-                  <input
-                    className="cell-input"
-                    value={row.containerNo}
-                    onChange={(e) => updateRow(row.id, { containerNo: e.target.value })}
-                  />
-                </td>
-                <td>
-                  <input
-                    className="cell-input"
-                    value={row.modelName}
-                    onChange={(e) => updateRow(row.id, { modelName: e.target.value })}
-                  />
-                </td>
-                <td>
-                  <input
-                    className="cell-input"
-                    value={row.partNo}
-                    onChange={(e) => updateRow(row.id, { partNo: e.target.value })}
-                  />
-                </td>
-                <td>
-                  <input
-                    className="cell-input cell-input--num"
-                    type="number"
-                    value={row.qty}
-                    onChange={(e) => updateRow(row.id, { qty: Number(e.target.value) || 0 })}
-                  />
-                </td>
-                <td>
-                  <input
-                    className="cell-input cell-input--date"
-                    type="date"
-                    value={row.etdTcTech || ''}
-                    onChange={(e) => updateRow(row.id, { etdTcTech: e.target.value })}
-                  />
-                </td>
-                <td>
-                  <input
-                    className="cell-input cell-input--date"
-                    type="date"
-                    value={row.etdPort || ''}
-                    onChange={(e) => updateRow(row.id, { etdPort: e.target.value })}
-                  />
-                </td>
-                <td>
-                  <input
-                    className="cell-input cell-input--date"
-                    type="date"
-                    value={row.etaPort || ''}
-                    onChange={(e) => updateRow(row.id, { etaPort: e.target.value })}
-                  />
-                </td>
-                <td>
-                  <input
-                    className="cell-input"
-                    value={row.etaWh ?? ''}
-                    onChange={(e) => updateRow(row.id, { etaWh: e.target.value })}
-                    placeholder="YYYY-MM-DD"
-                  />
-                </td>
-                <td>
-                  <input
-                    className="cell-input"
-                    value={row.deliveryLocation ?? ''}
-                    onChange={(e) =>
-                      updateRow(row.id, { deliveryLocation: e.target.value })
-                    }
-                  />
-                </td>
-                <td className="cell--center">
-                  <input
-                    type="checkbox"
-                    checked={!!row.arrived}
-                    onChange={(e) => updateRow(row.id, { arrived: e.target.checked })}
-                    title="입고 완료 후 저장 시 Master 재고 반영·행 제거"
-                  />
-                </td>
-                <td className="transit-page__td--remark">
-                  <input
-                    className="cell-input transit-page__cell-input--remark"
-                    value={row.remark ?? ''}
-                    onChange={(e) => updateRow(row.id, { remark: e.target.value })}
-                  />
-                </td>
-                <td>
-                  <input
-                    className="cell-input transit-page__cell-input--tctech"
-                    value={row.tcTechNo ?? ''}
-                    onChange={(e) => updateRow(row.id, { tcTechNo: e.target.value })}
-                  />
-                </td>
-                <td>
-                  <button
-                    type="button"
-                    className="btn btn--ghost transit-page__btn-del"
-                    onClick={() => handleDelete(row.id)}
-                  >
-                    {koEn({ ko: '삭제', en: 'Del' })}
-                  </button>
-                </td>
-              </tr>
-            ))}
+            {inTransit.map((row) => {
+              const skuKey = `${row.modelName}\t${row.partNo}`
+              const unitP = unitPriceBySku.get(skuKey) || 0
+              return (
+                <tr
+                  key={row.id}
+                  className={isInTransitRowDelayed(row, asOfDate) ? 'row--delay' : undefined}
+                >
+                  <td>
+                    <input
+                      className="cell-input"
+                      value={row.etaWh ?? ''}
+                      onChange={(e) => updateRow(row.id, { etaWh: e.target.value })}
+                      placeholder="YYYY-MM-DD"
+                    />
+                  </td>
+                  <td>
+                    <input
+                      className="cell-input"
+                      value={row.containerNo}
+                      onChange={(e) => updateRow(row.id, { containerNo: e.target.value })}
+                    />
+                  </td>
+                  <td>
+                    <input
+                      className="cell-input"
+                      value={row.modelName}
+                      onChange={(e) => updateRow(row.id, { modelName: e.target.value })}
+                    />
+                  </td>
+                  <td>
+                    <input
+                      className="cell-input"
+                      value={row.partNo}
+                      onChange={(e) => updateRow(row.id, { partNo: e.target.value })}
+                    />
+                  </td>
+                  <td>
+                    <input
+                      className="cell-input cell-input--num"
+                      type="number"
+                      value={row.qty}
+                      onChange={(e) => updateRow(row.id, { qty: Number(e.target.value) || 0 })}
+                    />
+                  </td>
+                  <td className="cell--num cell--muted" title={koEn(L.colUnitPrice)}>
+                    {unitP
+                      ? unitP.toLocaleString('en-US', {
+                          minimumFractionDigits: 2,
+                          maximumFractionDigits: 2,
+                        })
+                      : '—'}
+                  </td>
+                  <td className="cell--num cell--muted">
+                    {formatInvValue((Number(row.qty) || 0) * unitP, currency)}
+                  </td>
+                  <td>
+                    <input
+                      className="cell-input cell-input--date"
+                      type="date"
+                      value={row.etdTcTech || ''}
+                      onChange={(e) => updateRow(row.id, { etdTcTech: e.target.value })}
+                    />
+                  </td>
+                  <td>
+                    <input
+                      className="cell-input cell-input--date"
+                      type="date"
+                      value={row.etdPort || ''}
+                      onChange={(e) => updateRow(row.id, { etdPort: e.target.value })}
+                    />
+                  </td>
+                  <td>
+                    <input
+                      className="cell-input cell-input--date"
+                      type="date"
+                      value={row.etaPort || ''}
+                      onChange={(e) => updateRow(row.id, { etaPort: e.target.value })}
+                    />
+                  </td>
+                  <td>
+                    <input
+                      className="cell-input"
+                      value={row.deliveryLocation ?? ''}
+                      onChange={(e) =>
+                        updateRow(row.id, { deliveryLocation: e.target.value })
+                      }
+                    />
+                  </td>
+                  <td className="cell--center">
+                    <input
+                      type="checkbox"
+                      checked={!!row.arrived}
+                      onChange={(e) => updateRow(row.id, { arrived: e.target.checked })}
+                      title="입고 완료 후 저장 시 창고 재고에 반영되고 행은 제거됩니다."
+                    />
+                  </td>
+                  <td className="transit-page__td--remark">
+                    <input
+                      className="cell-input transit-page__cell-input--remark"
+                      value={row.remark ?? ''}
+                      onChange={(e) => updateRow(row.id, { remark: e.target.value })}
+                    />
+                  </td>
+                  <td>
+                    <input
+                      className="cell-input transit-page__cell-input--tctech"
+                      value={row.tcTechNo ?? ''}
+                      onChange={(e) => updateRow(row.id, { tcTechNo: e.target.value })}
+                    />
+                  </td>
+                  <td>
+                    <button
+                      type="button"
+                      className="btn btn--ghost transit-page__btn-del"
+                      onClick={() => handleDelete(row.id)}
+                    >
+                      {koEn({ ko: '삭제', en: 'Del' })}
+                    </button>
+                  </td>
+                </tr>
+              )
+            })}
           </tbody>
         </table>
       </div>

@@ -22,7 +22,8 @@ import {
   saveUsersToStorage,
   setSessionUserId as writeBrowserSessionUserId,
 } from './utils/auth'
-import { canAccessView, isAdminUser } from './utils/permissions'
+import { VIEW_IDS, canAccessView, isAdminUser } from './utils/permissions'
+import { VIEW_LABELS, formatKoEn } from './i18n/labels'
 import LoginPage from './components/auth/LoginPage.jsx'
 import Dashboard from './components/Dashboard.jsx'
 import MasterDataPage from './components/pages/MasterDataPage.jsx'
@@ -34,18 +35,9 @@ import SettingsPage from './components/pages/SettingsPage.jsx'
 import './App.css'
 import './components/pages/pages.css'
 
-const VIEWS = [
-  { id: 'dashboard', label: 'Dashboard' },
-  { id: 'master', label: 'Master Data' },
-  { id: 'delivery', label: 'Delivery Plan' },
-  { id: 'transit', label: 'In-Transit' },
-  { id: 'forecast', label: 'Forecast Upload' },
-  { id: 'projection', label: 'Inventory Projection' },
-  { id: 'settings', label: 'Settings' },
-]
-
 function firstAllowedView(authUser) {
-  return VIEWS.find((v) => canAccessView(authUser, v.id))?.id ?? 'dashboard'
+  if (!authUser) return 'dashboard'
+  return VIEW_IDS.find((id) => canAccessView(authUser, id)) ?? 'dashboard'
 }
 
 function App() {
@@ -137,7 +129,13 @@ function App() {
   }, [])
 
   const visibleNav = useMemo(
-    () => VIEWS.filter((v) => authUser && canAccessView(authUser, v.id)),
+    () =>
+      authUser
+        ? VIEW_IDS.filter((id) => canAccessView(authUser, id)).map((id) => ({
+            id,
+            label: formatKoEn(VIEW_LABELS[id]),
+          }))
+        : [],
     [authUser],
   )
 
@@ -154,7 +152,7 @@ function App() {
     if (!authUser) return
     /* eslint-disable react-hooks/set-state-in-effect -- align view with URL hash after login */
     const raw = window.location.hash.replace(/^#\/?/, '')
-    if (raw && VIEWS.some((v) => v.id === raw) && canAccessView(authUser, raw)) {
+    if (raw && VIEW_IDS.includes(raw) && canAccessView(authUser, raw)) {
       setView(raw)
     } else {
       const first = firstAllowedView(authUser)
@@ -168,7 +166,7 @@ function App() {
     if (!authUser) return
     const onHash = () => {
       const raw = window.location.hash.replace(/^#\/?/, '')
-      if (!raw || !VIEWS.some((v) => v.id === raw) || !canAccessView(authUser, raw)) {
+      if (!raw || !VIEW_IDS.includes(raw) || !canAccessView(authUser, raw)) {
         const first = firstAllowedView(authUser)
         window.history.replaceState(null, '', `#/${first}`)
         setView(first)
@@ -225,7 +223,10 @@ function App() {
   return (
     <div className="app">
       <nav className="app-nav" aria-label="Main">
-        <span className="app-nav__brand">TC Inventory</span>
+        <span className="app-nav__brand" title="TC TECH 실시간 해외재고 관리">
+          TC TECH
+          <span className="app-nav__brand-sub">· 실시간 해외재고</span>
+        </span>
         {visibleNav.map((v) => (
           <button
             key={v.id}
@@ -253,15 +254,16 @@ function App() {
           deliveryPlans={deliveryPlans}
           inTransitContainers={inTransit}
           opsMeta={opsMeta}
-          weeklyPlans={weeklyPlans}
-          setWeeklyPlans={setWeeklyPlans}
-          startingInventory={startingInventory}
-          setStartingInventory={setStartingInventory}
-          setDataSimSource={setDataSimSource}
         />
       )}
       {view === 'master' && (
-        <MasterDataPage masterItems={masterItems} setMasterItems={setMasterItems} />
+        <MasterDataPage
+          masterItems={masterItems}
+          setMasterItems={setMasterItems}
+          deliveryPlans={deliveryPlans}
+          inTransit={inTransit}
+          opsMeta={opsMeta}
+        />
       )}
       {view === 'delivery' && (
         <DeliveryPlanPage
@@ -276,6 +278,8 @@ function App() {
           inTransit={inTransit}
           setInTransit={setInTransit}
           setMasterItems={setMasterItems}
+          masterItems={masterItems}
+          opsMeta={opsMeta}
         />
       )}
       {view === 'forecast' && (
@@ -304,6 +308,7 @@ function App() {
           setUsers={setUsers}
           currentUserId={authUser.id}
           onForceAuthReset={handleForceAuthReset}
+          onNavigateView={goView}
         />
       )}
     </div>

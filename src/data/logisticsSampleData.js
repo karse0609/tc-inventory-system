@@ -6,8 +6,8 @@
 import { PILOT_MODEL_NAME } from '../config/products'
 
 export const operationsMeta = {
-  title: 'TC TECH 해외재고 · 물류 운영',
-  subtitle: 'Overseas Inventory & Logistics Operations Dashboard',
+  title: 'TC TECH 실시간 해외재고 관리',
+  subtitle: 'TC TECH Real-Time Overseas Inventory Management',
   asOfDate: '2026-05-20',
   timezone: 'Asia/Seoul',
   timezoneLabel: 'KST (Asia/Seoul)',

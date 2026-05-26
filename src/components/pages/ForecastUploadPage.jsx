@@ -1,8 +1,10 @@
 import { useMemo, useState } from 'react'
 import { getEnabledProducts, PILOT_MODEL_NAME } from '../../config/products'
 import { operationsMeta } from '../../data/logisticsSampleData'
+import { L } from '../../i18n/labels'
 import { ParseProductExcelError, parseProductExcel } from '../../utils/parseGs30eExcel'
 import { buildForecastApplyPreview } from '../../utils/forecastMerge'
+import BilingualLabel from '../BilingualLabel'
 import '../logistics/ops.css'
 import './pages.css'
 
@@ -77,10 +79,11 @@ export default function ForecastUploadPage({
   return (
     <div className="page page--wide">
       <header className="page__header">
-        <h1>Forecast Upload</h1>
+        <h1>
+          <BilingualLabel label={L.forecastUploadScreen} compact as="span" />
+        </h1>
         <p className="page__desc">
-          Excel은 <strong>보조 기능</strong>입니다. Master에 등록된 Model·Part No와만 매칭하여 납품 계획
-          수량을 갱신합니다. 신규 품목은 자동 추가되지 않습니다 — Master Data에서 먼저 등록하세요.
+          <BilingualLabel label={L.forecastUploadPageDesc} compact as="span" />
         </p>
       </header>
 
@@ -137,7 +140,7 @@ export default function ForecastUploadPage({
         <section className="card page__section">
           <h2>Preview</h2>
           <p className="page__hint">
-            적용 시 Master에 존재하는 Part만 반영됩니다. 신규 Part 행은 아래 &quot;Unmatched&quot;에
+            적용 시 창고 재고에 존재하는 Part만 반영됩니다. 신규 Part 행은 아래 &quot;Unmatched&quot;에
             표시됩니다.
           </p>
           <div className="page__actions">
@@ -187,7 +190,7 @@ export default function ForecastUploadPage({
             </table>
           </div>
 
-          <h3>Unmatched — add in Master Data first ({previewResult.unmatched.length})</h3>
+          <h3>Unmatched — 창고 재고에 먼저 등록 ({previewResult.unmatched.length})</h3>
           <div className="table-wrap">
             <table className="ops-table">
               <thead>

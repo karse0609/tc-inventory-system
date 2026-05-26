@@ -1,4 +1,6 @@
 import { operationsMeta as defaultOps } from '../../data/logisticsSampleData'
+import { L, formatKoEn } from '../../i18n/labels'
+import BilingualLabel from '../BilingualLabel'
 import UserManagementPage from './UserManagementPage.jsx'
 import '../logistics/ops.css'
 import './pages.css'
@@ -12,6 +14,7 @@ export default function SettingsPage({
   setUsers,
   currentUserId,
   onForceAuthReset,
+  onNavigateView,
 }) {
   function patch(field, value) {
     setOpsMeta((o) => ({ ...o, [field]: value }))
@@ -21,8 +24,23 @@ export default function SettingsPage({
     <div className="page">
       <header className="page__header page__header--row">
         <div>
-          <h1>Settings</h1>
-          <p className="page__desc">기준일·표시 단위 등 운영 설정입니다.</p>
+          <h1>
+            <BilingualLabel label={L.settingsScreen} compact as="span" />
+          </h1>
+          <p className="page__desc">
+            <BilingualLabel label={L.settingsSubtitle} compact as="span" />
+          </p>
+          {onNavigateView && (
+            <p className="page__actions">
+              <button
+                type="button"
+                className="btn btn--ghost"
+                onClick={() => onNavigateView('master')}
+              >
+                {formatKoEn(L.openWarehouseInventory)}
+              </button>
+            </p>
+          )}
         </div>
         {onForceAuthReset && (
           <button
@@ -99,7 +117,8 @@ export default function SettingsPage({
       <section className="card page__section">
         <h2>Data reset</h2>
         <p className="page__hint">
-          Master Data, Delivery Plan, In-Transit 및 시뮬레이션 주간 데이터를 샘플 초기값으로 되돌립니다.
+          창고 재고(Warehouse Inventory), 출고 계획, 운송중, 시뮬레이션 주간 데이터를 샘플 초기값으로
+          되돌립니다.
           (사용자 계정은 유지됩니다.)
         </p>
         <button type="button" className="btn btn--ghost" onClick={onResetAllData}>

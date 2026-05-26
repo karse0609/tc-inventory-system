@@ -3,25 +3,22 @@
  * Supabase/Firebase 등으로 교체 시 이 모듈만 서버 스키마에 맞게 조정하면 됩니다.
  */
 
+import { VIEW_LABELS, formatKoEn } from '../i18n/labels.js'
+
+/** 네비 표시 순서 (TC TECH 실시간 해외재고 관리 흐름) */
 export const VIEW_IDS = [
   'dashboard',
   'master',
-  'delivery',
   'transit',
+  'delivery',
   'forecast',
   'projection',
   'settings',
 ]
 
-export const VIEW_MENU_LABELS = {
-  dashboard: 'Dashboard',
-  master: 'Master Data',
-  delivery: 'Delivery Plan',
-  transit: 'In-Transit',
-  forecast: 'Forecast Upload',
-  projection: 'Inventory Projection',
-  settings: 'Settings',
-}
+export const VIEW_MENU_LABELS = Object.fromEntries(
+  VIEW_IDS.map((id) => [id, formatKoEn(VIEW_LABELS[id])]),
+)
 
 /** @typedef {{ dashboard?: boolean, master?: boolean, delivery?: boolean, transit?: boolean, forecast?: boolean, projection?: boolean, settings?: boolean }} MenuPermissions */
 

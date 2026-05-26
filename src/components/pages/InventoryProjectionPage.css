@@ -154,6 +154,29 @@
   font-variant-numeric: tabular-nums;
 }
 
+.inv-proj-opening {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.06rem;
+  line-height: 1.12;
+}
+
+.inv-proj-opening--muted {
+  font-size: 0.62rem;
+  color: var(--muted);
+  font-weight: 500;
+}
+
+.inv-proj-opening__tag {
+  display: inline-block;
+  min-width: 0.65rem;
+  margin-right: 0.1rem;
+  font-size: 0.55rem;
+  font-weight: 700;
+  opacity: 0.75;
+}
+
 .inv-proj-week {
   min-width: 4.35rem;
   max-width: 4.6rem;
@@ -182,15 +205,15 @@
 }
 
 .inv-proj-cell--critical {
-  background: rgba(220, 38, 38, 0.09);
+  background: rgba(220, 38, 38, 0.04);
 }
 
 .inv-proj-cell--warning {
-  background: rgba(234, 179, 8, 0.12);
+  background: rgba(234, 179, 8, 0.06);
 }
 
 .inv-proj-cell--stable {
-  background: rgba(22, 163, 74, 0.08);
+  background: rgba(22, 163, 74, 0.05);
 }
 
 .inv-proj-cell--na {
@@ -208,17 +231,17 @@
 }
 
 .inv-proj-status--critical {
-  background: rgba(220, 38, 38, 0.2);
+  background: rgba(220, 38, 38, 0.12);
   color: #991b1b;
 }
 
 .inv-proj-status--warning {
-  background: rgba(234, 179, 8, 0.35);
+  background: rgba(234, 179, 8, 0.2);
   color: #92400e;
 }
 
 .inv-proj-status--stable {
-  background: rgba(22, 163, 74, 0.25);
+  background: rgba(22, 163, 74, 0.15);
   color: #166534;
 }
 

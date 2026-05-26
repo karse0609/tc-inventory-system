@@ -44,6 +44,12 @@
   line-height: 1.45;
 }
 
+.page__desc--secondary {
+  margin-top: -0.45rem;
+  margin-bottom: 0.75rem;
+  font-size: 0.82rem;
+}
+
 .page__actions {
   display: flex;
   flex-wrap: wrap;
@@ -193,9 +199,20 @@
 
 .app-nav__brand {
   margin-right: auto;
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.2rem 0.35rem;
   font-weight: 800;
   font-size: 0.9rem;
   color: var(--text-h);
+}
+
+.app-nav__brand-sub {
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: var(--muted);
+  letter-spacing: -0.02em;
 }
 
 .app-nav__user {

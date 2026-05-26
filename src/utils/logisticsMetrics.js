@@ -164,3 +164,54 @@ export function getThisWeekAggregatedDeliveryQty(itemPlans, modelName, asOfDate)
     })
     .reduce((sum, row) => sum + (Number(row.qty ?? row.plannedQty) || 0), 0)
 }
+
+/** 모델별 창고(마스터) 재고 수량·금액 */
+export function sumWarehouseStockForModel(masterItems, modelName) {
+  const rows = filterByModel(masterItems, modelName).filter((r) => r.status !== 'Inactive')
+  let qty = 0
+  let value = 0
+  for (const r of rows) {
+    const q = Number(r.currentStock) || 0
+    const p = Number(r.unitPrice) || 0
+    qty += q
+    value += q * p
+  }
+  return { qty, value }
+}
+
+/**
+ * 운송중(컨테이너 목록) 수량·금액 — 단가는 masterItems에서 model+part 매칭
+ * @param {object[]} containers 이미 모델 등으로 필터된 행
+ */
+export function sumInTransitStockForContainers(containers, masterItems) {
+  const priceMap = new Map()
+  for (const m of masterItems) {
+    if (m.status === 'Inactive') continue
+    priceMap.set(`${m.modelName}\t${m.partNo}`, Number(m.unitPrice) || 0)
+  }
+  let qty = 0
+  let value = 0
+  for (const row of containers) {
+    if (!isInTransitRowActive(row)) continue
+    const q = Number(row.qty) || 0
+    const unit = priceMap.get(`${row.modelName}\t${row.partNo}`) || 0
+    qty += q
+    value += q * unit
+  }
+  return { qty, value }
+}
+
+/** ETA Port 또는 ETA W/H가 기준일보다 이전인 미도착 컨테이너 */
+export function isInTransitRowDelayed(row, asOfDate) {
+  if (!isInTransitRowActive(row) || !asOfDate) return false
+  const etaP = row.etaPort
+  if (etaP && /^\d{4}-\d{2}-\d{2}$/.test(String(etaP)) && String(etaP) < asOfDate) return true
+  const wh = String(row.etaWh ?? '').trim()
+  if (/^\d{4}-\d{2}-\d{2}$/.test(wh) && wh < asOfDate) return true
+  return false
+}
+
+/** ETA Port 또는 ETA W/H가 기준일보다 이전인 미도착 컨테이너 수 */
+export function countDelayedInTransitContainers(containers, asOfDate) {
+  return containers.filter((row) => isInTransitRowDelayed(row, asOfDate)).length
+}

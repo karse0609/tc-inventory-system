@@ -66,8 +66,8 @@ export default function TodayStatus({ metrics, unit, currency = 'USD' }) {
       value: covDisplay,
       meta: `${L.weeks.en} · min`,
       highlight: true,
-      warn: covFinite && cov < 4,
-      danger: covFinite && cov < 2,
+      warn: covFinite && cov >= 3 && cov < 4,
+      danger: covFinite && cov < 3,
     },
     {
       label: L.inventoryValue,

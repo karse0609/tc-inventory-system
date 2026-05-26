@@ -312,18 +312,18 @@
 }
 
 .inv-hero--stable {
-  border-color: rgba(22, 163, 74, 0.45);
-  background: rgba(22, 163, 74, 0.06);
+  border-color: rgba(22, 163, 74, 0.32);
+  background: rgba(22, 163, 74, 0.04);
 }
 
 .inv-hero--caution {
-  border-color: rgba(217, 119, 6, 0.5);
-  background: rgba(217, 119, 6, 0.08);
+  border-color: rgba(217, 119, 6, 0.35);
+  background: rgba(217, 119, 6, 0.05);
 }
 
 .inv-hero--danger {
-  border-color: rgba(220, 38, 38, 0.5);
-  background: rgba(220, 38, 38, 0.08);
+  border-color: rgba(220, 38, 38, 0.35);
+  background: rgba(220, 38, 38, 0.05);
 }
 
 .inv-hero__main {

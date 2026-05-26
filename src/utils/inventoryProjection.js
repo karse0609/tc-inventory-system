@@ -1,3 +1,4 @@
+import { MIN_MANAGEMENT_WEEKS } from '../config/inventoryPolicy'
 import { planWeekMonday } from './deliveryPlanHorizon'
 import { isInTransitRowActive } from './logisticsMetrics'
 
@@ -37,6 +38,29 @@ function arrivalQtyForWeek(transitRows, modelName, partNo, mondayIso) {
   return sum
 }
 
+/** 활성 운송중 수량 합계(ETA 주차와 무관, 파이프라인 표시용) */
+function pipelineQtyForSku(transitRows, modelName, partNo) {
+  let sum = 0
+  for (const t of transitRows) {
+    if (!isInTransitRowActive(t)) continue
+    if (t.modelName !== modelName || t.partNo !== partNo) continue
+    sum += Number(t.qty) || 0
+  }
+  return sum
+}
+
+function projectionStatusFromPolicy(projected, weeklyOut, safetyWeeks, leadTimeDays) {
+  if (weeklyOut <= 0) return 'na'
+  const cov = projected / weeklyOut
+  if (!Number.isFinite(cov)) return 'na'
+  const safetyW =
+    safetyWeeks > 0 ? safetyWeeks : MIN_MANAGEMENT_WEEKS
+  const leadW = Math.max(0, (Number(leadTimeDays) || 0) / 7)
+  if (cov < safetyW) return 'critical'
+  if (cov < safetyW + leadW) return 'warning'
+  return 'stable'
+}
+
 /**
  * @param {object[]} masterItems
  * @param {object[]} deliveryPlans
@@ -50,6 +74,14 @@ export function buildInventoryProjectionRows(masterItems, deliveryPlans, inTrans
   return items.map((item) => {
     let projected = Number(item.currentStock) || 0
     const weeks = {}
+    const safetyWeeks = Number(item.safetyStockWeeks) || 0
+    const leadTimeDays = Number(item.leadTime) || 0
+    const masterWeeklyDemand = Number(item.weeklyDemand) || 0
+    const inTransitPipeline = pipelineQtyForSku(
+      inTransitRows,
+      item.modelName,
+      item.partNo,
+    )
 
     for (const col of sortedWeeks) {
       const arrival = arrivalQtyForWeek(inTransitRows, item.modelName, item.partNo, col.periodStart)
@@ -59,20 +91,21 @@ export function buildInventoryProjectionRows(masterItems, deliveryPlans, inTrans
         item.partNo,
         col.periodStart,
       )
-      const safetyW = Number(item.safetyStockWeeks) || 0
+      const weeklyOut = Math.max(delivery, masterWeeklyDemand)
 
       projected = projected + arrival - delivery
 
-      const coverageWeeks = delivery > 0 ? projected / delivery : null
-      const safetyStockQty = delivery * safetyW
+      const coverageWeeks = weeklyOut > 0 ? projected / weeklyOut : null
+      const safetyWForQty = safetyWeeks > 0 ? safetyWeeks : MIN_MANAGEMENT_WEEKS
+      const safetyStockQty = weeklyOut * safetyWForQty
       const gap = projected - safetyStockQty
 
-      let status = 'na'
-      if (coverageWeeks != null && Number.isFinite(coverageWeeks)) {
-        if (coverageWeeks < 2) status = 'critical'
-        else if (coverageWeeks < 4) status = 'warning'
-        else status = 'stable'
-      }
+      const status = projectionStatusFromPolicy(
+        projected,
+        weeklyOut,
+        safetyWeeks,
+        leadTimeDays,
+      )
 
       weeks[col.periodStart] = {
         weekId: col.week,
@@ -82,6 +115,7 @@ export function buildInventoryProjectionRows(masterItems, deliveryPlans, inTrans
         safetyStockQty,
         arrival,
         delivery,
+        weeklyOut,
         status,
       }
     }
@@ -92,7 +126,9 @@ export function buildInventoryProjectionRows(masterItems, deliveryPlans, inTrans
       partNo: item.partNo,
       description: item.description ?? '',
       currentStock: Number(item.currentStock) || 0,
-      safetyStockWeeks: Number(item.safetyStockWeeks) || 0,
+      inTransitPipeline,
+      safetyStockWeeks: safetyWeeks,
+      leadTimeDays,
       weeks,
     }
   })

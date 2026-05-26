@@ -9,10 +9,15 @@ export function getWeeklyDemandSeries(itemDeliveryPlans, asOfDate) {
   return future.map((row) => Number(row.qty ?? row.plannedQty) || 0)
 }
 
-export function sumInTransitByPart(containers, partNo) {
+export function sumInTransitByPart(containers, modelName, partNo) {
   return containers
-    .filter((c) => c.partNo === partNo && isInTransitRowActive(c))
-    .reduce((sum, c) => sum + c.qty, 0)
+    .filter(
+      (c) =>
+        c.partNo === partNo &&
+        c.modelName === modelName &&
+        isInTransitRowActive(c),
+    )
+    .reduce((sum, c) => sum + (Number(c.qty) || 0), 0)
 }
 
 /**
@@ -47,7 +52,9 @@ export function buildItemInventoryStatus({
   inTransitContainers,
   asOfDate,
 }) {
-  const partPlans = itemDeliveryPlans.filter((p) => p.partNo === item.partNo)
+  const partPlans = itemDeliveryPlans.filter(
+    (p) => p.partNo === item.partNo && p.modelName === item.modelName,
+  )
   const weeklyDemand =
     item.weeklyDemand != null && item.weeklyDemand !== ''
       ? Number(item.weeklyDemand) || 0
@@ -57,7 +64,11 @@ export function buildItemInventoryStatus({
   const plannedDelivery = Number(firstWeek?.qty ?? firstWeek?.plannedQty) || 0
   const confirmedDelivery = null
 
-  const inTransitQty = sumInTransitByPart(inTransitContainers, item.partNo)
+  const inTransitQty = sumInTransitByPart(
+    inTransitContainers,
+    item.modelName,
+    item.partNo,
+  )
   const warehouseStock = item.currentStock
 
   const coverageWeeks = calculateDemandBasedCoverageWeeks(

@@ -54,8 +54,8 @@ export const L = {
   inventoryValue: { ko: '재고 금액', en: 'Inventory Value' },
   minManagementWeeks: { ko: '최소 관리 기준', en: 'Min. Target' },
   coverageLegend: {
-    ko: '2주 미만 위험 · 2~4주 주의 · 4주+ 안정',
-    en: '<2w Critical · 2–4w Warning · 4w+ Stable',
+    ko: '4주 이상 안정 · 3~4주 주의 · 3주 미만 위험',
+    en: '4w+ stable · 3–4w caution · <3w critical',
   },
   description: { ko: '품명', en: 'Description' },
   currentStock: { ko: '현재재고', en: 'Current Stock' },
@@ -89,8 +89,8 @@ export const L = {
   weeklyDemandTotal: { ko: '주간 수요 합', en: 'Weekly Demand (Σ)' },
 
   multiItemNote: {
-    ko: 'Master Data + Delivery Plan 기준 · Multi-SKU (model + part)',
-    en: 'Driven by Master Data + Delivery Plan · Multi-SKU (model + part)',
+    ko: '선택 모델 기준 · 창고 + 운송중 + 납품 계획 (Multi-SKU)',
+    en: 'Per selected model · warehouse + in-transit + delivery plan (Multi-SKU)',
   },
 
   excelUpload: { ko: 'Excel 업로드', en: 'Excel Upload' },
@@ -103,13 +103,17 @@ export const L = {
   actionCancel: { ko: '취소', en: 'Cancel' },
   actionDelete: { ko: '삭제', en: 'Delete' },
 
-  /** Delivery Plan 화면 */
-  deliveryPlanScreenTitle: { ko: '납품 계획', en: 'Delivery Plan' },
+  /** Delivery Plan 화면 — 출고 계획 */
+  deliveryPlanScreenTitle: { ko: '출고 계획', en: 'Delivery Plan' },
+  deliveryPlanScreenSubtitle: {
+    ko: '주차별 출고 수량 수기 입력(품목별)',
+    en: 'Manual weekly outbound qty per SKU',
+  },
   deliveryPlanPageDesc: {
     ko:
-      '품번(행) × 주차(열) 가로형 그리드입니다. 각 셀에는 주간 납품 수량만 입력합니다. 기준일이 속한 주를 포함해 과거 최대 52주까지 표시 범위를 넓힐 수 있으며, 데이터는 브라우저 저장소에 보관됩니다. 재고 예측(Inventory Projection)의 주간 납품 수량은 이 값을 사용합니다.',
+      '기준일 기준 주차(열) × 품목(행) 그리드에 주차별 출고(납품) 수량을 입력합니다. 데이터는 브라우저에 저장되며, 재고 예측은 여기서 입력한 주간 출고와 운송중 입고·창고 재고를 함께 반영합니다.',
     en:
-      'Horizontal grid: parts (rows) × weeks (columns). Enter weekly delivery qty per cell. You can widen the past window up to 52 weeks including the week of the as-of date; data is kept in browser storage. Inventory Projection uses these values as weekly delivery qty.',
+      'Grid: parts × calendar weeks from as-of date. Weekly outbound qty per cell; stored in the browser. Inventory Projection combines this with warehouse stock and timed in-transit arrivals.',
   },
   previousWeeksShown: { ko: '이전 주(표시)', en: 'Past weeks (shown)' },
   futureWeeksShown: { ko: '이후 주(표시)', en: 'Future weeks (shown)' },
@@ -130,6 +134,74 @@ export const L = {
     en: 'All weekly delivery plan data for this part will be deleted. Do you want to continue?',
   },
   deletePartPlansTitle: { ko: '납품 계획 삭제', en: 'Delete delivery plan' },
+
+  /** 화면 제목 */
+  warehouseInventoryScreen: { ko: '창고 재고', en: 'Warehouse Inventory' },
+  warehouseInventorySubtitle: {
+    ko: '해외창고 재고 — 품목별 현재재고·단가·재고금액·커버리지(주)',
+    en: 'Overseas warehouse: qty, unit price, stock value, coverage weeks per SKU',
+  },
+  inTransitInventoryScreen: { ko: '운송중 재고', en: 'In-Transit Inventory' },
+  inTransitSubtitle: {
+    ko: 'ETA·컨테이너·품목별 수량·단가·재고금액. 입고완료 후 저장하면 해외창고 재고에 반영됩니다.',
+    en: 'ETA, container, qty, unit price, value. Mark received and save to post qty into warehouse stock.',
+  },
+  forecastUploadScreen: { ko: '출고 예측 업로드', en: 'Forecast Upload' },
+  forecastUploadPageDesc: {
+    ko:
+      'Excel로 주차별 출고 예측을 일괄 반영하는 보조 기능입니다. 창고 재고에 등록된 Model·Part와만 매칭되며, 신규 품목은 자동 추가되지 않습니다.',
+    en:
+      'Optional Excel merge into weekly outbound plans. Only matches parts already on Warehouse Inventory; new SKUs are not created automatically.',
+  },
+  inventoryProjectionScreen: { ko: '재고 예측', en: 'Inventory Projection' },
+  inventoryProjectionSubtitle: {
+    ko:
+      '주차별로 창고 재고에 운송중 입고(ETA 주)를 더하고 출고 계획을 뺀 예상 재고와 주수(커버리지)를 봅니다. 안전재고 주수와 리드타임(일→주)으로 안정·주의·위험을 표시합니다.',
+    en:
+      'Per week: warehouse + in-transit arrivals by ETA − outbound from Delivery Plan; coverage weeks. Status uses safety weeks + lead time.',
+  },
+  settingsScreen: { ko: '설정', en: 'Settings' },
+  settingsSubtitle: {
+    ko:
+      '기준일·통화·대시보드 문구 등 운영 설정입니다. 품목별 단가·리드타임·안전재고 주수·평균 주간 출고량은 창고 재고 화면에서 입력하세요.',
+    en:
+      'As-of date, currency, dashboard copy. Per-SKU unit price, lead time, safety weeks, and avg weekly demand are edited under Warehouse Inventory.',
+  },
+  colUnitPrice: { ko: '단가', en: 'Unit Price' },
+  warehousePipelineAbbr: { ko: '운송중', en: 'In-transit' },
+  openWarehouseInventory: { ko: '창고 재고 화면으로', en: 'Open Warehouse Inventory' },
+  projectionLegendShort: {
+    ko: 'Inv: 전주 예상 + 해당주 ETA 입고 − 출고계획 · Cov: 예상 ÷ max(출고계획, 주간수요) · Gap: 예상 − 안전재고수량',
+    en: 'Inv: prior + ETA arrivals − outbound · Cov: projected ÷ max(plan, weekly demand) · Gap: vs safety qty',
+  },
+  projectionStatusLabels: {
+    critical: { ko: '위험', en: 'Critical' },
+    warning: { ko: '주의', en: 'Warning' },
+    stable: { ko: '안정', en: 'Stable' },
+    na: { ko: '해당없음', en: 'N/A' },
+  },
+
+  /** Dashboard 상단 KPI */
+  dashboardWarehouseQty: { ko: '창고 재고 수량', en: 'Warehouse stock qty' },
+  dashboardWarehouseValue: { ko: '창고 재고 금액', en: 'Warehouse stock value' },
+  dashboardInTransitQty: { ko: '운송중 재고 수량', en: 'In-transit stock qty' },
+  dashboardInTransitValue: { ko: '운송중 재고 금액', en: 'In-transit stock value' },
+  dashboardThisWeekEtaQty: { ko: '이번주 ETA 수량', en: 'This week ETA qty' },
+  dashboardDelayContainers: { ko: '지연 컨테이너', en: 'Delay containers' },
+  delayOverdue: { ko: '지연', en: 'Overdue' },
+  inventoryByPart: { ko: '품번별 재고 현황', en: 'Inventory by part' },
+  weeklyDeliveryQty: { ko: '주간 납품', en: 'Weekly delivery' },
+}
+
+/** 앱 상단 메뉴 — TC TECH 실시간 해외재고 관리 */
+export const VIEW_LABELS = {
+  dashboard: { ko: '대시보드', en: 'Dashboard' },
+  master: L.warehouseInventoryScreen,
+  transit: L.inTransitInventoryScreen,
+  delivery: L.deliveryPlanScreenTitle,
+  forecast: L.forecastUploadScreen,
+  projection: L.inventoryProjectionScreen,
+  settings: L.settingsScreen,
 }
 
 /** 한글(English) 단일 문자열 — 버튼·짧은 메뉴 등 */

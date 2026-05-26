@@ -3,10 +3,10 @@
 /** 최소 관리 기준 — 4주 재고 */
 export const MIN_MANAGEMENT_WEEKS = 4
 
-/** 커버리지 상태 구간 (주) */
+/** 커버리지 상태 구간 (주) — 대시보드 KPI와 동일: 4주+ 안정, 3~4주 주의, 3주 미만 위험 */
 export const COVERAGE_THRESHOLDS = {
-  dangerMax: 2, // 2주 미만 → 위험
-  cautionMax: 4, // 2주 이상 ~ 4주 미만 → 주의
+  dangerMax: 3, // 3주 미만 → 위험
+  cautionMax: 4, // 3주 이상 ~ 4주 미만 → 주의
   // 4주 이상 → 안정
 }
 

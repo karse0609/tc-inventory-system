@@ -226,6 +226,9 @@ export default function DeliveryPlanPage({
         <p className="page__desc">
           <BilingualLabel label={L.deliveryPlanPageDesc} compact as="span" />
         </p>
+        <p className="page__desc page__desc--secondary">
+          <BilingualLabel label={L.deliveryPlanScreenSubtitle} compact as="span" />
+        </p>
         <div className="delivery-plan-page__toolbar">
           <label>
             <BilingualLabel label={L.previousWeeksShown} compact as="span" />

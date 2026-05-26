@@ -493,6 +493,90 @@ tbody tr:hover {
   padding: 1.5rem !important;
 }
 
+/* 실시간 해외재고 — 핵심 KPI 띠 */
+.dashboard__scope-note {
+  margin: 0.35rem 0 0;
+  font-size: 0.75rem;
+  color: var(--muted);
+  max-width: 44rem;
+  line-height: 1.35;
+}
+
+.dash-kpi {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(9.5rem, 1fr));
+  gap: 0.5rem;
+  margin: 0;
+}
+
+.dash-kpi__card {
+  padding: 0.65rem 0.7rem;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--surface, #fff);
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.dash-kpi__label {
+  font-size: 0.68rem;
+  color: var(--muted);
+  line-height: 1.25;
+}
+
+.dash-kpi__value {
+  font-size: 1.15rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-h);
+}
+
+.dash-kpi__meta {
+  font-size: 0.65rem;
+  color: var(--muted);
+}
+
+.dash-kpi__meta--muted {
+  opacity: 0.75;
+}
+
+.dash-kpi__card--cov-good {
+  border-color: rgba(22, 163, 74, 0.32);
+}
+
+.dash-kpi__card--cov-warn {
+  border-color: rgba(217, 119, 6, 0.38);
+  background: rgba(217, 119, 6, 0.04);
+}
+
+.dash-kpi__card--cov-bad {
+  border-color: rgba(220, 38, 38, 0.38);
+  background: rgba(220, 38, 38, 0.04);
+}
+
+.dash-kpi__card--cov-neutral {
+  /* default surface */
+}
+
+.dash-kpi__card--alert {
+  border-color: rgba(220, 38, 38, 0.42);
+  background: rgba(220, 38, 38, 0.06);
+}
+
+.inv-status-panel--compact .ops-section__title {
+  text-transform: none;
+  letter-spacing: 0.02em;
+  font-size: 0.88rem;
+}
+
+.inv-status-panel__hint {
+  margin: 0 0 0.6rem;
+  font-size: 0.72rem;
+  color: var(--muted);
+  line-height: 1.35;
+}
+
 @media (max-width: 960px) {
   .dashboard__kpis {
     grid-template-columns: repeat(2, 1fr);
