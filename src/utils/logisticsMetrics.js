@@ -1,6 +1,7 @@
 /** 물류 운영 KPI · 주차/지연 판단 */
 
 import { ALL_MODELS_VALUE } from '../config/products'
+import { addCalendarDaysIso } from './timeZones'
 import { formatWeekHeaderShort, isoWeekLabelFromMonday } from './weekIsoLabels'
 
 /** 납품 행의 주 시작일(월요일 YYYY-MM-DD) */
@@ -66,6 +67,21 @@ export function isInTransitRowActive(row) {
   return true
 }
 
+/**
+ * 과거 조회일 기준 운송중 파이프라인(근사): 아직 미입고이면서,
+ * ETD(선적 시작)가 조회일 이후로만 잡히는 행은 당시엔 아직 출발 전으로 제외.
+ */
+export function isInTransitRowActiveAsOf(row, asOfDate, refDate) {
+  if (!isInTransitRowActive(row)) return false
+  if (!asOfDate || !refDate || !/^\d{4}-\d{2}-\d{2}$/.test(asOfDate) || !/^\d{4}-\d{2}-\d{2}$/.test(refDate)) {
+    return true
+  }
+  if (asOfDate >= refDate) return true
+  const etd = String(row.etdTcTech || row.etdPort || '').trim()
+  if (/^\d{4}-\d{2}-\d{2}$/.test(etd) && etd > asOfDate) return false
+  return true
+}
+
 export function sumWeeklyDemandForModel(masterItems, modelName) {
   return filterByModel(masterItems, modelName)
     .filter((row) => row.status !== 'Inactive')
@@ -90,10 +106,8 @@ export function buildTodayStatus({
   const inTransit = inTransitContainers.filter(isInTransitRowActive)
   const inTransitQty = inTransit.reduce((sum, row) => sum + row.qty, 0)
 
-  const thisWeekEtaRows = inTransitContainers.filter(
-    (row) => isInTransitRowActive(row) && isThisWeekInboundEta(row, asOfDate),
-  )
-  const thisWeekEtaQty = thisWeekEtaRows.reduce((sum, row) => sum + row.qty, 0)
+  const thisWeekEtaRows = getDashboardEtaPortWindowRows(inTransitContainers, asOfDate)
+  const thisWeekEtaQty = thisWeekEtaRows.reduce((sum, row) => sum + (Number(row.qty) || 0), 0)
 
   const thisWeekDeliveryQty = getThisWeekAggregatedDeliveryQty(
     itemDeliveryPlans,
@@ -123,6 +137,31 @@ export function getThisWeekEtaRows(containers, asOfDate) {
     .filter(isInTransitRowActive)
     .filter((row) => isThisWeekInboundEta(row, asOfDate))
     .sort((a, b) => rowInboundEtaDate(a).localeCompare(rowInboundEtaDate(b)))
+}
+
+/** ETA Port만 사용 (YYYY-MM-DD) */
+export function etaPortDateOnly(row) {
+  const p = String(row?.etaPort ?? '').trim()
+  return /^\d{4}-\d{2}-\d{2}$/.test(p) ? p : ''
+}
+
+/**
+ * 대시보드「도착 예정」: ETA Port가 기준일 이전(미입고 지연)이거나,
+ * 기준일 초과~기준일+7일 이내인 미입고 행만.
+ */
+export function getDashboardEtaPortWindowRows(containers, asOfDate) {
+  if (!asOfDate || !/^\d{4}-\d{2}-\d{2}$/.test(String(asOfDate))) return []
+  const limit = addCalendarDaysIso(asOfDate, 7)
+  if (!limit) return []
+  return containers
+    .filter(isInTransitRowActive)
+    .filter((row) => {
+      const etaP = etaPortDateOnly(row)
+      if (!etaP) return false
+      if (etaP <= asOfDate) return true
+      return etaP <= limit
+    })
+    .sort((a, b) => etaPortDateOnly(a).localeCompare(etaPortDateOnly(b)))
 }
 
 export function getFutureDeliveryPlans(plans, asOfDate) {

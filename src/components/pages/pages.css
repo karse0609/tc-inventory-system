@@ -159,32 +159,6 @@ td.cell--excel-invalid {
   font-size: 0.75rem;
 }
 
-.forecast-upload__row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 1rem;
-  align-items: flex-end;
-}
-
-.forecast-upload__file {
-  cursor: pointer;
-}
-
-.forecast-upload__steps {
-  margin: 0.75rem 0 0;
-  padding-left: 1.1rem;
-  font-size: 0.85rem;
-  color: var(--muted);
-}
-
-.forecast-upload__steps .ok {
-  color: var(--text-h);
-}
-
-.forecast-upload__steps .fail {
-  color: var(--danger, #b91c1c);
-}
-
 .settings-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));

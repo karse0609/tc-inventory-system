@@ -26,14 +26,30 @@ export const L = {
   dashboardModelAll: { ko: '전체', en: 'All' },
   dashboardWeekEtaWhCol: { ko: 'ETA 창고', en: 'ETA W/H' },
   dashboardWeekEtaDesc: {
-    ko: '기준일이 속한 주에 도착 예정(ETA)인 활성 운송 행입니다. 주차 판정은 창고 ETA가 있으면 그 날짜, 없으면 Port ETA를 사용합니다.',
-    en: 'Active in-transit lines whose inbound ETA falls in the as-of calendar week. Uses warehouse ETA when set, otherwise port ETA.',
+    ko:
+      '기준일 기준: ETA Port가 기준일 이전인 미입고(지연)와, 기준일 다음~7일 이내 도착 예정인 행만 표시합니다. Port ETA가 없으면 제외됩니다.',
+    en:
+      'As-of: overdue (Port ETA on/before as-of, not received) plus Port ETA within the next 7 days. Rows without Port ETA are omitted.',
   },
   dashboardWeekEtaEmpty: {
-    ko: '이번 주 도착 예정인 운송 컨테이너가 없습니다.',
-    en: 'No in-transit containers scheduled to arrive this week.',
+    ko: '조건에 해당하는 도착 예정 컨테이너가 없습니다.',
+    en: 'No containers match the arrival window.',
   },
   asOfDate: { ko: '기준일', en: 'As-of Date' },
+  opsQueryDateKst: {
+    ko: '조회 기준일(KST)',
+    en: 'Query date (KST)',
+  },
+  dashboardSeattleTime: { ko: 'Seattle Time', en: 'Seattle Time' },
+  dashboardKoreaTime: { ko: 'Korea Time (KST)', en: 'Korea Time (KST)' },
+  dashboardAsOfSeattleLine: { ko: '기준일(Seattle)', en: 'As-of date (Seattle)' },
+  dashboardAsOfKstLine: { ko: '한국시간(KST)', en: 'Korea time (KST)' },
+  dashboardAsOfLedgerHint: {
+    ko:
+      '과거 기준일 창고 재고는 입고 확정(운송중 저장) 시 쌓이는 이력으로 역산합니다. 이력이 없으면 출고 계획만 반영해 근사합니다.',
+    en:
+      'Past as-of warehouse stock is derived from receipt history when you save in-transit arrivals. Without history, only delivery-plan outbounds adjust the estimate.',
+  },
   timezone: { ko: '기준 시간대', en: 'Timezone' },
   modelTotal: { ko: '모델 전 Part 합', en: 'All parts (model)' },
 
@@ -114,8 +130,8 @@ export const L = {
   showDataManagement: { ko: 'Data Management 펼치기', en: 'Expand Data Management' },
   hideDataManagement: { ko: 'Data Management 접기', en: 'Collapse Data Management' },
   dataManagementHint: {
-    ko: '시뮬레이션·차트·이력 (Excel은 Forecast Upload)',
-    en: 'Simulation · chart · history (Excel: Forecast Upload)',
+    ko: '시뮬레이션·차트·이력 (출고는 출고 계획 화면에서 수기 입력)',
+    en: 'Simulation · chart · history (outbound: manual in Delivery Plan)',
   },
   weeklyDemandTotal: { ko: '주간 수요 합', en: 'Weekly Demand (Σ)' },
 
@@ -181,13 +197,6 @@ export const L = {
     ko: '정말 삭제하시겠습니까? 삭제 후 복구할 수 없습니다.',
     en: 'Are you sure you want to delete? This cannot be undone.',
   },
-  forecastUploadScreen: { ko: '출고 예측 업로드', en: 'Forecast Upload' },
-  forecastUploadPageDesc: {
-    ko:
-      'Excel로 주차별 출고 예측을 일괄 반영하는 보조 기능입니다. 창고 재고에 등록된 Model·Part와만 매칭되며, 신규 품목은 자동 추가되지 않습니다.',
-    en:
-      'Optional Excel merge into weekly outbound plans. Only matches parts already on Warehouse Inventory; new SKUs are not created automatically.',
-  },
   inventoryProjectionScreen: { ko: '재고 예측', en: 'Inventory Projection' },
   inventoryProjectionSubtitle: {
     ko:
@@ -240,13 +249,12 @@ export const L = {
   weeklyDeliveryQty: { ko: '주간 납품', en: 'Weekly delivery' },
 }
 
-/** 앱 상단 메뉴 — TC TECH 실시간 해외재고 관리 */
+/** 앱 상단 메뉴 — Dashboard · Warehouse · In-Transit · Delivery Plan · Inventory Projection · Settings */
 export const VIEW_LABELS = {
   dashboard: { ko: '대시보드', en: 'Dashboard' },
   master: L.warehouseInventoryScreen,
   transit: L.inTransitInventoryScreen,
   delivery: L.deliveryPlanScreenTitle,
-  forecast: L.forecastUploadScreen,
   projection: L.inventoryProjectionScreen,
   settings: L.settingsScreen,
 }

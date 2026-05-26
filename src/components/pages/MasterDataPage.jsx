@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from 'react'
+import { useCallback, useMemo, useRef, useState } from 'react'
 import { getEnabledProducts } from '../../config/products'
 import { MIN_MANAGEMENT_WEEKS } from '../../config/inventoryPolicy'
 import { operationsMeta } from '../../data/logisticsSampleData'
@@ -14,6 +14,7 @@ import {
 } from '../../utils/excelGridClipboard'
 import { newId } from '../../utils/newId'
 import ExcelGridToolbar from '../grid/ExcelGridToolbar.jsx'
+import useGridNativePaste from '../../hooks/useGridNativePaste.js'
 import BilingualLabel from '../BilingualLabel'
 import '../logistics/ops.css'
 import './pages.css'
@@ -47,6 +48,7 @@ export default function MasterDataPage({
   const [excelMsg, setExcelMsg] = useState('')
   const [selected, setSelected] = useState(() => new Set())
   const [invalidIds, setInvalidIds] = useState(() => new Set())
+  const masterTableRef = useRef(null)
 
   const asOfDate = opsMeta?.asOfDate ?? operationsMeta.asOfDate
 
@@ -129,27 +131,16 @@ export default function MasterDataPage({
     return ix >= 0 ? ix : 0
   }, [masterItems, selected])
 
-  const handlePasteFromExcel = useCallback(async () => {
+  const applyMasterMatrix = useCallback((matrix, startRowIdx, startColIdx = 0) => {
     setExcelMsg('')
     setInvalidIds(new Set())
-    const text = await readClipboardText()
-    if (!String(text).trim()) {
-      setExcelMsg(`!${formatKoEn(L.excelClipboardEmpty)}`)
-      return
-    }
-    const matrix = splitTsvToMatrix(text)
-    if (!matrix.length) {
-      setExcelMsg(`!${formatKoEn(L.excelClipboardEmpty)}`)
-      return
-    }
     const errs = []
     const bad = new Set()
-    const start = firstSelectedIndex
 
     setMasterItems((prev) => {
       const next = [...prev]
       for (let r = 0; r < matrix.length; r++) {
-        const rowIdx = start + r
+        let rowIdx = startRowIdx + r
         while (rowIdx >= next.length) {
           next.push({
             id: newId('master'),
@@ -165,9 +156,11 @@ export default function MasterDataPage({
           })
         }
         const row = { ...next[rowIdx] }
-        for (let c = 0; c < matrix[r].length && c < MASTER_COLS.length; c++) {
-          const field = MASTER_COLS[c]
-          const cell = String(matrix[r][c] ?? '').trim()
+        for (let mc = 0; mc < matrix[r].length; mc++) {
+          const fi = startColIdx + mc
+          if (fi >= MASTER_COLS.length) break
+          const field = MASTER_COLS[fi]
+          const cell = String(matrix[r][mc] ?? '').trim()
           if (cell === '') continue
           if (
             field === 'currentStock' ||
@@ -177,7 +170,7 @@ export default function MasterDataPage({
           ) {
             const p = parseQtyCell(cell)
             if (!p.ok) {
-              errs.push(`R${r + 1} C${c + 1}: ${field} — not a number`)
+              errs.push(`R${r + 1} C${mc + 1}: ${field} — not a number`)
               bad.add(row.id)
               continue
             }
@@ -203,10 +196,39 @@ export default function MasterDataPage({
     })
 
     setInvalidIds(bad)
-    setExcelMsg(
-      errs.length ? `!${errs.join('\n')}` : formatKoEn(L.excelPasteDone),
-    )
-  }, [firstSelectedIndex])
+    setExcelMsg(errs.length ? `!${errs.join('\n')}` : formatKoEn(L.excelPasteDone))
+  }, [])
+
+  const handlePasteFromExcel = useCallback(async () => {
+    setExcelMsg('')
+    setInvalidIds(new Set())
+    const text = await readClipboardText()
+    if (!String(text).trim()) {
+      setExcelMsg(`!${formatKoEn(L.excelClipboardEmpty)}`)
+      return
+    }
+    const matrix = splitTsvToMatrix(text)
+    if (!matrix.length) {
+      setExcelMsg(`!${formatKoEn(L.excelClipboardEmpty)}`)
+      return
+    }
+    applyMasterMatrix(matrix, firstSelectedIndex, 0)
+  }, [applyMasterMatrix, firstSelectedIndex])
+
+  const onMasterNativePaste = useCallback(
+    (matrix, cell) => {
+      const row = Number.parseInt(String(cell.getAttribute('data-excel-row') ?? ''), 10)
+      const col = Number.parseInt(String(cell.getAttribute('data-excel-col') ?? ''), 10)
+      applyMasterMatrix(
+        matrix,
+        Number.isFinite(row) ? row : 0,
+        Number.isFinite(col) ? col : 0,
+      )
+    },
+    [applyMasterMatrix],
+  )
+
+  useGridNativePaste({ tableRef: masterTableRef, onPasteMatrix: onMasterNativePaste })
 
   const handleCopyToExcel = useCallback(async () => {
     setExcelMsg('')
@@ -242,7 +264,7 @@ export default function MasterDataPage({
     setSelected(new Set())
     setInvalidIds(new Set())
     setExcelMsg('')
-  }, [selected.size])
+  }, [selected])
 
   return (
     <div className="page page--wide">
@@ -276,7 +298,7 @@ export default function MasterDataPage({
       </header>
 
       <div className="table-wrap page__table">
-        <table className="ops-table master-table">
+        <table ref={masterTableRef} className="ops-table master-table">
           <thead>
             <tr>
               <th className="cell--center" style={{ width: '2rem' }}>
@@ -302,7 +324,7 @@ export default function MasterDataPage({
             </tr>
           </thead>
           <tbody>
-            {masterItems.map((row) => {
+            {masterItems.map((row, rowIdx) => {
               const st = itemStatusById.get(row.id)
               const cov = st?.coverageWeeks
               return (
@@ -319,6 +341,9 @@ export default function MasterDataPage({
                     <input
                       className="cell-input"
                       list="model-options"
+                      data-excel-paste
+                      data-excel-row={rowIdx}
+                      data-excel-col={0}
                       value={row.modelName}
                       onChange={(e) => updateRow(row.id, { modelName: e.target.value })}
                     />
@@ -326,6 +351,9 @@ export default function MasterDataPage({
                   <td>
                     <input
                       className="cell-input"
+                      data-excel-paste
+                      data-excel-row={rowIdx}
+                      data-excel-col={1}
                       value={row.partNo}
                       onChange={(e) => updateRow(row.id, { partNo: e.target.value })}
                     />
@@ -333,6 +361,9 @@ export default function MasterDataPage({
                   <td>
                     <input
                       className="cell-input master-table__desc"
+                      data-excel-paste
+                      data-excel-row={rowIdx}
+                      data-excel-col={2}
                       value={row.description}
                       onChange={(e) => updateRow(row.id, { description: e.target.value })}
                     />
@@ -340,6 +371,9 @@ export default function MasterDataPage({
                   <td>
                     <input
                       className="cell-input cell-input--num"
+                      data-excel-paste
+                      data-excel-row={rowIdx}
+                      data-excel-col={3}
                       type="number"
                       value={row.currentStock}
                       onChange={(e) =>
@@ -353,6 +387,9 @@ export default function MasterDataPage({
                   <td>
                     <input
                       className="cell-input cell-input--num"
+                      data-excel-paste
+                      data-excel-row={rowIdx}
+                      data-excel-col={4}
                       type="number"
                       value={row.weeklyDemand}
                       onChange={(e) =>
@@ -363,6 +400,9 @@ export default function MasterDataPage({
                   <td>
                     <input
                       className="cell-input cell-input--num"
+                      data-excel-paste
+                      data-excel-row={rowIdx}
+                      data-excel-col={5}
                       type="number"
                       min={0}
                       value={row.safetyStockWeeks ?? MIN_MANAGEMENT_WEEKS}
@@ -376,6 +416,9 @@ export default function MasterDataPage({
                   <td>
                     <input
                       className="cell-input cell-input--num"
+                      data-excel-paste
+                      data-excel-row={rowIdx}
+                      data-excel-col={6}
                       type="number"
                       min={0}
                       value={row.leadTime ?? 0}
@@ -387,6 +430,9 @@ export default function MasterDataPage({
                   <td>
                     <select
                       className="cell-input"
+                      data-excel-paste
+                      data-excel-row={rowIdx}
+                      data-excel-col={7}
                       value={row.status}
                       onChange={(e) => updateRow(row.id, { status: e.target.value })}
                     >

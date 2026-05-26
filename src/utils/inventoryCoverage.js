@@ -51,6 +51,8 @@ export function buildItemInventoryStatus({
   itemDeliveryPlans,
   inTransitContainers,
   asOfDate,
+  /** 기준일 시점 창고 재고(없으면 item.currentStock) */
+  warehouseStockQty,
 }) {
   const partPlans = itemDeliveryPlans.filter(
     (p) => p.partNo === item.partNo && p.modelName === item.modelName,
@@ -69,7 +71,10 @@ export function buildItemInventoryStatus({
     item.modelName,
     item.partNo,
   )
-  const warehouseStock = item.currentStock
+  const warehouseStock =
+    warehouseStockQty != null && !Number.isNaN(Number(warehouseStockQty))
+      ? Math.max(0, Number(warehouseStockQty))
+      : Number(item.currentStock) || 0
 
   const coverageWeeks = calculateDemandBasedCoverageWeeks(
     warehouseStock,

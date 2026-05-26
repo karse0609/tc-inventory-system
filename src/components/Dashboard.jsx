@@ -1,8 +1,8 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { ALL_MODELS_VALUE, getEnabledProducts } from '../config/products'
 import { todayShipments as sampleTodayShipments } from '../data/logisticsSampleData'
 import { L, formatKoEn } from '../i18n/labels'
-import { formatAsOfDisplay } from '../utils/inventoryHelpers'
+import { computeWarehouseQtyAsOf, sumWarehouseStockForModelWithAsOf } from '../utils/inventoryAsOf'
 import {
   buildInventorySummary,
   buildItemInventoryStatus,
@@ -10,10 +10,11 @@ import {
 import {
   buildTodayStatus,
   filterByModel,
-  getThisWeekEtaRows,
+  getDashboardEtaPortWindowRows,
+  isInTransitRowActiveAsOf,
   sumInTransitStockForContainers,
-  sumWarehouseStockForModel,
 } from '../utils/logisticsMetrics'
+import { formatKstDateTime, formatSeattleDateTime, getKoreaCalendarDate } from '../utils/timeZones'
 import BilingualLabel from './BilingualLabel'
 import DashboardCoreKpis from './logistics/DashboardCoreKpis'
 import InventoryStatusPanel from './logistics/InventoryStatusPanel'
@@ -33,14 +34,35 @@ export default function Dashboard({
   opsMeta,
   setOpsMeta,
   unitCostKrwBySku,
+  arrivalLedger = [],
 }) {
   const [selectedModelName, setSelectedModelName] = useState(ALL_MODELS_VALUE)
+  const [clockTick, setClockTick] = useState(() => new Date())
+  const [referenceDate, setReferenceDate] = useState(() => getKoreaCalendarDate())
+
+  useEffect(() => {
+    const clockId = window.setInterval(() => setClockTick(new Date()), 1000)
+    const refId = window.setInterval(() => setReferenceDate(getKoreaCalendarDate()), 60_000)
+    return () => {
+      window.clearInterval(clockId)
+      window.clearInterval(refId)
+    }
+  }, [])
+
   const asOfDate = opsMeta.asOfDate
+  const seattleClock = formatSeattleDateTime(clockTick)
+  const koreaClock = formatKstDateTime(clockTick)
 
   const containers = useMemo(
     () => filterByModel(inTransitContainers, selectedModelName),
     [inTransitContainers, selectedModelName],
   )
+
+  const containersAsOf = useMemo(
+    () => containers.filter((r) => isInTransitRowActiveAsOf(r, asOfDate, referenceDate)),
+    [containers, asOfDate, referenceDate],
+  )
+
   const todayShipments = useMemo(
     () => filterByModel(sampleTodayShipments, selectedModelName),
     [selectedModelName],
@@ -59,15 +81,31 @@ export default function Dashboard({
 
   const itemInventoryRows = useMemo(
     () =>
-      itemsForModel.map((item) =>
-        buildItemInventoryStatus({
+      itemsForModel.map((item) => {
+        const warehouseStockQty = computeWarehouseQtyAsOf({
+          item,
+          deliveryPlans,
+          arrivalLedger,
+          asOfDate,
+          referenceDate,
+        })
+        return buildItemInventoryStatus({
           item,
           itemDeliveryPlans: itemPlansForModel,
-          inTransitContainers: containers,
+          inTransitContainers: containersAsOf,
           asOfDate,
-        }),
-      ),
-    [itemsForModel, itemPlansForModel, containers, asOfDate],
+          warehouseStockQty,
+        })
+      }),
+    [
+      itemsForModel,
+      itemPlansForModel,
+      containersAsOf,
+      asOfDate,
+      deliveryPlans,
+      arrivalLedger,
+      referenceDate,
+    ],
   )
 
   const inventorySummary = useMemo(
@@ -85,7 +123,7 @@ export default function Dashboard({
       buildTodayStatus({
         asOfDate,
         todayShipments,
-        inTransitContainers: containers,
+        inTransitContainers: containersAsOf,
         itemDeliveryPlans: deliveryPlans,
         modelName: selectedModelName,
         inventorySummary,
@@ -94,7 +132,7 @@ export default function Dashboard({
     [
       asOfDate,
       todayShipments,
-      containers,
+      containersAsOf,
       deliveryPlans,
       selectedModelName,
       inventorySummary,
@@ -103,19 +141,42 @@ export default function Dashboard({
   )
 
   const warehouse = useMemo(
-    () => sumWarehouseStockForModel(masterItems, selectedModelName, unitCostKrwBySku),
-    [masterItems, selectedModelName, unitCostKrwBySku],
+    () =>
+      sumWarehouseStockForModelWithAsOf(
+        masterItems,
+        selectedModelName,
+        unitCostKrwBySku,
+        deliveryPlans,
+        arrivalLedger,
+        asOfDate,
+        referenceDate,
+      ),
+    [
+      masterItems,
+      selectedModelName,
+      unitCostKrwBySku,
+      deliveryPlans,
+      arrivalLedger,
+      asOfDate,
+      referenceDate,
+    ],
   )
 
   const inTransitTotals = useMemo(
-    () => sumInTransitStockForContainers(containers, unitCostKrwBySku),
-    [containers, unitCostKrwBySku],
+    () => sumInTransitStockForContainers(containersAsOf, unitCostKrwBySku),
+    [containersAsOf, unitCostKrwBySku],
   )
 
   const weekEtaRows = useMemo(
-    () => getThisWeekEtaRows(containers, asOfDate),
-    [containers, asOfDate],
+    () => getDashboardEtaPortWindowRows(containersAsOf, asOfDate),
+    [containersAsOf, asOfDate],
   )
+
+  const showLedgerHint =
+    (!arrivalLedger || arrivalLedger.length === 0) &&
+    referenceDate &&
+    asOfDate &&
+    asOfDate < referenceDate
 
   const enabledProducts = getEnabledProducts()
 
@@ -128,8 +189,22 @@ export default function Dashboard({
         <div>
           <p className="dashboard__eyebrow">{opsMeta.subtitle}</p>
           <h1>{opsMeta.title}</h1>
+          <div className="dashboard__clock-bar" aria-live="polite">
+            <div className="dashboard__as-of-item">
+              <span className="dashboard__as-of-label">
+                <BilingualLabel label={L.dashboardSeattleTime} compact as="span" />
+              </span>
+              <span className="dashboard__as-of-value">{seattleClock}</span>
+            </div>
+            <div className="dashboard__as-of-item">
+              <span className="dashboard__as-of-label">
+                <BilingualLabel label={L.dashboardKoreaTime} compact as="span" />
+              </span>
+              <span className="dashboard__as-of-value">{koreaClock}</span>
+            </div>
+          </div>
           <div className="dashboard__as-of-inline">
-            <BilingualLabel label={L.asOfDate} compact as="span" />
+            <BilingualLabel label={L.opsQueryDateKst} compact as="span" />
             {typeof setOpsMeta === 'function' ? (
               <input
                 type="date"
@@ -138,16 +213,18 @@ export default function Dashboard({
                 onChange={(e) =>
                   setOpsMeta((o) => ({ ...o, asOfDate: e.target.value || o.asOfDate }))
                 }
-                aria-label={formatKoEn(L.asOfDate)}
+                aria-label={formatKoEn(L.opsQueryDateKst)}
               />
             ) : (
               <time dateTime={asOfDate}>{asOfDate}</time>
             )}
-            <span className="dashboard__as-of-readable">
-              {formatAsOfDisplay(asOfDate, opsMeta.timezone)} · {opsMeta.timezoneLabel}
-            </span>
             <span className="tag tag--model">{modelTag}</span>
           </div>
+          {showLedgerHint ? (
+            <p className="dashboard__as-of-hint" role="note">
+              <BilingualLabel label={L.dashboardAsOfLedgerHint} compact as="span" />
+            </p>
+          ) : null}
           <p className="dashboard__scope-note">
             <BilingualLabel label={L.multiItemNote} as="span" />
           </p>

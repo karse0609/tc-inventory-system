@@ -24,9 +24,13 @@ function rowQty(row) {
 }
 
 /**
+ * Forecast Excel → 납품 계획 병합(미리보기). UI「출고 예측 업로드」는 제거됨 — 재도입 시 `parseProductExcel` +
+ * 본 함수로 `setDeliveryPlans` 미리보기/적용.
+ *
  * Excel에서 파싱된 행 중 Master에 존재하는 Part만 납품 계획에 반영합니다.
  * 신규 Part는 적용하지 않습니다(마스터에 먼저 등록).
  * @returns {{ next: object[], matched: object[], unmatched: object[], updatedKeys: string[] }}
+ * @see repo docs/forecast-upload-restore.md
  */
 export function buildForecastApplyPreview(existingPlans, parsedRows, masterItems) {
   const masterKeys = new Set(

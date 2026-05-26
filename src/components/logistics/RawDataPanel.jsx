@@ -55,8 +55,8 @@ export default function RawDataPanel({
       {open && (
         <div className="raw-data-panel__body">
           <p className="page__hint" style={{ marginBottom: '0.75rem' }}>
-            Forecast Excel은 <strong>Forecast Upload</strong> 메뉴에서만 적용합니다. Master Data /
-            Delivery Plan은 각 관리 화면에서 편집합니다.
+            주차별 출고는 <strong>출고 계획</strong> 화면에서 수기·Excel 붙여넣기로 입력합니다. 창고 재고·운송중은
+            각 관리 화면에서 편집합니다.
           </p>
 
           <section className="card dashboard__simulation">

@@ -2,6 +2,11 @@ import * as XLSX from 'xlsx'
 import { getExcelSheetName, PILOT_MODEL_NAME } from '../config/products'
 import { parseWideFormatItemDeliveryPlans } from './parseExcelWideFormat'
 
+/**
+ * 제품/주차 형식 Excel 파싱 (Pilot 시트 등).
+ * 현재 앱 네비에는 연결된 화면 없음 — 출고 예측 업로드 재도입 시 이 모듈 + `forecastMerge.buildForecastApplyPreview` 사용.
+ */
+
 /** @deprecated GS30E — Pilot 시트명은 GS1930E */
 export const GS30E_SHEET_NAME = 'GS30E'
 

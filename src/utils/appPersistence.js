@@ -8,6 +8,8 @@ const KEYS = {
   simSource: 'tc-inv-sim-source',
   /** 관리자 전용: SKU별 대당 원가(KRW) */
   unitCostsKrw: 'tc-inv-unit-cost-krw-by-sku',
+  /** 운송중 입고 확정 이력(기준일 역산용) */
+  arrivalLedger: 'tc-inv-arrival-ledger',
 }
 
 export function loadJson(key, fallback = null) {

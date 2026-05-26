@@ -1,7 +1,16 @@
-import { useMemo } from 'react'
+import { useCallback, useMemo, useRef, useState } from 'react'
 import { operationsMeta as defaultOps } from '../../data/logisticsSampleData'
 import { L, formatKoEn } from '../../i18n/labels'
 import { skuCostKey } from '../../utils/unitCostKrw'
+import {
+  matrixToTsv,
+  parseQtyCell,
+  readClipboardText,
+  splitTsvToMatrix,
+  writeClipboardText,
+} from '../../utils/excelGridClipboard'
+import ExcelGridToolbar from '../grid/ExcelGridToolbar.jsx'
+import useGridNativePaste from '../../hooks/useGridNativePaste.js'
 import BilingualLabel from '../BilingualLabel'
 import UserManagementPage from './UserManagementPage.jsx'
 import '../logistics/ops.css'
@@ -45,6 +54,143 @@ export default function SettingsPage({
     )
     return rows
   }, [masterItems])
+
+  const [excelMsg, setExcelMsg] = useState('')
+  const [selectedCost, setSelectedCost] = useState(() => new Set())
+  const [invalidCostKeys, setInvalidCostKeys] = useState(() => new Set())
+  const unitCostTableRef = useRef(null)
+
+  const toggleCostSelect = useCallback((mapKey) => {
+    setSelectedCost((s) => {
+      const n = new Set(s)
+      if (n.has(mapKey)) n.delete(mapKey)
+      else n.add(mapKey)
+      return n
+    })
+  }, [])
+
+  const toggleCostSelectAll = useCallback(() => {
+    setSelectedCost((s) => {
+      if (s.size === skuRowsForCost.length) return new Set()
+      return new Set(skuRowsForCost.map((r) => r.mapKey))
+    })
+  }, [skuRowsForCost])
+
+  const firstSelectedCostIndex = useMemo(() => {
+    if (!selectedCost.size) return 0
+    const ix = skuRowsForCost.findIndex((r) => selectedCost.has(r.mapKey))
+    return ix >= 0 ? ix : 0
+  }, [skuRowsForCost, selectedCost])
+
+  const applyUnitCostMatrix = useCallback(
+    (matrix, startRowIdx) => {
+      if (typeof setUnitCostKrwBySku !== 'function') return
+      setExcelMsg('')
+      setInvalidCostKeys(new Set())
+      const errs = []
+      const bad = new Set()
+
+      setUnitCostKrwBySku((prev) => {
+        const next = { ...(prev || {}) }
+        for (let r = 0; r < matrix.length; r++) {
+          const rowIdx = startRowIdx + r
+          if (rowIdx >= skuRowsForCost.length) break
+          const sku = skuRowsForCost[rowIdx]
+          const cells = matrix[r]
+          let costRaw = cells[0]
+          if (cells.length >= 3) {
+            const cModel = String(cells[0] ?? '').trim()
+            const cPart = String(cells[1] ?? '').trim()
+            costRaw = cells[2]
+            if (cModel && cPart && skuCostKey(cModel, cPart) !== sku.mapKey) {
+              errs.push(`R${r + 1}: Model/Part does not match screen row ${rowIdx + 1}`)
+              bad.add(sku.mapKey)
+            }
+          } else if (cells.length === 2) {
+            costRaw = cells[1]
+            const cPart = String(cells[0] ?? '').trim()
+            if (cPart && cPart !== sku.partNo) {
+              errs.push(`R${r + 1}: Part does not match row`)
+              bad.add(sku.mapKey)
+            }
+          }
+          const pq = parseQtyCell(costRaw ?? '')
+          if (!pq.ok) {
+            errs.push(`R${r + 1}: KRW not a number`)
+            bad.add(sku.mapKey)
+            continue
+          }
+          if (pq.empty) {
+            delete next[sku.mapKey]
+          } else {
+            next[sku.mapKey] = Math.max(0, Math.round(pq.value))
+          }
+        }
+        return next
+      })
+
+      setInvalidCostKeys(bad)
+      setExcelMsg(errs.length ? `!${errs.slice(0, 6).join('\n')}` : formatKoEn(L.excelPasteDone))
+    },
+    [skuRowsForCost, setUnitCostKrwBySku],
+  )
+
+  const handlePasteUnitCost = useCallback(async () => {
+    if (typeof setUnitCostKrwBySku !== 'function') return
+    const text = await readClipboardText()
+    if (!String(text).trim()) {
+      setExcelMsg(`!${formatKoEn(L.excelClipboardEmpty)}`)
+      return
+    }
+    const matrix = splitTsvToMatrix(text)
+    if (!matrix.length) {
+      setExcelMsg(`!${formatKoEn(L.excelClipboardEmpty)}`)
+      return
+    }
+    applyUnitCostMatrix(matrix, firstSelectedCostIndex)
+  }, [applyUnitCostMatrix, firstSelectedCostIndex, setUnitCostKrwBySku])
+
+  const onUnitCostNativePaste = useCallback(
+    (matrix, cell) => {
+      const row = Number.parseInt(String(cell.getAttribute('data-excel-row') ?? ''), 10)
+      applyUnitCostMatrix(matrix, Number.isFinite(row) ? row : 0)
+    },
+    [applyUnitCostMatrix],
+  )
+
+  useGridNativePaste({
+    tableRef: unitCostTableRef,
+    enabled: Boolean(isAdmin && skuRowsForCost.length > 0 && typeof setUnitCostKrwBySku === 'function'),
+    onPasteMatrix: onUnitCostNativePaste,
+  })
+
+  const handleCopyUnitCost = useCallback(async () => {
+    setExcelMsg('')
+    const header = ['Model', 'Part No', 'Unit cost (KRW)']
+    const src =
+      selectedCost.size > 0
+        ? skuRowsForCost.filter((r) => selectedCost.has(r.mapKey))
+        : skuRowsForCost
+    const body = src.map((row) => [
+      row.modelName,
+      row.partNo,
+      unitCostKrwBySku[row.mapKey] == null ? '' : String(unitCostKrwBySku[row.mapKey]),
+    ])
+    await writeClipboardText(matrixToTsv([header, ...body]))
+    setExcelMsg(formatKoEn(L.excelCopyDone))
+  }, [skuRowsForCost, selectedCost, unitCostKrwBySku])
+
+  const handleClearUnitCost = useCallback(() => {
+    if (!selectedCost.size || typeof setUnitCostKrwBySku !== 'function') return
+    setUnitCostKrwBySku((prev) => {
+      const next = { ...(prev || {}) }
+      for (const k of selectedCost) delete next[k]
+      return next
+    })
+    setSelectedCost(new Set())
+    setInvalidCostKeys(new Set())
+    setExcelMsg('')
+  }, [selectedCost, setUnitCostKrwBySku])
 
   return (
     <div className="page">
@@ -153,55 +299,90 @@ export default function SettingsPage({
               <BilingualLabel label={L.settingsUnitCostEmpty} compact as="span" />
             </p>
           ) : (
-            <div className="table-wrap">
-              <table className="ops-table settings-unit-cost-table">
-                <thead>
-                  <tr>
-                    <th>Model</th>
-                    <th>Part No</th>
-                    <th>
-                      <BilingualLabel label={L.settingsUnitCostColKrw} compact as="span" />
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {skuRowsForCost.map((row) => (
-                    <tr key={row.mapKey}>
-                      <td>{row.modelName}</td>
-                      <td>
-                        <code>{row.partNo}</code>
-                      </td>
-                      <td>
+            <>
+              <ExcelGridToolbar
+                onPasteFromExcel={handlePasteUnitCost}
+                onCopyToExcel={handleCopyUnitCost}
+                onClearSelected={handleClearUnitCost}
+                selectedCount={selectedCost.size}
+                message={excelMsg}
+              />
+              <div className="table-wrap">
+                <table ref={unitCostTableRef} className="ops-table settings-unit-cost-table">
+                  <thead>
+                    <tr>
+                      <th className="cell--center" style={{ width: '2rem' }}>
                         <input
-                          type="number"
-                          className="cell-input cell-input--num"
-                          min={0}
-                          step={1}
-                          value={
-                            unitCostKrwBySku[row.mapKey] == null
-                              ? ''
-                              : unitCostKrwBySku[row.mapKey]
+                          type="checkbox"
+                          aria-label="Select all"
+                          checked={
+                            skuRowsForCost.length > 0 &&
+                            selectedCost.size === skuRowsForCost.length
                           }
-                          onChange={(e) => {
-                            const raw = e.target.value
-                            setUnitCostKrwBySku((prev) => {
-                              const next = { ...(prev || {}) }
-                              if (raw === '') {
-                                delete next[row.mapKey]
-                              } else {
-                                next[row.mapKey] = Math.max(0, Math.round(Number(raw) || 0))
-                              }
-                              return next
-                            })
-                          }}
-                          aria-label={`Unit cost KRW ${row.modelName} ${row.partNo}`}
+                          onChange={toggleCostSelectAll}
                         />
-                      </td>
+                      </th>
+                      <th>Model</th>
+                      <th>Part No</th>
+                      <th>
+                        <BilingualLabel label={L.settingsUnitCostColKrw} compact as="span" />
+                      </th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                  </thead>
+                  <tbody>
+                    {skuRowsForCost.map((row, rowIdx) => (
+                      <tr
+                        key={row.mapKey}
+                        className={
+                          invalidCostKeys.has(row.mapKey) ? 'row--excel-invalid' : undefined
+                        }
+                      >
+                        <td className="cell--center">
+                          <input
+                            type="checkbox"
+                            checked={selectedCost.has(row.mapKey)}
+                            onChange={() => toggleCostSelect(row.mapKey)}
+                            aria-label="Select row"
+                          />
+                        </td>
+                        <td>{row.modelName}</td>
+                        <td>
+                          <code>{row.partNo}</code>
+                        </td>
+                        <td>
+                          <input
+                            type="number"
+                            className="cell-input cell-input--num"
+                            data-excel-paste
+                            data-excel-row={rowIdx}
+                            min={0}
+                            step={1}
+                            value={
+                              unitCostKrwBySku[row.mapKey] == null
+                                ? ''
+                                : unitCostKrwBySku[row.mapKey]
+                            }
+                            onChange={(e) => {
+                              const raw = e.target.value
+                              setUnitCostKrwBySku((prev) => {
+                                const next = { ...(prev || {}) }
+                                if (raw === '') {
+                                  delete next[row.mapKey]
+                                } else {
+                                  next[row.mapKey] = Math.max(0, Math.round(Number(raw) || 0))
+                                }
+                                return next
+                              })
+                            }}
+                            aria-label={`Unit cost KRW ${row.modelName} ${row.partNo}`}
+                          />
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </>
           )}
         </section>
       )}

@@ -10,6 +10,7 @@ import {
   weeklyPlans as sampleWeeklyPlans,
 } from './data/sampleInventoryData'
 import { loadJson, saveJson, storageKeys } from './utils/appPersistence'
+import { getKoreaCalendarDate } from './utils/timeZones'
 import { migrateDeliveryPlansToSimple } from './utils/deliveryPlanMigrate'
 import { migrateInTransitRows } from './utils/inTransitMigrate'
 import {
@@ -29,7 +30,6 @@ import Dashboard from './components/Dashboard.jsx'
 import MasterDataPage from './components/pages/MasterDataPage.jsx'
 import DeliveryPlanPage from './components/pages/DeliveryPlanPage.jsx'
 import InTransitPage from './components/pages/InTransitPage.jsx'
-import ForecastUploadPage from './components/pages/ForecastUploadPage.jsx'
 import InventoryProjectionPage from './components/pages/InventoryProjectionPage.jsx'
 import SettingsPage from './components/pages/SettingsPage.jsx'
 import './App.css'
@@ -68,7 +68,12 @@ function App() {
   })
   const [opsMeta, setOpsMeta] = useState(() => {
     const loaded = loadJson(storageKeys.ops)
-    return loaded && typeof loaded === 'object' ? { ...defaultOpsMeta, ...loaded } : defaultOpsMeta
+    const base =
+      loaded && typeof loaded === 'object' ? { ...defaultOpsMeta, ...loaded } : { ...defaultOpsMeta }
+    if (!base.asOfDate || !/^\d{4}-\d{2}-\d{2}$/.test(String(base.asOfDate))) {
+      base.asOfDate = getKoreaCalendarDate()
+    }
+    return base
   })
   const [weeklyPlans, setWeeklyPlans] = useState(() => {
     const loaded = loadJson(storageKeys.weekly)
@@ -85,6 +90,15 @@ function App() {
     const loaded = loadJson(storageKeys.unitCostsKrw)
     return loaded && typeof loaded === 'object' && !Array.isArray(loaded) ? loaded : {}
   })
+  const [arrivalLedger, setArrivalLedger] = useState(() => {
+    const raw = loadJson(storageKeys.arrivalLedger)
+    return Array.isArray(raw) ? raw : []
+  })
+
+  const appendArrivalLedger = useCallback((entries) => {
+    if (!Array.isArray(entries) || !entries.length) return
+    setArrivalLedger((prev) => [...prev, ...entries])
+  }, [])
 
   useEffect(() => {
     saveUsersToStorage(users)
@@ -123,17 +137,21 @@ function App() {
   useEffect(() => {
     saveJson(storageKeys.unitCostsKrw, unitCostKrwBySku)
   }, [unitCostKrwBySku])
+  useEffect(() => {
+    saveJson(storageKeys.arrivalLedger, arrivalLedger)
+  }, [arrivalLedger])
 
   const resetAllData = useCallback(() => {
     Object.values(storageKeys).forEach((k) => localStorage.removeItem(k))
     setMasterItems(buildSeedMasterItems())
     setDeliveryPlans(migrateDeliveryPlansToSimple(buildSeedDeliveryPlans()))
     setInTransit(buildSeedInTransit())
-    setOpsMeta(defaultOpsMeta)
+    setOpsMeta({ ...defaultOpsMeta, asOfDate: getKoreaCalendarDate() })
     setWeeklyPlans(sampleWeeklyPlans)
     setStartingInventory(INITIAL_STARTING_INVENTORY)
     setDataSimSource('sample')
     setUnitCostKrwBySku({})
+    setArrivalLedger([])
   }, [])
 
   const visibleNav = useMemo(
@@ -264,6 +282,7 @@ function App() {
           opsMeta={opsMeta}
           setOpsMeta={setOpsMeta}
           unitCostKrwBySku={unitCostKrwBySku}
+          arrivalLedger={arrivalLedger}
         />
       )}
       {view === 'master' && (
@@ -289,14 +308,7 @@ function App() {
           setInTransit={setInTransit}
           setMasterItems={setMasterItems}
           opsMeta={opsMeta}
-        />
-      )}
-      {view === 'forecast' && (
-        <ForecastUploadPage
-          masterItems={masterItems}
-          deliveryPlans={deliveryPlans}
-          setDeliveryPlans={setDeliveryPlans}
-          opsMeta={opsMeta}
+          appendArrivalLedger={appendArrivalLedger}
         />
       )}
       {view === 'projection' && (

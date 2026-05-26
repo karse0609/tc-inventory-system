@@ -1,11 +1,20 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import BilingualLabel from '../BilingualLabel'
 import { operationsMeta } from '../../data/logisticsSampleData'
 import { formatKoEn, L } from '../../i18n/labels'
 import { saveJson, storageKeys } from '../../utils/appPersistence'
 import { buildWeekHorizon, planWeekMonday } from '../../utils/deliveryPlanHorizon'
 import { getWeekRange } from '../../utils/logisticsMetrics'
+import {
+  matrixToTsv,
+  parseQtyCell,
+  readClipboardText,
+  splitTsvToMatrix,
+  writeClipboardText,
+} from '../../utils/excelGridClipboard'
 import { newId } from '../../utils/newId'
+import useGridNativePaste from '../../hooks/useGridNativePaste.js'
+import ExcelGridToolbar from '../grid/ExcelGridToolbar.jsx'
 import '../logistics/ops.css'
 import './pages.css'
 import './DeliveryPlanPage.css'
@@ -92,7 +101,7 @@ function buildPartRows(masterItems, deliveryPlans, draftRows) {
   return rows
 }
 
-function WeekCell({ col, plan, disabled, asOfDate, onQtyChange }) {
+function WeekCell({ col, plan, disabled, asOfDate, onQtyChange, onFocusAnchor, rowIndex, weekIdx }) {
   const mon = weekStartFromCol(col)
   const weekRange = getWeekRange(asOfDate)
   const isFutureWeek = mon > weekRange.end
@@ -112,7 +121,12 @@ function WeekCell({ col, plan, disabled, asOfDate, onQtyChange }) {
         disabled={readOnly}
         aria-label={ariaWeek}
         value={val === '' ? '' : val}
+        data-excel-paste
+        data-dp-row={rowIndex}
+        data-dp-kind="week"
+        data-dp-week-idx={weekIdx}
         onChange={(e) => onQtyChange(col, e.target.value)}
+        onFocus={() => onFocusAnchor?.()}
       />
     </td>
   )
@@ -131,6 +145,12 @@ export default function DeliveryPlanPage({
   const [draftRows, setDraftRows] = useState([])
   const [saveHint, setSaveHint] = useState('')
   const [deleteTarget, setDeleteTarget] = useState(null)
+  const [excelMsg, setExcelMsg] = useState('')
+  const [selected, setSelected] = useState(() => new Set())
+  const [invalidRowKeys, setInvalidRowKeys] = useState(() => new Set())
+  /** 붙여넣기 시작 위치: 행 인덱스 + 열 앵커(모델/부품/주차) */
+  const pasteAnchorRef = useRef({ rowIndex: 0, colKind: 'week', weekColIndex: 0 })
+  const dpTableRef = useRef(null)
 
   const columns = useMemo(
     () => buildWeekHorizon(asOfDate, pastWeeks, futureWeeks, weekOffset),
@@ -212,6 +232,275 @@ export default function DeliveryPlanPage({
     setDeleteTarget(null)
   }
 
+  const toggleSelect = useCallback((rowKey) => {
+    setSelected((s) => {
+      const n = new Set(s)
+      if (n.has(rowKey)) n.delete(rowKey)
+      else n.add(rowKey)
+      return n
+    })
+  }, [])
+
+  const toggleSelectAll = useCallback(() => {
+    setSelected((s) => {
+      if (s.size === partRows.length) return new Set()
+      return new Set(partRows.map((p) => p.rowKey))
+    })
+  }, [partRows])
+
+  const pickStartRowIndex = useCallback(() => {
+    const indices = partRows
+      .map((p, i) => (selected.has(p.rowKey) ? i : -1))
+      .filter((i) => i >= 0)
+    if (indices.length) return Math.min(...indices)
+    const { rowIndex } = pasteAnchorRef.current
+    if (!partRows.length) return 0
+    return Math.max(0, Math.min(rowIndex, partRows.length - 1))
+  }, [partRows, selected])
+
+  const weekPasteReadOnly = useCallback(
+    (spec, col, plan) => {
+      const cellDisabled =
+        (spec.kind === 'draft' && (!spec.modelName || !spec.partNo)) ||
+        (spec.kind === 'plan' && (!spec.modelName || !spec.partNo))
+      if (cellDisabled) return true
+      const mon = weekStartFromCol(col)
+      const weekRange = getWeekRange(asOfDate)
+      const isFutureWeek = mon > weekRange.end
+      const lockedByRow = plan?.locked === true
+      const lockedByPolicy = FUTURE_WEEKS_LOCKED && isFutureWeek
+      return lockedByRow || lockedByPolicy
+    },
+    [asOfDate],
+  )
+
+  const runPlanMatrixPaste = useCallback(
+    (matrix, anchor, startRowIdx) => {
+      if (!matrix?.length || !anchor) return
+      setExcelMsg('')
+      setInvalidRowKeys(new Set())
+      const errs = []
+      const invalid = new Set()
+
+      let plans = [...deliveryPlans]
+      let drafts = [...draftRows]
+      const rowsList = partRows.map((s) => ({ ...s }))
+
+      function ensureRow(idx) {
+        while (idx >= rowsList.length) {
+          const id = newId('draft')
+          drafts.push({ id, modelName: '', partNo: '' })
+          rowsList.push({
+            rowKey: `d:${id}`,
+            kind: 'draft',
+            draftId: id,
+            modelName: '',
+            partNo: '',
+          })
+        }
+      }
+
+      function planAt(spec, wk) {
+        return plans.find(
+          (p) =>
+            p.modelName === spec.modelName && p.partNo === spec.partNo && planWeekMonday(p) === wk,
+        )
+      }
+
+      function applyQty(spec, col, raw) {
+        const wk = weekStartFromCol(col)
+        const pl = planAt(spec, wk)
+        if (weekPasteReadOnly(spec, col, pl)) return
+        if (!spec.modelName || !spec.partNo) {
+          errs.push(`${spec.rowKey}: Model / Part required for week paste`)
+          invalid.add(spec.rowKey)
+          return
+        }
+        plans = mergeCellUpdate(plans, spec.modelName, spec.partNo, wk, raw)
+      }
+
+      function setModelPart(spec, newModel, newPart) {
+        const oldM = spec.modelName
+        const oldP = spec.partNo
+        if (spec.kind === 'draft') {
+          drafts = drafts.map((d) =>
+            d.id === spec.draftId ? { ...d, modelName: newModel, partNo: newPart } : d,
+          )
+          spec.modelName = newModel
+          spec.partNo = newPart
+          return
+        }
+        if (spec.kind === 'plan') {
+          plans = plans.map((pl) =>
+            pl.modelName === oldM && pl.partNo === oldP
+              ? { ...pl, modelName: newModel, partNo: newPart }
+              : pl,
+          )
+          spec.modelName = newModel
+          spec.partNo = newPart
+        }
+      }
+
+      for (let r = 0; r < matrix.length; r++) {
+        const rowIdx = startRowIdx + r
+        ensureRow(rowIdx)
+        const spec = rowsList[rowIdx]
+        const cells = matrix[r]
+
+        if (anchor.colKind === 'week') {
+          let wc = Number(anchor.weekColIndex) || 0
+          if (wc < 0) wc = 0
+          for (let c = 0; c < cells.length; c++) {
+            const wi = wc + c
+            if (wi >= columns.length) break
+            const rawCell = cells[c]
+            if (String(rawCell ?? '').trim() === '') continue
+            const pq = parseQtyCell(rawCell)
+            if (!pq.ok) {
+              errs.push(`R${r + 1} C${c + 1}: not a number`)
+              invalid.add(spec.rowKey)
+              continue
+            }
+            const col = columns[wi]
+            applyQty(spec, col, pq.value === 0 ? '' : String(pq.value))
+          }
+        } else if (anchor.colKind === 'model') {
+          if (spec.kind === 'master') {
+            errs.push(`R${r + 1}: Master row model/part are read-only — use week cell anchor`)
+            invalid.add(spec.rowKey)
+            continue
+          }
+          const newModel = String(cells[0] ?? '').trim()
+          const newPart = String(cells[1] ?? '').trim()
+          if (newModel || newPart)
+            setModelPart(spec, newModel || spec.modelName, newPart || spec.partNo)
+          for (let c = 2; c < cells.length; c++) {
+            const wi = c - 2
+            if (wi >= columns.length) break
+            const rawCell = cells[c]
+            if (String(rawCell ?? '').trim() === '') continue
+            const pq = parseQtyCell(rawCell)
+            if (!pq.ok) {
+              errs.push(`R${r + 1} C${c + 1}: not a number`)
+              invalid.add(spec.rowKey)
+              continue
+            }
+            applyQty(spec, columns[wi], pq.value === 0 ? '' : String(pq.value))
+          }
+        } else if (anchor.colKind === 'part') {
+          if (spec.kind === 'master') {
+            errs.push(`R${r + 1}: Master row part column is read-only — use week cell anchor`)
+            invalid.add(spec.rowKey)
+            continue
+          }
+          const newPart = String(cells[0] ?? '').trim()
+          if (newPart) setModelPart(spec, spec.modelName, newPart)
+          for (let c = 1; c < cells.length; c++) {
+            const wi = c - 1
+            if (wi >= columns.length) break
+            const rawCell = cells[c]
+            if (String(rawCell ?? '').trim() === '') continue
+            const pq = parseQtyCell(rawCell)
+            if (!pq.ok) {
+              errs.push(`R${r + 1} C${c + 1}: not a number`)
+              invalid.add(spec.rowKey)
+              continue
+            }
+            applyQty(spec, columns[wi], pq.value === 0 ? '' : String(pq.value))
+          }
+        }
+
+        if (
+          (spec.kind === 'draft' || spec.kind === 'plan') &&
+          (!String(spec.modelName || '').trim() || !String(spec.partNo || '').trim())
+        ) {
+          invalid.add(spec.rowKey)
+          if (!errs.some((e) => e.includes('Model / Part')))
+            errs.push(`Row ${rowIdx + 1}: Model / Part No required`)
+        }
+      }
+
+      setDeliveryPlans(plans)
+      setDraftRows(drafts)
+      setInvalidRowKeys(invalid)
+      setExcelMsg(
+        errs.length
+          ? `!${errs.slice(0, 8).join('\n')}${errs.length > 8 ? '\n…' : ''}`
+          : formatKoEn(L.excelPasteDone),
+      )
+    },
+    [deliveryPlans, draftRows, partRows, columns, weekPasteReadOnly],
+  )
+
+  const handlePasteFromExcel = useCallback(async () => {
+    const text = await readClipboardText()
+    if (!String(text).trim()) {
+      setExcelMsg(`!${formatKoEn(L.excelClipboardEmpty)}`)
+      return
+    }
+    const matrix = splitTsvToMatrix(text)
+    if (!matrix.length) {
+      setExcelMsg(`!${formatKoEn(L.excelClipboardEmpty)}`)
+      return
+    }
+    runPlanMatrixPaste(matrix, pasteAnchorRef.current, pickStartRowIndex())
+  }, [runPlanMatrixPaste, pickStartRowIndex])
+
+  const onDpNativePaste = useCallback(
+    (matrix, cell) => {
+      const row = Number.parseInt(String(cell.getAttribute('data-dp-row') ?? ''), 10)
+      const kindRaw = cell.getAttribute('data-dp-kind') || 'week'
+      const weekIdx = Number.parseInt(String(cell.getAttribute('data-dp-week-idx') ?? ''), 10)
+      const kind =
+        kindRaw === 'model' || kindRaw === 'part' || kindRaw === 'week' ? kindRaw : 'week'
+      const anchor = {
+        rowIndex: Number.isFinite(row) ? row : 0,
+        colKind: kind,
+        weekColIndex: Number.isFinite(weekIdx) ? weekIdx : 0,
+      }
+      pasteAnchorRef.current = anchor
+      runPlanMatrixPaste(matrix, anchor, Number.isFinite(row) ? row : 0)
+    },
+    [runPlanMatrixPaste],
+  )
+
+  useGridNativePaste({ tableRef: dpTableRef, onPasteMatrix: onDpNativePaste })
+
+  const handleCopyToExcel = useCallback(async () => {
+    setExcelMsg('')
+    const header = ['Model', 'Part No', ...columns.map((c) => c.headerShort ?? c.week ?? '')]
+    const src = selected.size > 0 ? partRows.filter((p) => selected.has(p.rowKey)) : partRows
+    const body = src.map((spec) => {
+      const cells = [spec.modelName ?? '', spec.partNo ?? '']
+      for (const col of columns) {
+        const wk = weekStartFromCol(col)
+        const pl = planByKey.get(`${spec.modelName}\t${spec.partNo}\t${wk}`)
+        const q = pl?.qty
+        cells.push(q != null && q !== '' ? String(q) : '')
+      }
+      return cells
+    })
+    await writeClipboardText(matrixToTsv([header, ...body]))
+    setExcelMsg(formatKoEn(L.excelCopyDone))
+  }, [partRows, selected, columns, planByKey])
+
+  const handleClearSelected = useCallback(() => {
+    if (!selected.size) return
+    setDeliveryPlans((plans) => {
+      let next = [...plans]
+      for (const rk of selected) {
+        const spec = partRows.find((p) => p.rowKey === rk)
+        if (!spec || spec.kind === 'draft') continue
+        next = next.filter((p) => !(p.modelName === spec.modelName && p.partNo === spec.partNo))
+      }
+      return next
+    })
+    setDraftRows((drafts) => drafts.filter((d) => !selected.has(`d:${d.id}`)))
+    setSelected(new Set())
+    setInvalidRowKeys(new Set())
+    setExcelMsg('')
+  }, [selected, partRows])
+
   const pastOptions = useMemo(
     () => Array.from({ length: MAX_PAST_WEEKS + 1 }, (_, i) => i),
     [],
@@ -229,6 +518,13 @@ export default function DeliveryPlanPage({
         <p className="page__desc page__desc--secondary">
           <BilingualLabel label={L.deliveryPlanScreenSubtitle} compact as="span" />
         </p>
+        <ExcelGridToolbar
+          onPasteFromExcel={handlePasteFromExcel}
+          onCopyToExcel={handleCopyToExcel}
+          onClearSelected={handleClearSelected}
+          selectedCount={selected.size}
+          message={excelMsg}
+        />
         <div className="delivery-plan-page__toolbar">
           <label>
             <BilingualLabel label={L.previousWeeksShown} compact as="span" />
@@ -286,7 +582,7 @@ export default function DeliveryPlanPage({
             </button>
           </div>
           <span className="page__hint" style={{ margin: 0 }}>
-            {formatKoEn(L.asOfDate)}: <strong>{asOfDate}</strong> · {formatKoEn(L.columnsCount)}{' '}
+            {formatKoEn(L.opsQueryDateKst)}: <strong>{asOfDate}</strong> · {formatKoEn(L.columnsCount)}{' '}
             {columns.length} {formatKoEn(L.weeks)}
             {weekOffset !== 0
               ? ` · ${formatKoEn(L.viewOffsetWeeks)} ${weekOffset > 0 ? '+' : ''}${weekOffset} ${formatKoEn(L.weeks)}`
@@ -341,9 +637,17 @@ export default function DeliveryPlanPage({
       )}
 
       <div className="dp-table-wrap page__table">
-        <table className="dp-grid">
+        <table ref={dpTableRef} className="dp-grid">
           <thead>
             <tr>
+              <th className="cell--center" style={{ width: '2rem' }}>
+                <input
+                  type="checkbox"
+                  aria-label="Select all"
+                  checked={partRows.length > 0 && selected.size === partRows.length}
+                  onChange={toggleSelectAll}
+                />
+              </th>
               <th className="dp-th--sticky dp-col-model">
                 <BilingualLabel label={L.model} compact as="span" />
               </th>
@@ -364,7 +668,7 @@ export default function DeliveryPlanPage({
             </tr>
           </thead>
           <tbody>
-            {partRows.map((spec) => {
+            {partRows.map((spec, rowIndex) => {
               const { modelName, partNo, rowKey, kind, draftId } = spec
               const cellDisabled =
                 (kind === 'draft' && (!modelName || !partNo)) ||
@@ -380,7 +684,18 @@ export default function DeliveryPlanPage({
                 kind === 'draft' && canQuickRemoveDraft ? false : !modelName || !partNo
 
               return (
-                <tr key={rowKey}>
+                <tr
+                  key={rowKey}
+                  className={invalidRowKeys.has(rowKey) ? 'row--excel-invalid' : undefined}
+                >
+                  <td className="cell--center">
+                    <input
+                      type="checkbox"
+                      checked={selected.has(rowKey)}
+                      onChange={() => toggleSelect(rowKey)}
+                      aria-label="Select row"
+                    />
+                  </td>
                   <td className="dp-td--sticky dp-col-model">
                     {masterFrozen ? (
                       <input
@@ -394,6 +709,13 @@ export default function DeliveryPlanPage({
                         className="dp-input"
                         value={modelName}
                         placeholder={formatKoEn(L.model)}
+                        data-excel-paste
+                        data-dp-row={rowIndex}
+                        data-dp-kind="model"
+                        data-dp-week-idx={0}
+                        onFocus={() => {
+                          pasteAnchorRef.current = { rowIndex, colKind: 'model', weekColIndex: 0 }
+                        }}
                         onChange={(e) => {
                           if (kind === 'draft') updateDraft(draftId, { modelName: e.target.value })
                           else
@@ -421,6 +743,13 @@ export default function DeliveryPlanPage({
                         className="dp-input"
                         value={partNo}
                         placeholder={formatKoEn(L.partNo)}
+                        data-excel-paste
+                        data-dp-row={rowIndex}
+                        data-dp-kind="part"
+                        data-dp-week-idx={0}
+                        onFocus={() => {
+                          pasteAnchorRef.current = { rowIndex, colKind: 'part', weekColIndex: 0 }
+                        }}
                         onChange={(e) => updateDraft(draftId, { partNo: e.target.value })}
                       />
                     ) : (
@@ -428,6 +757,13 @@ export default function DeliveryPlanPage({
                         className="dp-input"
                         value={partNo}
                         placeholder={formatKoEn(L.partNo)}
+                        data-excel-paste
+                        data-dp-row={rowIndex}
+                        data-dp-kind="part"
+                        data-dp-week-idx={0}
+                        onFocus={() => {
+                          pasteAnchorRef.current = { rowIndex, colKind: 'part', weekColIndex: 0 }
+                        }}
                         onChange={(e) => {
                           setDeliveryPlans((plans) =>
                             plans.map((p) =>
@@ -440,7 +776,7 @@ export default function DeliveryPlanPage({
                       />
                     )}
                   </td>
-                  {columns.map((col) => {
+                  {columns.map((col, weekIdx) => {
                     const wk = weekStartFromCol(col)
                     const plan = planByKey.get(`${modelName}\t${partNo}\t${wk}`)
                     return (
@@ -450,7 +786,16 @@ export default function DeliveryPlanPage({
                         plan={plan}
                         asOfDate={asOfDate}
                         disabled={cellDisabled}
+                        rowIndex={rowIndex}
+                        weekIdx={weekIdx}
                         onQtyChange={onQtyChange(modelName, partNo)}
+                        onFocusAnchor={() => {
+                          pasteAnchorRef.current = {
+                            rowIndex,
+                            colKind: 'week',
+                            weekColIndex: weekIdx,
+                          }
+                        }}
                       />
                     )
                   })}

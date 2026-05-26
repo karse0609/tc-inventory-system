@@ -7,6 +7,8 @@ import { formatKoEn, L } from '../../i18n/labels'
  *   onClearSelected: () => void
  *   selectedCount?: number
  *   disabled?: boolean
+ *   disablePaste?: boolean
+ *   disableClear?: boolean
  *   message?: string
  * }} props
  */
@@ -16,6 +18,8 @@ export default function ExcelGridToolbar({
   onClearSelected,
   selectedCount = 0,
   disabled = false,
+  disablePaste = false,
+  disableClear = false,
   message = '',
 }) {
   const isError = message.startsWith('!')
@@ -27,7 +31,7 @@ export default function ExcelGridToolbar({
         <button
           type="button"
           className="btn btn--ghost btn--sm"
-          disabled={disabled}
+          disabled={disabled || disablePaste}
           onClick={() => onPasteFromExcel()}
         >
           {formatKoEn(L.excelPasteFrom)}
@@ -43,7 +47,7 @@ export default function ExcelGridToolbar({
         <button
           type="button"
           className="btn btn--ghost btn--sm"
-          disabled={disabled || selectedCount === 0}
+          disabled={disabled || disableClear || selectedCount === 0}
           onClick={() => onClearSelected()}
         >
           {formatKoEn(L.excelClearSelected)}

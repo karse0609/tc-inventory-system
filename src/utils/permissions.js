@@ -5,13 +5,15 @@
 
 import { VIEW_LABELS, formatKoEn } from '../i18n/labels.js'
 
-/** 네비 표시 순서 (TC TECH 실시간 해외재고 관리 흐름) */
+/**
+ * 네비 표시 순서 (운영: 대시보드 → 창고 → 운송중 → 출고 계획 → 재고 예측 → 설정).
+ * Forecast Excel 업로드 뷰는 제외됨. 재도입 시 `VIEW_LABELS`·App 라우트에 `forecast` 추가.
+ */
 export const VIEW_IDS = [
   'dashboard',
   'master',
   'transit',
   'delivery',
-  'forecast',
   'projection',
   'settings',
 ]
@@ -20,7 +22,7 @@ export const VIEW_MENU_LABELS = Object.fromEntries(
   VIEW_IDS.map((id) => [id, formatKoEn(VIEW_LABELS[id])]),
 )
 
-/** @typedef {{ dashboard?: boolean, master?: boolean, delivery?: boolean, transit?: boolean, forecast?: boolean, projection?: boolean, settings?: boolean }} MenuPermissions */
+/** @typedef {{ dashboard?: boolean, master?: boolean, delivery?: boolean, transit?: boolean, projection?: boolean, settings?: boolean }} MenuPermissions */
 
 /** @param {string} role */
 export function defaultMenuPermissionsForRole(role) {

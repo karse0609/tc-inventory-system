@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 import { operationsMeta } from '../../data/logisticsSampleData'
 import { L, formatKoEn } from '../../i18n/labels'
 import { buildWeekHorizon } from '../../utils/deliveryPlanHorizon'
@@ -6,6 +6,8 @@ import {
   buildInventoryProjectionRows,
   shortWeekLabel,
 } from '../../utils/inventoryProjection'
+import { matrixToTsv, writeClipboardText } from '../../utils/excelGridClipboard'
+import ExcelGridToolbar from '../grid/ExcelGridToolbar.jsx'
 import BilingualLabel from '../BilingualLabel'
 import '../logistics/ops.css'
 import './pages.css'
@@ -46,6 +48,49 @@ export default function InventoryProjectionPage({
     [masterItems, deliveryPlans, inTransit, weekColumns],
   )
 
+  const [excelMsg, setExcelMsg] = useState('')
+
+  const handlePasteNoop = useCallback(() => {}, [])
+
+  const handleCopyToExcel = useCallback(async () => {
+    setExcelMsg('')
+    const header = [
+      'Model',
+      'Part No',
+      'Description',
+      'Current Stock',
+      'In-transit pipeline',
+    ]
+    for (const c of weekColumns) {
+      const h = `${shortWeekLabel(c.week)} ${c.headerShort ?? ''}`.trim()
+      header.push(`${h} Inv`, `${h} Cov`, `${h} Gap`, `${h} Status`)
+    }
+    const body = rows.map((r) => {
+      const cells = [
+        r.modelName,
+        r.partNo,
+        r.description ?? '',
+        String(r.currentStock ?? ''),
+        String(r.inTransitPipeline ?? ''),
+      ]
+      for (const c of weekColumns) {
+        const cell = r.weeks[c.periodStart]
+        const st = cell?.status ?? 'na'
+        cells.push(
+          String(Math.round(cell?.projected ?? 0)),
+          fmtCov(cell?.coverageWeeks),
+          String(Math.round(cell?.gap ?? 0)),
+          st,
+        )
+      }
+      return cells
+    })
+    await writeClipboardText(matrixToTsv([header, ...body]))
+    setExcelMsg(formatKoEn(L.excelCopyDone))
+  }, [rows, weekColumns])
+
+  const handleClearNoop = useCallback(() => {}, [])
+
   return (
     <div className="page inv-proj-page">
       <header className="page__header">
@@ -56,6 +101,15 @@ export default function InventoryProjectionPage({
           <BilingualLabel label={L.inventoryProjectionSubtitle} compact as="span" /> 기준일{' '}
           <strong>{asOfDate}</strong> 포함 앞으로 <strong>{futureWeeks + 1}</strong>주를 표시합니다.
         </p>
+        <ExcelGridToolbar
+          onPasteFromExcel={handlePasteNoop}
+          onCopyToExcel={handleCopyToExcel}
+          onClearSelected={handleClearNoop}
+          selectedCount={0}
+          disablePaste
+          disableClear
+          message={excelMsg || formatKoEn(L.excelReadonlyGrid)}
+        />
         <div className="inv-proj-toolbar">
           <label>
             표시 주차(미래)
