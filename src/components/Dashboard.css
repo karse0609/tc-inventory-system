@@ -564,6 +564,38 @@ tbody tr:hover {
   background: rgba(220, 38, 38, 0.06);
 }
 
+.dashboard__week-eta {
+  margin-top: 0.25rem;
+}
+
+.dashboard__week-eta-title {
+  margin: 0 0 0.35rem;
+  font-size: 0.95rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-h);
+}
+
+.dashboard__week-eta-hint {
+  margin: 0 0 0.75rem;
+  font-size: 0.78rem;
+  line-height: 1.4;
+  color: var(--muted);
+}
+
+.dashboard__week-eta-empty {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+.dashboard__week-eta-table {
+  margin: 0;
+  max-height: min(42vh, 380px);
+  overflow: auto;
+}
+
 .inv-status-panel--compact .ops-section__title {
   text-transform: none;
   letter-spacing: 0.02em;

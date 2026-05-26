@@ -5,6 +5,9 @@
 
 export const PILOT_MODEL_NAME = 'GS1930E'
 
+/** 대시보드 모델 셀렉터 «전체» — `filterByModel` 등과 동일한 값으로 사용 */
+export const ALL_MODELS_VALUE = '__ALL_MODELS__'
+
 /** @typedef {{ modelName: string, sheetName: string, displayName: string, pilot: boolean, enabled: boolean, safetyStock?: number }} ProductConfig */
 
 /** @type {ProductConfig[]} */

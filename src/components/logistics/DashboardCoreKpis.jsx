@@ -27,7 +27,7 @@ function coverageDisplay(coverageWeeks) {
 }
 
 /**
- * 실시간 해외재고 대시보드 — 핵심 KPI 7종
+ * 실시간 해외재고 대시보드 — 핵심 KPI 6종
  */
 export default function DashboardCoreKpis({
   warehouseQty,
@@ -36,7 +36,6 @@ export default function DashboardCoreKpis({
   inTransitValue,
   thisWeekEtaQty,
   coverageWeeks,
-  delayedContainerCount,
   unit,
   currency = 'USD',
 }) {
@@ -63,17 +62,6 @@ export default function DashboardCoreKpis({
       value: coverageDisplay(coverageWeeks),
       meta: <BilingualLabel label={L.weeks} compact as="span" />,
       extraClass: coverageCardClass(coverageWeeks),
-    },
-    {
-      label: L.dashboardDelayContainers,
-      value: formatNumber(delayedContainerCount),
-      meta:
-        delayedContainerCount > 0 ? (
-          <BilingualLabel label={L.delayOverdue} compact as="span" />
-        ) : (
-          <span className="dash-kpi__meta--muted">—</span>
-        ),
-      extraClass: delayedContainerCount > 0 ? 'dash-kpi__card--alert' : '',
     },
   ]
 

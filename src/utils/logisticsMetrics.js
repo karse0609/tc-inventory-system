@@ -1,5 +1,6 @@
 /** 물류 운영 KPI · 주차/지연 판단 */
 
+import { ALL_MODELS_VALUE } from '../config/products'
 import { formatWeekHeaderShort, isoWeekLabelFromMonday } from './weekIsoLabels'
 
 /** 납품 행의 주 시작일(월요일 YYYY-MM-DD) */
@@ -39,7 +40,22 @@ export function isToday(dateStr, asOfDate) {
 }
 
 export function filterByModel(records, modelName) {
+  if (!modelName || modelName === ALL_MODELS_VALUE) return records
   return records.filter((row) => row.modelName === modelName)
+}
+
+/** 도착 예정일: 창고 ETA 우선, 없으면 Port ETA */
+export function rowInboundEtaDate(row) {
+  const wh = String(row?.etaWh ?? '').trim()
+  if (/^\d{4}-\d{2}-\d{2}$/.test(wh)) return wh
+  const p = String(row?.etaPort ?? '').trim()
+  if (/^\d{4}-\d{2}-\d{2}$/.test(p)) return p
+  return ''
+}
+
+export function isThisWeekInboundEta(row, asOfDate) {
+  const d = rowInboundEtaDate(row)
+  return !!d && isThisWeek(d, asOfDate)
 }
 
 /** 운송중 집계·표시에 포함할 행 (입고 완료·레거시 종료 상태 제외) */
@@ -75,7 +91,7 @@ export function buildTodayStatus({
   const inTransitQty = inTransit.reduce((sum, row) => sum + row.qty, 0)
 
   const thisWeekEtaRows = inTransitContainers.filter(
-    (row) => isInTransitRowActive(row) && isThisWeek(row.etaPort, asOfDate),
+    (row) => isInTransitRowActive(row) && isThisWeekInboundEta(row, asOfDate),
   )
   const thisWeekEtaQty = thisWeekEtaRows.reduce((sum, row) => sum + row.qty, 0)
 
@@ -105,8 +121,8 @@ export function buildTodayStatus({
 export function getThisWeekEtaRows(containers, asOfDate) {
   return containers
     .filter(isInTransitRowActive)
-    .filter((row) => isThisWeek(row.etaPort, asOfDate))
-    .sort((a, b) => String(a.etaPort).localeCompare(String(b.etaPort)))
+    .filter((row) => isThisWeekInboundEta(row, asOfDate))
+    .sort((a, b) => rowInboundEtaDate(a).localeCompare(rowInboundEtaDate(b)))
 }
 
 export function getFutureDeliveryPlans(plans, asOfDate) {

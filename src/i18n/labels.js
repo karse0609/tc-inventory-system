@@ -2,6 +2,16 @@
 
 export const L = {
   pilotItem: { ko: 'Pilot 품목', en: 'Pilot Item' },
+  dashboardModelAll: { ko: '전체', en: 'All' },
+  dashboardWeekEtaWhCol: { ko: 'ETA 창고', en: 'ETA W/H' },
+  dashboardWeekEtaDesc: {
+    ko: '기준일이 속한 주에 도착 예정(ETA)인 활성 운송 행입니다. 주차 판정은 창고 ETA가 있으면 그 날짜, 없으면 Port ETA를 사용합니다.',
+    en: 'Active in-transit lines whose inbound ETA falls in the as-of calendar week. Uses warehouse ETA when set, otherwise port ETA.',
+  },
+  dashboardWeekEtaEmpty: {
+    ko: '이번 주 도착 예정인 운송 컨테이너가 없습니다.',
+    en: 'No in-transit containers scheduled to arrive this week.',
+  },
   asOfDate: { ko: '기준일', en: 'As-of Date' },
   timezone: { ko: '기준 시간대', en: 'Timezone' },
   modelTotal: { ko: '모델 전 Part 합', en: 'All parts (model)' },

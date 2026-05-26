@@ -254,6 +254,7 @@ function App() {
           deliveryPlans={deliveryPlans}
           inTransitContainers={inTransit}
           opsMeta={opsMeta}
+          setOpsMeta={setOpsMeta}
         />
       )}
       {view === 'master' && (
