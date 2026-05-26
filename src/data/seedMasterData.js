@@ -1,5 +1,6 @@
 import { MIN_MANAGEMENT_WEEKS } from '../config/inventoryPolicy'
 import { newId } from '../utils/newId'
+import { migrateDeliveryPlansToSimple } from '../utils/deliveryPlanMigrate'
 import { inventoryItems, itemDeliveryPlans, inTransitContainers } from './logisticsSampleData'
 
 function avgPlannedForPart(partNo, modelName) {
@@ -7,7 +8,10 @@ function avgPlannedForPart(partNo, modelName) {
     (p) => p.partNo === partNo && p.modelName === modelName,
   )
   if (!rows.length) return 800
-  const sum = rows.reduce((s, r) => s + (Number(r.plannedQty) || 0), 0)
+  const sum = rows.reduce((s, r) => {
+    const q = r.qty ?? r.plannedQty
+    return s + (Number(q) || 0)
+  }, 0)
   return Math.max(1, Math.round(sum / rows.length))
 }
 
@@ -28,17 +32,11 @@ export function buildSeedMasterItems() {
 }
 
 export function buildSeedDeliveryPlans() {
-  return itemDeliveryPlans.map((p, i) => ({
+  const raw = itemDeliveryPlans.map((p, i) => ({
     id: newId(`seed-plan-${i}`),
-    modelName: p.modelName,
-    partNo: p.partNo,
-    week: p.week,
-    label: p.label,
-    periodStart: p.periodStart,
-    plannedQty: p.plannedQty,
-    confirmedQty: p.confirmedQty ?? null,
-    status: p.status ?? 'planned',
+    ...p,
   }))
+  return migrateDeliveryPlansToSimple(raw)
 }
 
 export function buildSeedInTransit() {

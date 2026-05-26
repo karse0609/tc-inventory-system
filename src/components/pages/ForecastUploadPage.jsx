@@ -168,20 +168,18 @@ export default function ForecastUploadPage({
                 <tr>
                   <th>Part</th>
                   <th>Week start</th>
-                  <th>Planned</th>
-                  <th>Confirmed</th>
+                  <th>Qty</th>
                 </tr>
               </thead>
               <tbody>
                 {previewResult.matched.slice(0, 50).map((r, i) => (
-                  <tr key={`${r.partNo}-${r.periodStart}-${i}`}>
+                  <tr key={`${r.partNo}-${r.weekStartDate || r.periodStart}-${i}`}>
                     <td>
                       <code>{r.partNo}</code>
                     </td>
-                    <td>{r.periodStart || r.weekStartDate}</td>
-                    <td className="cell--num">{formatNum(r.plannedQty)}</td>
+                    <td>{r.weekStartDate || r.periodStart}</td>
                     <td className="cell--num">
-                      {r.confirmedQty != null ? formatNum(r.confirmedQty) : '—'}
+                      {formatNum(r.qty ?? r.plannedQty)}
                     </td>
                   </tr>
                 ))}
@@ -201,12 +199,12 @@ export default function ForecastUploadPage({
               </thead>
               <tbody>
                 {previewResult.unmatched.slice(0, 50).map((r, i) => (
-                  <tr key={`u-${r.partNo}-${r.periodStart}-${i}`}>
+                  <tr key={`u-${r.partNo}-${r.weekStartDate || r.periodStart}-${i}`}>
                     <td>
                       <code>{r.partNo}</code>
                     </td>
-                    <td>{r.periodStart || r.weekStartDate}</td>
-                    <td className="cell--num">{formatNum(r.plannedQty)}</td>
+                    <td>{r.weekStartDate || r.periodStart}</td>
+                    <td className="cell--num">{formatNum(r.qty ?? r.plannedQty)}</td>
                   </tr>
                 ))}
               </tbody>

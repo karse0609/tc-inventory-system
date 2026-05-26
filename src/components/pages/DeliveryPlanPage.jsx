@@ -1,10 +1,8 @@
 import { useCallback, useMemo, useState } from 'react'
 import { operationsMeta } from '../../data/logisticsSampleData'
 import { saveJson, storageKeys } from '../../utils/appPersistence'
-import {
-  buildWeekHorizon,
-  planWeekMonday,
-} from '../../utils/deliveryPlanHorizon'
+import { buildWeekHorizon, planWeekMonday } from '../../utils/deliveryPlanHorizon'
+import { getWeekRange } from '../../utils/logisticsMetrics'
 import { newId } from '../../utils/newId'
 import '../logistics/ops.css'
 import './pages.css'
@@ -12,49 +10,39 @@ import './DeliveryPlanPage.css'
 
 const DEFAULT_PAST = 2
 const DEFAULT_FUTURE = 22
+const MAX_PAST_WEEKS = 52
 
-function mergeCellUpdate(plans, modelName, partNo, colMonday, meta, patch) {
+/** 향후 주 잠금 UI — true로 바꾸면 정책상 미래 주 편집 비활성화 */
+const FUTURE_WEEKS_LOCKED = false
+
+function weekStartFromCol(col) {
+  return col.weekStartDate || col.periodStart
+}
+
+function mergeCellUpdate(plans, modelName, partNo, weekStartDate, rawValue) {
   const idx = plans.findIndex(
     (p) =>
       p.modelName === modelName &&
       p.partNo === partNo &&
-      planWeekMonday(p) === colMonday,
+      planWeekMonday(p) === weekStartDate,
   )
   const prev = idx >= 0 ? plans[idx] : {}
 
-  const planned =
-    patch.plannedQty !== undefined
-      ? patch.plannedQty === '' || patch.plannedQty === null
-        ? 0
-        : Number(patch.plannedQty) || 0
-      : Number(prev.plannedQty) || 0
+  const qty =
+    rawValue === '' || rawValue === null || rawValue === undefined
+      ? 0
+      : Number(rawValue) || 0
 
-  let confirmed =
-    patch.confirmedQty !== undefined
-      ? patch.confirmedQty === '' || patch.confirmedQty === null
-        ? null
-        : Number(patch.confirmedQty)
-      : prev.confirmedQty ?? null
-  if (typeof confirmed === 'number' && Number.isNaN(confirmed)) confirmed = null
-
-  const plannedEmpty = planned === 0
-  const confEmpty = confirmed === null || confirmed === undefined
-
-  if (plannedEmpty && confEmpty && idx >= 0) {
-    return plans.filter((_, i) => i !== idx)
-  }
-  if (plannedEmpty && confEmpty) return plans
+  if (qty === 0 && idx >= 0) return plans.filter((_, i) => i !== idx)
+  if (qty === 0) return plans
 
   const row = {
     id: idx >= 0 ? prev.id : newId('plan'),
     modelName,
     partNo,
-    periodStart: colMonday,
-    week: meta.week,
-    label: meta.label,
-    plannedQty: planned,
-    confirmedQty: confEmpty ? null : confirmed,
-    status: prev.status ?? 'planned',
+    weekStartDate,
+    qty,
+    locked: idx >= 0 ? prev.locked === true : false,
   }
   if (idx >= 0) return plans.map((p, i) => (i === idx ? row : p))
   return [...plans, row]
@@ -102,38 +90,27 @@ function buildPartRows(masterItems, deliveryPlans, draftRows) {
   return rows
 }
 
-function WeekCell({ col, plan, disabled, onPatch }) {
-  const pVal = plan?.plannedQty ?? ''
-  const cVal = plan?.confirmedQty ?? ''
+function WeekCell({ col, plan, disabled, asOfDate, onQtyChange }) {
+  const mon = weekStartFromCol(col)
+  const weekRange = getWeekRange(asOfDate)
+  const isFutureWeek = mon > weekRange.end
+  const lockedByRow = plan?.locked === true
+  const lockedByPolicy = FUTURE_WEEKS_LOCKED && isFutureWeek
+  const readOnly = disabled || lockedByRow || lockedByPolicy
+  const val = plan?.qty ?? ''
+
   return (
-    <td className="dp-week-cell dp-week-col" title={col.week}>
-      <div className="dp-week-cell__stack">
-        <input
-          className="dp-input dp-input--planned"
-          type="number"
-          min={0}
-          step={1}
-          disabled={disabled}
-          aria-label={`Planned ${col.headerShort}`}
-          value={pVal === '' ? '' : pVal}
-          onChange={(e) =>
-            onPatch(col, { plannedQty: e.target.value, confirmedQty: plan?.confirmedQty })
-          }
-        />
-        <input
-          className="dp-input dp-input--confirmed"
-          type="number"
-          min={0}
-          step={1}
-          disabled={disabled}
-          aria-label={`Confirmed ${col.headerShort}`}
-          value={cVal === '' || cVal == null ? '' : cVal}
-          placeholder="Cfm"
-          onChange={(e) =>
-            onPatch(col, { plannedQty: plan?.plannedQty ?? 0, confirmedQty: e.target.value })
-          }
-        />
-      </div>
+    <td className="dp-week-cell dp-week-col" title={`${col.week} · ${mon}`}>
+      <input
+        className="dp-input dp-input--qty"
+        type="number"
+        min={0}
+        step={1}
+        disabled={readOnly}
+        aria-label={`Weekly qty ${col.headerShort}`}
+        value={val === '' ? '' : val}
+        onChange={(e) => onQtyChange(col, e.target.value)}
+      />
     </td>
   )
 }
@@ -147,12 +124,13 @@ export default function DeliveryPlanPage({
   const asOfDate = opsMeta?.asOfDate ?? operationsMeta.asOfDate
   const [pastWeeks, setPastWeeks] = useState(DEFAULT_PAST)
   const [futureWeeks, setFutureWeeks] = useState(DEFAULT_FUTURE)
+  const [weekOffset, setWeekOffset] = useState(0)
   const [draftRows, setDraftRows] = useState([])
   const [saveHint, setSaveHint] = useState('')
 
   const columns = useMemo(
-    () => buildWeekHorizon(asOfDate, pastWeeks, futureWeeks),
-    [asOfDate, pastWeeks, futureWeeks],
+    () => buildWeekHorizon(asOfDate, pastWeeks, futureWeeks, weekOffset),
+    [asOfDate, pastWeeks, futureWeeks, weekOffset],
   )
 
   const planByKey = useMemo(() => {
@@ -171,12 +149,11 @@ export default function DeliveryPlanPage({
     [masterItems, deliveryPlans, draftRows],
   )
 
-  const onPatch = useCallback(
-    (modelName, partNo) => (col, patch) => {
+  const onQtyChange = useCallback(
+    (modelName, partNo) => (col, raw) => {
       if (!modelName || !partNo) return
-      setDeliveryPlans((plans) =>
-        mergeCellUpdate(plans, modelName, partNo, col.periodStart, col, patch),
-      )
+      const wk = weekStartFromCol(col)
+      setDeliveryPlans((plans) => mergeCellUpdate(plans, modelName, partNo, wk, raw))
     },
     [setDeliveryPlans],
   )
@@ -199,29 +176,36 @@ export default function DeliveryPlanPage({
     setDraftRows((rows) => rows.filter((d) => d.id !== draftId))
   }
 
+  const pastOptions = useMemo(
+    () => Array.from({ length: MAX_PAST_WEEKS + 1 }, (_, i) => i),
+    [],
+  )
+
   return (
     <div className="page delivery-plan-page">
       <header className="page__header">
         <h1>Delivery Plan</h1>
         <p className="page__desc">
-          품번(행) × 주차(열) 가로형 그리드. Planned(위) / Confirmed(아래·청록) · 주차는 기준일 기준
-          자동 생성. Forecast Upload와 동일 Master Part만 집계됩니다.
+          품번(행) × 주차(열) 가로형 그리드. 주 셀에는 주간 납품 수량(qty)만 입력합니다. 기준일 주간을
+          포함해 과거는 최대 52주까지 넓혀 조회할 수 있으며, 데이터는 브라우저 저장소에 유지됩니다.
+          Inventory Projection의 Weekly Delivery은 이 수량을 사용합니다.
         </p>
         <div className="delivery-plan-page__toolbar">
           <label>
-            이전 주
+            이전 주(표시)
             <select
               value={pastWeeks}
               onChange={(e) => setPastWeeks(Number(e.target.value))}
             >
-              <option value={0}>0</option>
-              <option value={1}>1</option>
-              <option value={2}>2</option>
-              <option value={4}>4</option>
+              {pastOptions.map((n) => (
+                <option key={n} value={n}>
+                  {n}
+                </option>
+              ))}
             </select>
           </label>
           <label>
-            이후 주
+            이후 주(표시)
             <select
               value={futureWeeks}
               onChange={(e) => setFutureWeeks(Number(e.target.value))}
@@ -233,8 +217,36 @@ export default function DeliveryPlanPage({
               <option value={34}>34</option>
             </select>
           </label>
+          <div className="delivery-plan-page__nav">
+            <button
+              type="button"
+              className="btn btn--ghost"
+              onClick={() => setWeekOffset((o) => o - 12)}
+            >
+              이전 12주
+            </button>
+            <button
+              type="button"
+              className="btn btn--ghost"
+              onClick={() => setWeekOffset((o) => o + 12)}
+            >
+              다음 12주
+            </button>
+            <button
+              type="button"
+              className="btn btn--ghost"
+              onClick={() => {
+                setWeekOffset(0)
+                setPastWeeks(DEFAULT_PAST)
+                setFutureWeeks(DEFAULT_FUTURE)
+              }}
+            >
+              현재 기준으로
+            </button>
+          </div>
           <span className="page__hint" style={{ margin: 0 }}>
             기준일: <strong>{asOfDate}</strong> · 열 {columns.length}주
+            {weekOffset !== 0 ? ` · 뷰 오프셋 ${weekOffset > 0 ? '+' : ''}${weekOffset}주` : ''}
           </span>
           <div className="page__actions" style={{ marginLeft: 'auto' }}>
             <button type="button" className="btn btn--ghost" onClick={addDraftRow}>
@@ -258,11 +270,14 @@ export default function DeliveryPlanPage({
             <tr>
               <th className="dp-th--sticky dp-col-model">Model</th>
               <th className="dp-th--sticky-end dp-col-part">Part No</th>
-              {columns.map((c) => (
-                <th key={c.periodStart} className="dp-week-col" title={`${c.week} · ${c.periodStart}`}>
-                  {c.headerShort}
-                </th>
-              ))}
+              {columns.map((c) => {
+                const wk = weekStartFromCol(c)
+                return (
+                  <th key={wk} className="dp-week-col" title={`${c.week} · ${wk}`}>
+                    {c.headerShort}
+                  </th>
+                )
+              })}
             </tr>
           </thead>
           <tbody>
@@ -345,14 +360,16 @@ export default function DeliveryPlanPage({
                     )}
                   </td>
                   {columns.map((col) => {
-                    const plan = planByKey.get(`${modelName}\t${partNo}\t${col.periodStart}`)
+                    const wk = weekStartFromCol(col)
+                    const plan = planByKey.get(`${modelName}\t${partNo}\t${wk}`)
                     return (
                       <WeekCell
-                        key={col.periodStart}
+                        key={wk}
                         col={col}
                         plan={plan}
+                        asOfDate={asOfDate}
                         disabled={cellDisabled}
-                        onPatch={onPatch(modelName, partNo)}
+                        onQtyChange={onQtyChange(modelName, partNo)}
                       />
                     )
                   })}

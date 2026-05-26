@@ -10,6 +10,7 @@ import {
   weeklyPlans as sampleWeeklyPlans,
 } from './data/sampleInventoryData'
 import { loadJson, saveJson, storageKeys } from './utils/appPersistence'
+import { migrateDeliveryPlansToSimple } from './utils/deliveryPlanMigrate'
 import { migrateInTransitRows } from './utils/inTransitMigrate'
 import {
   authenticate,
@@ -28,6 +29,7 @@ import MasterDataPage from './components/pages/MasterDataPage.jsx'
 import DeliveryPlanPage from './components/pages/DeliveryPlanPage.jsx'
 import InTransitPage from './components/pages/InTransitPage.jsx'
 import ForecastUploadPage from './components/pages/ForecastUploadPage.jsx'
+import InventoryProjectionPage from './components/pages/InventoryProjectionPage.jsx'
 import SettingsPage from './components/pages/SettingsPage.jsx'
 import './App.css'
 import './components/pages/pages.css'
@@ -38,6 +40,7 @@ const VIEWS = [
   { id: 'delivery', label: 'Delivery Plan' },
   { id: 'transit', label: 'In-Transit' },
   { id: 'forecast', label: 'Forecast Upload' },
+  { id: 'projection', label: 'Inventory Projection' },
   { id: 'settings', label: 'Settings' },
 ]
 
@@ -61,7 +64,8 @@ function App() {
   })
   const [deliveryPlans, setDeliveryPlans] = useState(() => {
     const loaded = loadJson(storageKeys.plans)
-    return Array.isArray(loaded) && loaded.length ? loaded : buildSeedDeliveryPlans()
+    const base = Array.isArray(loaded) && loaded.length ? loaded : buildSeedDeliveryPlans()
+    return migrateDeliveryPlansToSimple(base)
   })
   const [inTransit, setInTransit] = useState(() => {
     const loaded = loadJson(storageKeys.transit)
@@ -124,7 +128,7 @@ function App() {
   const resetAllData = useCallback(() => {
     Object.values(storageKeys).forEach((k) => localStorage.removeItem(k))
     setMasterItems(buildSeedMasterItems())
-    setDeliveryPlans(buildSeedDeliveryPlans())
+    setDeliveryPlans(migrateDeliveryPlansToSimple(buildSeedDeliveryPlans()))
     setInTransit(buildSeedInTransit())
     setOpsMeta(defaultOpsMeta)
     setWeeklyPlans(sampleWeeklyPlans)
@@ -279,6 +283,14 @@ function App() {
           masterItems={masterItems}
           deliveryPlans={deliveryPlans}
           setDeliveryPlans={setDeliveryPlans}
+          opsMeta={opsMeta}
+        />
+      )}
+      {view === 'projection' && (
+        <InventoryProjectionPage
+          masterItems={masterItems}
+          deliveryPlans={deliveryPlans}
+          inTransit={inTransit}
           opsMeta={opsMeta}
         />
       )}

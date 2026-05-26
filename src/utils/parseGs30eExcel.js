@@ -377,7 +377,7 @@ function synthesizeWeeklyPlansFromItemDeliveryPlans(plans, modelName) {
       })
     }
     const w = map.get(start)
-    w.weeklyOutbound += Number(p.plannedQty) || 0
+    w.weeklyOutbound += Number(p.qty ?? p.plannedQty) || 0
   }
   const sorted = [...map.values()].sort((a, b) => a.periodStart.localeCompare(b.periodStart))
   return sorted.map((row, index, arr) => ({
@@ -604,11 +604,7 @@ export function parseProductExcel(buffer, options = {}) {
       modelName,
       partNo: 'Pilot Item',
       weekStartDate: w.periodStart,
-      periodStart: w.periodStart,
-      week: w.week,
-      label: w.label,
-      plannedQty: w.weeklyOutbound,
-      confirmedQty: null,
+      qty: Number(w.weeklyOutbound) || 0,
       source: 'Excel Upload',
     }))
 

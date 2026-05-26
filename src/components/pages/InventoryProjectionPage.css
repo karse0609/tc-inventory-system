@@ -1,0 +1,228 @@
+/* Inventory Projection — 주차별 예상재고 그리드 */
+
+.inv-proj-page {
+  max-width: min(1920px, 100%);
+  margin: 0 auto;
+  padding: 0.5rem 0.65rem 1.25rem;
+  box-sizing: border-box;
+}
+
+.inv-proj-page .page__header h1 {
+  font-size: 1.05rem;
+}
+
+.inv-proj-page .page__desc {
+  font-size: 0.78rem;
+  line-height: 1.4;
+}
+
+.inv-proj-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 1rem;
+  margin: 0.35rem 0 0.45rem;
+}
+
+.inv-proj-toolbar label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.72rem;
+  color: var(--muted);
+}
+
+.inv-proj-toolbar select {
+  font-size: 0.72rem;
+  padding: 0.2rem 0.4rem;
+  border-radius: 4px;
+  border: 1px solid var(--border);
+  background: var(--bg);
+}
+
+.inv-proj-legend {
+  font-size: 0.68rem;
+  color: var(--muted);
+  margin-bottom: 0.35rem;
+  line-height: 1.35;
+}
+
+.inv-proj-wrap {
+  overflow-x: auto;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg, #fff);
+}
+
+.inv-proj-table {
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 0.7rem;
+  min-width: max(100%, 720px);
+}
+
+.inv-proj-table th,
+.inv-proj-table td {
+  padding: 0.12rem 0.18rem;
+  border-bottom: 1px solid var(--border);
+  border-right: 1px solid var(--border);
+  vertical-align: top;
+  line-height: 1.15;
+}
+
+.inv-proj-table thead th {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  background: rgba(0, 0, 0, 0.05);
+  font-weight: 600;
+  color: var(--muted);
+  text-align: center;
+  font-size: 0.65rem;
+}
+
+.inv-proj-table thead th.inv-proj-th--sticky {
+  z-index: 6;
+  text-align: left;
+}
+
+.inv-proj-table tbody td.inv-proj-td--sticky {
+  background: var(--bg, #fff);
+}
+
+.inv-proj-table tbody tr:hover td {
+  background: rgba(37, 99, 235, 0.04);
+}
+
+.inv-proj-table tbody tr:hover td.inv-proj-td--sticky {
+  background: rgba(37, 99, 235, 0.07);
+}
+
+.inv-proj-th--sticky,
+.inv-proj-td--sticky {
+  position: sticky;
+  left: 0;
+  box-shadow: 1px 0 0 var(--border);
+}
+
+.inv-proj-th--sticky2,
+.inv-proj-td--sticky2 {
+  position: sticky;
+  left: 5.25rem;
+  box-shadow: 1px 0 0 var(--border);
+}
+
+.inv-proj-th--sticky3,
+.inv-proj-td--sticky3 {
+  position: sticky;
+  left: 12.25rem;
+  box-shadow: 1px 0 0 var(--border);
+}
+
+.inv-proj-th--sticky4,
+.inv-proj-td--sticky4 {
+  position: sticky;
+  left: 22.5rem;
+  box-shadow: 1px 0 0 var(--border);
+}
+
+.inv-proj-col-model {
+  width: 5.25rem;
+  min-width: 5.25rem;
+  max-width: 5.25rem;
+}
+
+.inv-proj-col-part {
+  width: 7rem;
+  min-width: 7rem;
+  max-width: 7rem;
+}
+
+.inv-proj-col-desc {
+  width: 10.25rem;
+  min-width: 10.25rem;
+  max-width: 10.25rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.inv-proj-col-stock {
+  width: 4.25rem;
+  min-width: 4.25rem;
+  max-width: 4.25rem;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.inv-proj-week {
+  min-width: 4.35rem;
+  max-width: 4.6rem;
+}
+
+.inv-proj-week-sub {
+  display: block;
+  font-weight: 400;
+  font-size: 0.58rem;
+  color: var(--muted);
+}
+
+.inv-proj-cell {
+  font-variant-numeric: tabular-nums;
+}
+
+.inv-proj-cell__line {
+  display: block;
+  white-space: nowrap;
+}
+
+.inv-proj-cell__label {
+  font-size: 0.58rem;
+  color: var(--muted);
+  margin-right: 0.15rem;
+}
+
+.inv-proj-cell--critical {
+  background: rgba(220, 38, 38, 0.09);
+}
+
+.inv-proj-cell--warning {
+  background: rgba(234, 179, 8, 0.12);
+}
+
+.inv-proj-cell--stable {
+  background: rgba(22, 163, 74, 0.08);
+}
+
+.inv-proj-cell--na {
+  background: rgba(0, 0, 0, 0.02);
+}
+
+.inv-proj-status {
+  display: inline-block;
+  margin-top: 0.08rem;
+  padding: 0.04rem 0.28rem;
+  border-radius: 3px;
+  font-size: 0.58rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+}
+
+.inv-proj-status--critical {
+  background: rgba(220, 38, 38, 0.2);
+  color: #991b1b;
+}
+
+.inv-proj-status--warning {
+  background: rgba(234, 179, 8, 0.35);
+  color: #92400e;
+}
+
+.inv-proj-status--stable {
+  background: rgba(22, 163, 74, 0.25);
+  color: #166534;
+}
+
+.inv-proj-status--na {
+  background: rgba(100, 116, 139, 0.2);
+  color: #475569;
+}

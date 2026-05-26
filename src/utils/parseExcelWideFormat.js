@@ -58,31 +58,6 @@ function toNumber(value) {
   return Number.isFinite(parsed) ? parsed : null
 }
 
-/** 로컬 날짜(YYYY-MM-DD) 기준 ISO 주차 라벨 */
-function isoWeekStringFromYmd(ymd) {
-  if (!ymd || !/^\d{4}-\d{2}-\d{2}$/.test(ymd)) return ''
-  const [y, m, d] = ymd.split('-').map(Number)
-  const date = new Date(y, m - 1, d, 12, 0, 0)
-  if (Number.isNaN(date.getTime())) return ''
-
-  const target = new Date(date.valueOf())
-  const dayNr = (date.getDay() + 6) % 7
-  target.setDate(target.getDate() - dayNr + 3)
-  const firstThursday = target.valueOf()
-  target.setMonth(0, 1)
-  if (target.getDay() !== 4) {
-    target.setMonth(0, 1 + ((4 - target.getDay() + 7) % 7))
-  }
-  const week = 1 + Math.ceil((firstThursday - target) / 604800000)
-  const isoYear = new Date(firstThursday).getFullYear()
-  return `${isoYear}-W${String(week).padStart(2, '0')}`
-}
-
-function weekLabelFromYmd(ymd) {
-  const w = isoWeekStringFromYmd(ymd)
-  return w || ymd
-}
-
 /**
  * 상단 여러 행을 훑어 열마다 마지막으로 파싱된 날짜를 헤더로 사용 (2행 헤더·날짜 하단 배치 대응)
  */
@@ -300,20 +275,20 @@ export function parseWideFormatItemDeliveryPlans(rows, modelName, sheetName, opt
   }
 
   const itemDeliveryPlans = []
-  for (const [key, { planned, confirmed }] of merge) {
+  for (const [key, cell] of merge) {
     const sep = key.indexOf(KEY_SEP)
     const partNo = sep >= 0 ? key.slice(0, sep) : key
     const weekStartDate = sep >= 0 ? key.slice(sep + KEY_SEP.length) : ''
     if (!weekStartDate) continue
+    const planned = cell.planned || 0
+    const confirmed = cell.confirmed
+    const cPart = confirmed != null && !Number.isNaN(Number(confirmed)) ? Number(confirmed) || 0 : 0
+    const qty = planned + cPart
     itemDeliveryPlans.push({
       modelName,
       partNo: partNo || PILOT_PART,
       weekStartDate,
-      periodStart: weekStartDate,
-      week: isoWeekStringFromYmd(weekStartDate),
-      label: weekLabelFromYmd(weekStartDate),
-      plannedQty: planned || 0,
-      confirmedQty: confirmed != null ? confirmed : null,
+      qty,
       source: SOURCE_EXCEL,
     })
   }

@@ -6,7 +6,7 @@ import { getFutureDeliveryPlans, isInTransitRowActive } from './logisticsMetrics
 
 export function getWeeklyDemandSeries(itemDeliveryPlans, asOfDate) {
   const future = getFutureDeliveryPlans(itemDeliveryPlans, asOfDate)
-  return future.map((row) => row.confirmedQty ?? row.plannedQty ?? 0)
+  return future.map((row) => Number(row.qty ?? row.plannedQty) || 0)
 }
 
 export function sumInTransitByPart(containers, partNo) {
@@ -54,11 +54,8 @@ export function buildItemInventoryStatus({
       : (getWeeklyDemandSeries(partPlans, asOfDate)[0] ?? 0)
 
   const firstWeek = getFirstFutureWeekPlan(partPlans, asOfDate)
-  const plannedDelivery = firstWeek?.plannedQty ?? 0
-  const confirmedDelivery =
-    firstWeek?.confirmedQty != null && firstWeek?.confirmedQty !== ''
-      ? firstWeek.confirmedQty
-      : null
+  const plannedDelivery = Number(firstWeek?.qty ?? firstWeek?.plannedQty) || 0
+  const confirmedDelivery = null
 
   const inTransitQty = sumInTransitByPart(inTransitContainers, item.partNo)
   const warehouseStock = item.currentStock

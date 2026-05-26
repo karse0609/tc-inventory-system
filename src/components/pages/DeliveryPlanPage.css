@@ -25,6 +25,18 @@
   margin-bottom: 0.4rem;
 }
 
+.delivery-plan-page__nav {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  align-items: center;
+}
+
+.delivery-plan-page__nav .btn {
+  font-size: 0.72rem;
+  padding: 0.22rem 0.45rem;
+}
+
 .delivery-plan-page__toolbar label {
   display: inline-flex;
   align-items: center;
@@ -132,10 +144,14 @@
   vertical-align: middle;
 }
 
-.dp-week-cell__stack {
-  display: flex;
-  flex-direction: column;
-  gap: 0.08rem;
+.dp-input--qty {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.dp-input--qty:focus {
+  outline: 2px solid rgba(37, 99, 235, 0.35);
+  border-color: rgba(37, 99, 235, 0.5);
 }
 
 .dp-input {
@@ -149,29 +165,6 @@
   line-height: 1.1;
   background: var(--bg);
   color: var(--text-h);
-}
-
-.dp-input--planned {
-  text-align: right;
-  font-variant-numeric: tabular-nums;
-}
-
-.dp-input--planned:focus {
-  outline: 2px solid rgba(37, 99, 235, 0.35);
-  border-color: rgba(37, 99, 235, 0.5);
-}
-
-.dp-input--confirmed {
-  text-align: right;
-  font-size: 0.68rem;
-  font-variant-numeric: tabular-nums;
-  background: rgba(14, 116, 144, 0.08);
-  border-color: rgba(14, 116, 144, 0.28);
-  color: rgb(14, 91, 108);
-}
-
-.dp-input--confirmed:focus {
-  outline: 2px solid rgba(14, 116, 144, 0.35);
 }
 
 .dp-input--readonly {

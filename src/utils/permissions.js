@@ -3,7 +3,15 @@
  * Supabase/Firebase 등으로 교체 시 이 모듈만 서버 스키마에 맞게 조정하면 됩니다.
  */
 
-export const VIEW_IDS = ['dashboard', 'master', 'delivery', 'transit', 'forecast', 'settings']
+export const VIEW_IDS = [
+  'dashboard',
+  'master',
+  'delivery',
+  'transit',
+  'forecast',
+  'projection',
+  'settings',
+]
 
 export const VIEW_MENU_LABELS = {
   dashboard: 'Dashboard',
@@ -11,10 +19,11 @@ export const VIEW_MENU_LABELS = {
   delivery: 'Delivery Plan',
   transit: 'In-Transit',
   forecast: 'Forecast Upload',
+  projection: 'Inventory Projection',
   settings: 'Settings',
 }
 
-/** @typedef {{ dashboard?: boolean, master?: boolean, delivery?: boolean, transit?: boolean, forecast?: boolean, settings?: boolean }} MenuPermissions */
+/** @typedef {{ dashboard?: boolean, master?: boolean, delivery?: boolean, transit?: boolean, forecast?: boolean, projection?: boolean, settings?: boolean }} MenuPermissions */
 
 /** @param {string} role */
 export function defaultMenuPermissionsForRole(role) {
@@ -30,6 +39,7 @@ export function defaultMenuPermissionsForRole(role) {
         master: true,
         delivery: true,
         transit: true,
+        projection: true,
       }
     case 'Viewer':
       return {

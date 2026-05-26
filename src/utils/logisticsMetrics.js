@@ -1,5 +1,15 @@
 /** 물류 운영 KPI · 주차/지연 판단 */
 
+import { formatWeekHeaderShort, isoWeekLabelFromMonday } from './weekIsoLabels'
+
+/** 납품 행의 주 시작일(월요일 YYYY-MM-DD) */
+export function planRowWeekStart(row) {
+  if (!row) return ''
+  const w = row.weekStartDate || row.periodStart
+  if (!w || !/^\d{4}-\d{2}-\d{2}$/.test(String(w))) return ''
+  return getWeekRange(String(w)).start
+}
+
 export function getWeekRange(isoDate) {
   const date = new Date(`${isoDate}T12:00:00`)
   const day = date.getDay()
@@ -102,13 +112,16 @@ export function getThisWeekEtaRows(containers, asOfDate) {
 export function getFutureDeliveryPlans(plans, asOfDate) {
   const range = getWeekRange(asOfDate)
   return plans
-    .filter((row) => row.periodStart >= range.start)
-    .sort((a, b) => a.periodStart.localeCompare(b.periodStart))
+    .filter((row) => {
+      const mon = planRowWeekStart(row)
+      return mon && mon >= range.start
+    })
+    .sort((a, b) => planRowWeekStart(a).localeCompare(planRowWeekStart(b)))
 }
 
 /**
- * itemDeliveryPlans → 모델별 주차 집계 (Planned / Confirmed 합계)
- * Confirmed: 값이 있는 행만 합산; 전부 null이면 null
+ * itemDeliveryPlans → 모델별 주차 집계 (주간 납품 qty 합계)
+ * 대시보드 표는 plannedQty 필드에 합계를 담고, confirmedQty는 사용하지 않음(null).
  */
 export function aggregateItemDeliveryPlansByWeek(itemPlans, modelName, asOfDate) {
   const rows = filterByModel(itemPlans, modelName)
@@ -116,57 +129,38 @@ export function aggregateItemDeliveryPlansByWeek(itemPlans, modelName, asOfDate)
   const map = new Map()
 
   for (const row of future) {
-    const key = row.week
-    if (!map.has(key)) {
-      map.set(key, {
+    const periodStart = planRowWeekStart(row)
+    if (!periodStart) continue
+    const qty = Number(row.qty ?? row.plannedQty) || 0
+    if (!map.has(periodStart)) {
+      map.set(periodStart, {
         modelName,
-        week: row.week,
-        label: row.label,
-        periodStart: row.periodStart,
+        week: row.week || isoWeekLabelFromMonday(periodStart),
+        label: row.label || formatWeekHeaderShort(periodStart),
+        periodStart,
         plannedQty: 0,
-        confirmedSum: 0,
-        confirmedParts: 0,
-        totalParts: 0,
       })
     }
-    const agg = map.get(key)
-    agg.plannedQty += Number(row.plannedQty) || 0
-    agg.totalParts += 1
-    if (row.confirmedQty != null && row.confirmedQty !== '') {
-      agg.confirmedSum += Number(row.confirmedQty) || 0
-      agg.confirmedParts += 1
-    }
+    const agg = map.get(periodStart)
+    agg.plannedQty += qty
   }
 
   return Array.from(map.values())
     .sort((a, b) => a.periodStart.localeCompare(b.periodStart))
-    .map((agg) => ({
-      modelName: agg.modelName,
-      week: agg.week,
-      label: agg.label,
-      periodStart: agg.periodStart,
-      plannedQty: agg.plannedQty,
-      confirmedQty:
-        agg.confirmedParts === 0 ? null : agg.confirmedSum,
-      status: 'planned',
-    }))
     .map((row) => ({
       ...row,
+      confirmedQty: null,
       status: isThisWeek(row.periodStart, asOfDate) ? 'in_progress' : 'planned',
     }))
 }
 
-/** 이번 주(기준일 주간) Part별 납품 합계 — 확정 우선, 없으면 계획 */
+/** 이번 주(기준일 주간) Part별 납품 합계 — 주간 qty */
 export function getThisWeekAggregatedDeliveryQty(itemPlans, modelName, asOfDate) {
   const range = getWeekRange(asOfDate)
   return filterByModel(itemPlans, modelName)
-    .filter((row) => isDateInRange(row.periodStart, range.start, range.end))
-    .reduce((sum, row) => {
-      const planned = Number(row.plannedQty) || 0
-      const confirmed =
-        row.confirmedQty != null && row.confirmedQty !== ''
-          ? Number(row.confirmedQty)
-          : null
-      return sum + (confirmed ?? planned)
-    }, 0)
+    .filter((row) => {
+      const mon = planRowWeekStart(row)
+      return mon && isDateInRange(mon, range.start, range.end)
+    })
+    .reduce((sum, row) => sum + (Number(row.qty ?? row.plannedQty) || 0), 0)
 }

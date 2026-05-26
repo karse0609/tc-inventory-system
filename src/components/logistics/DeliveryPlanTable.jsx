@@ -23,8 +23,7 @@ export default function DeliveryPlanTable({ plans, asOfDate }) {
             <tr>
               <th><BilingualLabel label={L.week} /></th>
               <th><BilingualLabel label={L.model} /></th>
-              <th><BilingualLabel label={L.plannedQty} /></th>
-              <th><BilingualLabel label={L.confirmedQty} /></th>
+              <th><BilingualLabel label={L.qty} /></th>
               <th><BilingualLabel label={L.status} /></th>
             </tr>
           </thead>
@@ -33,6 +32,7 @@ export default function DeliveryPlanTable({ plans, asOfDate }) {
               const isThisWeek =
                 row.periodStart >= weekRange.start &&
                 row.periodStart <= weekRange.end
+              const qty = Number(row.plannedQty ?? row.qty) || 0
               return (
                 <tr
                   key={`${row.modelName}-${row.week}-${row.periodStart}-${idx}`}
@@ -43,10 +43,7 @@ export default function DeliveryPlanTable({ plans, asOfDate }) {
                     <span className="cell-sub">{row.periodStart}</span>
                   </td>
                   <td>{row.modelName}</td>
-                  <td className="cell--num">{formatNumber(row.plannedQty)}</td>
-                  <td className="cell--num">
-                    {row.confirmedQty != null ? formatNumber(row.confirmedQty) : '—'}
-                  </td>
+                  <td className="cell--num">{formatNumber(qty)}</td>
                   <td>
                     <span
                       className={`status-pill status-pill--${row.status === 'in_progress' ? 'active' : 'planned'}`}

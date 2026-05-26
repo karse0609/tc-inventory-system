@@ -1,5 +1,5 @@
 import { planWeekMonday } from './deliveryPlanHorizon'
-import { getWeekRange, isInTransitRowActive } from './logisticsMetrics'
+import { isInTransitRowActive } from './logisticsMetrics'
 
 /** @param {string} weekId e.g. 2026-W20 → W20 */
 export function shortWeekLabel(weekId) {
@@ -12,10 +12,7 @@ function deliveryQtyForWeek(planRows, modelName, partNo, mondayIso) {
   for (const p of planRows) {
     if (p.modelName !== modelName || p.partNo !== partNo) continue
     if (planWeekMonday(p) !== mondayIso) continue
-    const c = p.confirmedQty
-    const use =
-      c != null && c !== '' && !Number.isNaN(Number(c)) ? Number(c) : Number(p.plannedQty) || 0
-    sum += use
+    sum += Number(p.qty ?? p.plannedQty) || 0
   }
   return sum
 }

@@ -1,12 +1,26 @@
+import { getWeekRange } from './logisticsMetrics'
+import { migrateDeliveryPlansToSimple } from './deliveryPlanMigrate'
 import { newId } from './newId'
 
 function planKey(p) {
-  const start = p.periodStart || p.weekStartDate || ''
-  return `${p.modelName}__${p.partNo}__${start}`
+  const raw = p.weekStartDate || p.periodStart || ''
+  if (!raw || !/^\d{4}-\d{2}-\d{2}$/.test(String(raw))) {
+    return `${p.modelName}__${p.partNo}__`
+  }
+  const mon = getWeekRange(String(raw)).start
+  return `${p.modelName}__${p.partNo}__${mon}`
 }
 
 function masterKey(m) {
   return `${m.modelName}__${m.partNo}`
+}
+
+function rowQty(row) {
+  if (row.qty != null && row.qty !== '') return Number(row.qty) || 0
+  const planned = Number(row.plannedQty) || 0
+  const c = row.confirmedQty
+  if (c != null && c !== '' && !Number.isNaN(Number(c))) return planned + Number(c)
+  return planned
 }
 
 /**
@@ -34,29 +48,26 @@ export function buildForecastApplyPreview(existingPlans, parsedRows, masterItems
 
   const updatedKeys = []
   for (const row of matched) {
-    const periodStart = row.periodStart || row.weekStartDate
-    if (!periodStart) continue
-    const key = planKey({ ...row, periodStart })
+    const raw = row.weekStartDate || row.periodStart
+    if (!raw) continue
+    const periodStart = getWeekRange(String(raw)).start
+    const key = planKey({ ...row, weekStartDate: periodStart })
+    const prev = map.get(key)
+    const qty = rowQty(row)
     const nextRow = {
-      id: map.get(key)?.id ?? newId('plan'),
+      id: prev?.id ?? newId('plan'),
       modelName: row.modelName,
       partNo: row.partNo,
-      week: row.week || map.get(key)?.week || '',
-      label: row.label || map.get(key)?.label || '',
-      periodStart,
-      plannedQty: Number(row.plannedQty) || 0,
-      confirmedQty:
-        row.confirmedQty !== undefined && row.confirmedQty !== ''
-          ? Number(row.confirmedQty)
-          : map.get(key)?.confirmedQty ?? null,
-      status: row.status || map.get(key)?.status || 'planned',
+      weekStartDate: periodStart,
+      qty,
+      locked: prev?.locked === true,
     }
     map.set(key, nextRow)
     updatedKeys.push(key)
   }
 
   return {
-    next: [...map.values()],
+    next: migrateDeliveryPlansToSimple([...map.values()]),
     matched,
     unmatched,
     updatedKeys,
