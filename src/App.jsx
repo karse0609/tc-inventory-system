@@ -81,6 +81,10 @@ function App() {
   const [dataSimSource, setDataSimSource] = useState(
     () => loadJson(storageKeys.simSource) ?? 'sample',
   )
+  const [unitCostKrwBySku, setUnitCostKrwBySku] = useState(() => {
+    const loaded = loadJson(storageKeys.unitCostsKrw)
+    return loaded && typeof loaded === 'object' && !Array.isArray(loaded) ? loaded : {}
+  })
 
   useEffect(() => {
     saveUsersToStorage(users)
@@ -116,6 +120,9 @@ function App() {
   useEffect(() => {
     saveJson(storageKeys.simSource, dataSimSource)
   }, [dataSimSource])
+  useEffect(() => {
+    saveJson(storageKeys.unitCostsKrw, unitCostKrwBySku)
+  }, [unitCostKrwBySku])
 
   const resetAllData = useCallback(() => {
     Object.values(storageKeys).forEach((k) => localStorage.removeItem(k))
@@ -126,6 +133,7 @@ function App() {
     setWeeklyPlans(sampleWeeklyPlans)
     setStartingInventory(INITIAL_STARTING_INVENTORY)
     setDataSimSource('sample')
+    setUnitCostKrwBySku({})
   }, [])
 
   const visibleNav = useMemo(
@@ -255,6 +263,7 @@ function App() {
           inTransitContainers={inTransit}
           opsMeta={opsMeta}
           setOpsMeta={setOpsMeta}
+          unitCostKrwBySku={unitCostKrwBySku}
         />
       )}
       {view === 'master' && (
@@ -279,7 +288,6 @@ function App() {
           inTransit={inTransit}
           setInTransit={setInTransit}
           setMasterItems={setMasterItems}
-          masterItems={masterItems}
           opsMeta={opsMeta}
         />
       )}
@@ -310,6 +318,9 @@ function App() {
           currentUserId={authUser.id}
           onForceAuthReset={handleForceAuthReset}
           onNavigateView={goView}
+          masterItems={masterItems}
+          unitCostKrwBySku={unitCostKrwBySku}
+          setUnitCostKrwBySku={setUnitCostKrwBySku}
         />
       )}
     </div>

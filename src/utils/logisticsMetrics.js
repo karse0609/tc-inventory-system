@@ -181,38 +181,38 @@ export function getThisWeekAggregatedDeliveryQty(itemPlans, modelName, asOfDate)
     .reduce((sum, row) => sum + (Number(row.qty ?? row.plannedQty) || 0), 0)
 }
 
-/** 모델별 창고(마스터) 재고 수량·금액 */
-export function sumWarehouseStockForModel(masterItems, modelName) {
+/** 모델별 창고(마스터) 재고 수량·금액(KRW) — 금액은 Settings 원가 맵 기준 */
+export function sumWarehouseStockForModel(masterItems, modelName, unitCostKrwBySku) {
   const rows = filterByModel(masterItems, modelName).filter((r) => r.status !== 'Inactive')
   let qty = 0
   let value = 0
   for (const r of rows) {
     const q = Number(r.currentStock) || 0
-    const p = Number(r.unitPrice) || 0
+    const cost =
+      unitCostKrwBySku && typeof unitCostKrwBySku === 'object'
+        ? Math.max(0, Number(unitCostKrwBySku[`${r.modelName}\t${r.partNo}`]) || 0)
+        : 0
     qty += q
-    value += q * p
+    value += q * cost
   }
   return { qty, value }
 }
 
 /**
- * 운송중(컨테이너 목록) 수량·금액 — 단가는 masterItems에서 model+part 매칭
+ * 운송중(컨테이너 목록) 수량·금액(KRW) — 단가는 Settings 원가 맵(model+part 키)
  * @param {object[]} containers 이미 모델 등으로 필터된 행
+ * @param {Record<string, number>} unitCostKrwBySku
  */
-export function sumInTransitStockForContainers(containers, masterItems) {
-  const priceMap = new Map()
-  for (const m of masterItems) {
-    if (m.status === 'Inactive') continue
-    priceMap.set(`${m.modelName}\t${m.partNo}`, Number(m.unitPrice) || 0)
-  }
+export function sumInTransitStockForContainers(containers, unitCostKrwBySku) {
+  const map = unitCostKrwBySku && typeof unitCostKrwBySku === 'object' ? unitCostKrwBySku : {}
   let qty = 0
   let value = 0
   for (const row of containers) {
     if (!isInTransitRowActive(row)) continue
     const q = Number(row.qty) || 0
-    const unit = priceMap.get(`${row.modelName}\t${row.partNo}`) || 0
+    const cost = Math.max(0, Number(map[`${row.modelName}\t${row.partNo}`]) || 0)
     qty += q
-    value += q * unit
+    value += q * cost
   }
   return { qty, value }
 }

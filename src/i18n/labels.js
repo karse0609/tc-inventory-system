@@ -1,6 +1,27 @@
 /** 주요 UI 용어 — 한국어 + English 병기 */
 
 export const L = {
+  excelPasteFrom: { ko: 'Excel에서 붙여넣기', en: 'Paste from Excel' },
+  excelCopyTo: { ko: 'Excel로 복사', en: 'Copy to Excel' },
+  excelClearSelected: { ko: '선택 행 지우기', en: 'Clear Selected Rows' },
+  excelRowsSelected: { ko: '행 선택됨', en: 'rows selected' },
+  excelClipboardEmpty: {
+    ko: '클립보드가 비어 있거나 읽을 수 없습니다.',
+    en: 'Clipboard is empty or unreadable.',
+  },
+  excelPasteDone: {
+    ko: '붙여넣기를 반영했습니다. 검증 메시지를 확인하세요.',
+    en: 'Paste applied. Check validation messages.',
+  },
+  excelCopyDone: {
+    ko: '클립보드에 복사했습니다.',
+    en: 'Copied to clipboard.',
+  },
+  excelReadonlyGrid: {
+    ko: '이 표는 계산 결과만 표시됩니다. 복사만 가능합니다.',
+    en: 'This grid is read-only; copy only.',
+  },
+
   pilotItem: { ko: 'Pilot 품목', en: 'Pilot Item' },
   dashboardModelAll: { ko: '전체', en: 'All' },
   dashboardWeekEtaWhCol: { ko: 'ETA 창고', en: 'ETA W/H' },
@@ -148,13 +169,17 @@ export const L = {
   /** 화면 제목 */
   warehouseInventoryScreen: { ko: '창고 재고', en: 'Warehouse Inventory' },
   warehouseInventorySubtitle: {
-    ko: '해외창고 재고 — 품목별 현재재고·단가·재고금액·커버리지(주)',
-    en: 'Overseas warehouse: qty, unit price, stock value, coverage weeks per SKU',
+    ko: '해외창고 재고 — 품목별 현재재고·커버리지(주)·주간 수요·안전·리드타임 등 운영 정보만 관리합니다.',
+    en: 'Warehouse ops only: stock, coverage weeks, weekly demand, safety, lead time (no unit cost on this screen).',
   },
   inTransitInventoryScreen: { ko: '운송중 재고', en: 'In-Transit Inventory' },
   inTransitSubtitle: {
-    ko: 'ETA·컨테이너·품목별 수량·단가·재고금액. 입고완료 후 저장하면 해외창고 재고에 반영됩니다.',
-    en: 'ETA, container, qty, unit price, value. Mark received and save to post qty into warehouse stock.',
+    ko: 'ETA·컨테이너·품목별 수량. 입고완료 후 저장하면 해외창고 재고에 반영됩니다. 재고 금액은 대시보드에서만 요약 표시됩니다.',
+    en: 'ETA, container, qty per SKU. Save after receipt to update warehouse stock. Inventory values are summarized on the Dashboard only.',
+  },
+  inTransitDeleteConfirm: {
+    ko: '정말 삭제하시겠습니까? 삭제 후 복구할 수 없습니다.',
+    en: 'Are you sure you want to delete? This cannot be undone.',
   },
   forecastUploadScreen: { ko: '출고 예측 업로드', en: 'Forecast Upload' },
   forecastUploadPageDesc: {
@@ -173,9 +198,21 @@ export const L = {
   settingsScreen: { ko: '설정', en: 'Settings' },
   settingsSubtitle: {
     ko:
-      '기준일·통화·대시보드 문구 등 운영 설정입니다. 품목별 단가·리드타임·안전재고 주수·평균 주간 출고량은 창고 재고 화면에서 입력하세요.',
+      '기준일·표시 단위·대시보드 문구 등 운영 설정입니다. 대당 원가(KRW)는 관리자만 이 화면에서 입력합니다. 창고 재고 화면에서는 수량·리드타임·안전재고·주간 수요만 다룹니다.',
     en:
-      'As-of date, currency, dashboard copy. Per-SKU unit price, lead time, safety weeks, and avg weekly demand are edited under Warehouse Inventory.',
+      'Ops settings and dashboard copy. Unit cost (KRW) per SKU is editable here for Admins only. Warehouse Inventory holds qty, lead time, safety, and weekly demand.',
+  },
+  settingsUnitCostTitle: { ko: '대당 원가 (KRW)', en: 'Unit cost (KRW)' },
+  settingsUnitCostHint: {
+    ko:
+      'Model·Part No별 대당 원가는 관리자만 이 화면에서 입력합니다. 일반 메뉴에는 원가가 노출되지 않으며, 대시보드에는 SKU별 단가 없이 합계 금액만 표시됩니다.',
+    en:
+      'Admins edit per-SKU unit cost (KRW) here only. Other screens hide cost; the dashboard shows aggregate KRW totals without per-line rates.',
+  },
+  settingsUnitCostColKrw: { ko: '대당 원가(KRW)', en: 'Unit cost (KRW)' },
+  settingsUnitCostEmpty: {
+    ko: '창고 재고에 활성 Model·Part가 없습니다. 먼저 품목을 등록하세요.',
+    en: 'No active SKUs. Add rows on Warehouse Inventory first.',
   },
   colUnitPrice: { ko: '단가', en: 'Unit Price' },
   warehousePipelineAbbr: { ko: '운송중', en: 'In-transit' },

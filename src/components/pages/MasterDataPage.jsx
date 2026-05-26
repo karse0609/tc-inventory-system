@@ -1,22 +1,33 @@
-import { useMemo, useState } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 import { getEnabledProducts } from '../../config/products'
 import { MIN_MANAGEMENT_WEEKS } from '../../config/inventoryPolicy'
 import { operationsMeta } from '../../data/logisticsSampleData'
 import { L, formatKoEn } from '../../i18n/labels'
 import { saveJson, storageKeys } from '../../utils/appPersistence'
 import { buildItemInventoryStatus } from '../../utils/inventoryCoverage'
+import {
+  matrixToTsv,
+  parseQtyCell,
+  readClipboardText,
+  splitTsvToMatrix,
+  writeClipboardText,
+} from '../../utils/excelGridClipboard'
 import { newId } from '../../utils/newId'
+import ExcelGridToolbar from '../grid/ExcelGridToolbar.jsx'
 import BilingualLabel from '../BilingualLabel'
 import '../logistics/ops.css'
 import './pages.css'
 
-function formatStockValue(n, currency = 'USD') {
-  return new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency,
-    maximumFractionDigits: 0,
-  }).format(Math.round(n) || 0)
-}
+const MASTER_COLS = [
+  'modelName',
+  'partNo',
+  'description',
+  'currentStock',
+  'weeklyDemand',
+  'safetyStockWeeks',
+  'leadTime',
+  'status',
+]
 
 function formatCoverageWeeks(weeks) {
   if (weeks === Infinity) return '∞'
@@ -33,8 +44,11 @@ export default function MasterDataPage({
 }) {
   const products = getEnabledProducts()
   const [saveHint, setSaveHint] = useState('')
+  const [excelMsg, setExcelMsg] = useState('')
+  const [selected, setSelected] = useState(() => new Set())
+  const [invalidIds, setInvalidIds] = useState(() => new Set())
+
   const asOfDate = opsMeta?.asOfDate ?? operationsMeta.asOfDate
-  const currency = opsMeta?.currency ?? operationsMeta.currency
 
   const itemStatusById = useMemo(() => {
     const m = new Map()
@@ -86,7 +100,149 @@ export default function MasterDataPage({
 
   function handleDelete(id) {
     setMasterItems((rows) => rows.filter((r) => r.id !== id))
+    setSelected((s) => {
+      const n = new Set(s)
+      n.delete(id)
+      return n
+    })
   }
+
+  const toggleSelect = useCallback((id) => {
+    setSelected((s) => {
+      const n = new Set(s)
+      if (n.has(id)) n.delete(id)
+      else n.add(id)
+      return n
+    })
+  }, [])
+
+  const toggleSelectAll = useCallback(() => {
+    setSelected((s) => {
+      if (s.size === masterItems.length) return new Set()
+      return new Set(masterItems.map((r) => r.id))
+    })
+  }, [masterItems])
+
+  const firstSelectedIndex = useMemo(() => {
+    if (!selected.size) return 0
+    const ix = masterItems.findIndex((r) => selected.has(r.id))
+    return ix >= 0 ? ix : 0
+  }, [masterItems, selected])
+
+  const handlePasteFromExcel = useCallback(async () => {
+    setExcelMsg('')
+    setInvalidIds(new Set())
+    const text = await readClipboardText()
+    if (!String(text).trim()) {
+      setExcelMsg(`!${formatKoEn(L.excelClipboardEmpty)}`)
+      return
+    }
+    const matrix = splitTsvToMatrix(text)
+    if (!matrix.length) {
+      setExcelMsg(`!${formatKoEn(L.excelClipboardEmpty)}`)
+      return
+    }
+    const errs = []
+    const bad = new Set()
+    const start = firstSelectedIndex
+
+    setMasterItems((prev) => {
+      const next = [...prev]
+      for (let r = 0; r < matrix.length; r++) {
+        const rowIdx = start + r
+        while (rowIdx >= next.length) {
+          next.push({
+            id: newId('master'),
+            modelName: '',
+            partNo: '',
+            description: '',
+            currentStock: 0,
+            unitPrice: 0,
+            weeklyDemand: 0,
+            safetyStockWeeks: MIN_MANAGEMENT_WEEKS,
+            leadTime: 14,
+            status: 'Active',
+          })
+        }
+        const row = { ...next[rowIdx] }
+        for (let c = 0; c < matrix[r].length && c < MASTER_COLS.length; c++) {
+          const field = MASTER_COLS[c]
+          const cell = String(matrix[r][c] ?? '').trim()
+          if (cell === '') continue
+          if (
+            field === 'currentStock' ||
+            field === 'weeklyDemand' ||
+            field === 'safetyStockWeeks' ||
+            field === 'leadTime'
+          ) {
+            const p = parseQtyCell(cell)
+            if (!p.ok) {
+              errs.push(`R${r + 1} C${c + 1}: ${field} — not a number`)
+              bad.add(row.id)
+              continue
+            }
+            if (field === 'safetyStockWeeks' || field === 'leadTime') {
+              row[field] = Math.max(0, Math.round(p.value))
+            } else {
+              row[field] = Math.max(0, p.value)
+            }
+          } else if (field === 'status') {
+            const v = cell.toLowerCase()
+            row.status = v.startsWith('inact') ? 'Inactive' : 'Active'
+          } else {
+            row[field] = cell
+          }
+        }
+        if (!String(row.modelName).trim() || !String(row.partNo).trim()) {
+          errs.push(`Row ${rowIdx + 1}: Model and Part No are required`)
+          bad.add(row.id)
+        }
+        next[rowIdx] = row
+      }
+      return next
+    })
+
+    setInvalidIds(bad)
+    setExcelMsg(
+      errs.length ? `!${errs.join('\n')}` : formatKoEn(L.excelPasteDone),
+    )
+  }, [firstSelectedIndex])
+
+  const handleCopyToExcel = useCallback(async () => {
+    setExcelMsg('')
+    const header = [
+      'Model',
+      'Part No',
+      'Description',
+      'Current Stock',
+      'Weekly Demand',
+      'Safety (wks)',
+      'Lead Time (d)',
+      'Status',
+    ]
+    const rowsSrc =
+      selected.size > 0 ? masterItems.filter((r) => selected.has(r.id)) : masterItems
+    const body = rowsSrc.map((row) => [
+      row.modelName ?? '',
+      row.partNo ?? '',
+      row.description ?? '',
+      String(row.currentStock ?? ''),
+      String(row.weeklyDemand ?? ''),
+      String(row.safetyStockWeeks ?? ''),
+      String(row.leadTime ?? ''),
+      row.status ?? '',
+    ])
+    await writeClipboardText(matrixToTsv([header, ...body]))
+    setExcelMsg(formatKoEn(L.excelCopyDone))
+  }, [masterItems, selected])
+
+  const handleClearSelected = useCallback(() => {
+    if (!selected.size) return
+    setMasterItems((rows) => rows.filter((r) => !selected.has(r.id)))
+    setSelected(new Set())
+    setInvalidIds(new Set())
+    setExcelMsg('')
+  }, [selected.size])
 
   return (
     <div className="page page--wide">
@@ -97,6 +253,13 @@ export default function MasterDataPage({
         <p className="page__desc">
           <BilingualLabel label={L.warehouseInventorySubtitle} compact as="span" />
         </p>
+        <ExcelGridToolbar
+          onPasteFromExcel={handlePasteFromExcel}
+          onCopyToExcel={handleCopyToExcel}
+          onClearSelected={handleClearSelected}
+          selectedCount={selected.size}
+          message={excelMsg}
+        />
         <div className="page__actions">
           <button type="button" className="btn btn--ghost" onClick={handleAdd}>
             Add Item
@@ -116,14 +279,18 @@ export default function MasterDataPage({
         <table className="ops-table master-table">
           <thead>
             <tr>
+              <th className="cell--center" style={{ width: '2rem' }}>
+                <input
+                  type="checkbox"
+                  aria-label="Select all"
+                  checked={masterItems.length > 0 && selected.size === masterItems.length}
+                  onChange={toggleSelectAll}
+                />
+              </th>
               <th>Model</th>
               <th>Part No</th>
               <th>Description</th>
               <th>Current Stock</th>
-              <th>Unit Price</th>
-              <th>
-                <BilingualLabel label={L.inventoryValue} compact as="span" />
-              </th>
               <th>
                 <BilingualLabel label={L.coverageWeeks} compact as="span" />
               </th>
@@ -137,12 +304,17 @@ export default function MasterDataPage({
           <tbody>
             {masterItems.map((row) => {
               const st = itemStatusById.get(row.id)
-              const stockVal =
-                st?.warehouseValue ??
-                (Number(row.currentStock) || 0) * (Number(row.unitPrice) || 0)
               const cov = st?.coverageWeeks
               return (
-                <tr key={row.id}>
+                <tr key={row.id} className={invalidIds.has(row.id) ? 'row--excel-invalid' : undefined}>
+                  <td className="cell--center">
+                    <input
+                      type="checkbox"
+                      checked={selected.has(row.id)}
+                      onChange={() => toggleSelect(row.id)}
+                      aria-label={`Select ${row.partNo}`}
+                    />
+                  </td>
                   <td>
                     <input
                       className="cell-input"
@@ -175,18 +347,6 @@ export default function MasterDataPage({
                       }
                     />
                   </td>
-                  <td>
-                    <input
-                      className="cell-input cell-input--num"
-                      type="number"
-                      step="0.01"
-                      value={row.unitPrice}
-                      onChange={(e) =>
-                        updateRow(row.id, { unitPrice: Number(e.target.value) || 0 })
-                      }
-                    />
-                  </td>
-                  <td className="cell--num cell--muted">{formatStockValue(stockVal, currency)}</td>
                   <td className="cell--num cell--muted" title={formatKoEn(L.demandBasedCoverage)}>
                     {formatCoverageWeeks(cov)}
                   </td>

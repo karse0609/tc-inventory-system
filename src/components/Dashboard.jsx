@@ -32,6 +32,7 @@ export default function Dashboard({
   inTransitContainers,
   opsMeta,
   setOpsMeta,
+  unitCostKrwBySku,
 }) {
   const [selectedModelName, setSelectedModelName] = useState(ALL_MODELS_VALUE)
   const asOfDate = opsMeta.asOfDate
@@ -102,13 +103,13 @@ export default function Dashboard({
   )
 
   const warehouse = useMemo(
-    () => sumWarehouseStockForModel(masterItems, selectedModelName),
-    [masterItems, selectedModelName],
+    () => sumWarehouseStockForModel(masterItems, selectedModelName, unitCostKrwBySku),
+    [masterItems, selectedModelName, unitCostKrwBySku],
   )
 
   const inTransitTotals = useMemo(
-    () => sumInTransitStockForContainers(containers, masterItems),
-    [containers, masterItems],
+    () => sumInTransitStockForContainers(containers, unitCostKrwBySku),
+    [containers, unitCostKrwBySku],
   )
 
   const weekEtaRows = useMemo(
@@ -179,7 +180,6 @@ export default function Dashboard({
         thisWeekEtaQty={todayMetrics.thisWeekEtaQty}
         coverageWeeks={inventorySummary.minCoverageWeeks}
         unit={opsMeta.unit}
-        currency={opsMeta.currency}
       />
 
       <InventoryStatusPanel
@@ -187,7 +187,6 @@ export default function Dashboard({
         itemRows={itemInventoryRows}
         summary={inventorySummary}
         unit={opsMeta.unit}
-        currency={opsMeta.currency}
       />
 
       <section className="dashboard__week-eta card" aria-labelledby="dash-week-eta-heading">

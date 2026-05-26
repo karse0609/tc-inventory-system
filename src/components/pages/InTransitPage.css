@@ -144,7 +144,7 @@
 }
 
 /*
- * colgroup — ETA 우선, 단가·금액 열 포함 (합계 ~100%)
+ * colgroup — ETA 우선 (합계 ~100%)
  */
 .transit-page__col--eta-wh {
   width: 6.2%;
@@ -163,15 +163,7 @@
 }
 
 .transit-page__col--qty {
-  width: 3.6%;
-}
-
-.transit-page__col--unitprice {
-  width: 5%;
-}
-
-.transit-page__col--value {
-  width: 5.8%;
+  width: 4.2%;
 }
 
 .transit-page__col--arrived {

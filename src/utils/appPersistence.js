@@ -6,6 +6,8 @@ const KEYS = {
   weekly: 'tc-inv-weekly-plans',
   starting: 'tc-inv-starting-inventory',
   simSource: 'tc-inv-sim-source',
+  /** 관리자 전용: SKU별 대당 원가(KRW) */
+  unitCostsKrw: 'tc-inv-unit-cost-krw-by-sku',
 }
 
 export function loadJson(key, fallback = null) {

@@ -1,16 +1,9 @@
 import BilingualLabel from '../BilingualLabel'
 import { L } from '../../i18n/labels'
+import { formatKrwTotal } from '../../utils/unitCostKrw'
 
 function formatNumber(value) {
   return new Intl.NumberFormat('ko-KR').format(Math.round(value))
-}
-
-function formatCurrency(value, currency = 'USD') {
-  return new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency,
-    maximumFractionDigits: 0,
-  }).format(value)
 }
 
 function coverageCardClass(coverageWeeks) {
@@ -27,7 +20,8 @@ function coverageDisplay(coverageWeeks) {
 }
 
 /**
- * 실시간 해외재고 대시보드 — 핵심 KPI 6종
+ * 실시간 해외재고 대시보드 — 핵심 KPI (수량·KRW 금액·ETA·커버리지)
+ * 재고 금액은 Settings의 대당 원가(KRW)만 사용합니다.
  */
 export default function DashboardCoreKpis({
   warehouseQty,
@@ -37,20 +31,27 @@ export default function DashboardCoreKpis({
   thisWeekEtaQty,
   coverageWeeks,
   unit,
-  currency = 'USD',
 }) {
+  const totalKrw = (Number(warehouseValue) || 0) + (Number(inTransitValue) || 0)
+  const krwMeta = 'KRW'
+
   const cards = [
     { label: L.dashboardWarehouseQty, value: formatNumber(warehouseQty), meta: unit },
     {
       label: L.dashboardWarehouseValue,
-      value: formatCurrency(warehouseValue, currency),
-      meta: currency,
+      value: formatKrwTotal(warehouseValue),
+      meta: krwMeta,
     },
     { label: L.dashboardInTransitQty, value: formatNumber(inTransitQty), meta: unit },
     {
       label: L.dashboardInTransitValue,
-      value: formatCurrency(inTransitValue, currency),
-      meta: currency,
+      value: formatKrwTotal(inTransitValue),
+      meta: krwMeta,
+    },
+    {
+      label: L.totalInventoryValue,
+      value: formatKrwTotal(totalKrw),
+      meta: krwMeta,
     },
     {
       label: L.dashboardThisWeekEtaQty,

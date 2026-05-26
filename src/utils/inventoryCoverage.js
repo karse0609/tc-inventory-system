@@ -83,14 +83,13 @@ export function buildItemInventoryStatus({
   const gap = warehouseStock - safetyStockQty
   const status = getCoverageStatus(coverageWeeks)
 
-  const warehouseValue = warehouseStock * item.unitPrice
-  const inTransitValue = inTransitQty * item.unitPrice
+  const warehouseValue = 0
+  const inTransitValue = 0
 
   return {
     modelName: item.modelName,
     partNo: item.partNo,
     description: item.description,
-    unitPrice: item.unitPrice,
     currentStock: warehouseStock,
     inTransitQty,
     weeklyDemand,

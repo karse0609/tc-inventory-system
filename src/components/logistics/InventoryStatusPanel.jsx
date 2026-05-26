@@ -11,14 +11,6 @@ function formatDecimal(value, digits = 1) {
   return value.toFixed(digits)
 }
 
-function formatCurrency(value, currency = 'USD') {
-  return new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency,
-    maximumFractionDigits: 0,
-  }).format(value)
-}
-
 function CoverageBadge({ status }) {
   const label = getCoverageStatusLabel(status)
   return (
@@ -35,7 +27,6 @@ export default function InventoryStatusPanel({
   itemRows,
   summary,
   unit,
-  currency,
   variant = 'default',
 }) {
   const compact = variant === 'compact'
@@ -89,42 +80,6 @@ export default function InventoryStatusPanel({
               <BilingualLabel label={L.coverageLegend} compact as="span" />
             </p>
           </article>
-
-          <div className="inv-value-grid">
-            <article className="inv-value-card">
-              <span className="inv-value-card__label">
-                <BilingualLabel label={L.warehouseInventoryValue} compact as="span" />
-              </span>
-              <strong className="inv-value-card__value">
-                {formatCurrency(summary.warehouseValue, currency)}
-              </strong>
-              <span className="inv-value-card__sub">
-                {formatNumber(summary.totalStock)} {unit}
-              </span>
-            </article>
-            <article className="inv-value-card">
-              <span className="inv-value-card__label">
-                <BilingualLabel label={L.inTransitInventoryValue} compact as="span" />
-              </span>
-              <strong className="inv-value-card__value">
-                {formatCurrency(summary.inTransitValue, currency)}
-              </strong>
-              <span className="inv-value-card__sub">
-                {formatNumber(summary.totalInTransit)} {unit}
-              </span>
-            </article>
-            <article className="inv-value-card inv-value-card--total">
-              <span className="inv-value-card__label">
-                <BilingualLabel label={L.totalInventoryValue} compact as="span" />
-              </span>
-              <strong className="inv-value-card__value">
-                {formatCurrency(summary.totalInventoryValue, currency)}
-              </strong>
-              <span className="inv-value-card__sub">
-                {itemRows.length} parts · {currency}
-              </span>
-            </article>
-          </div>
         </>
       )}
 

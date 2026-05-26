@@ -71,6 +71,47 @@
   color: var(--danger, #b91c1c);
 }
 
+/* Excel grid toolbar */
+.excel-grid-toolbar {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  margin-bottom: 0.65rem;
+}
+
+.excel-grid-toolbar__buttons {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem 0.5rem;
+}
+
+.excel-grid-toolbar__count {
+  font-size: 0.75rem;
+  color: var(--muted);
+}
+
+.excel-grid-toolbar__msg {
+  margin: 0;
+  font-size: 0.78rem;
+  color: var(--muted);
+  line-height: 1.35;
+  white-space: pre-wrap;
+}
+
+.excel-grid-toolbar__msg--error {
+  color: var(--danger, #b91c1c);
+}
+
+tr.row--excel-invalid td {
+  outline: 2px solid rgba(220, 38, 38, 0.45);
+  background: rgba(254, 226, 226, 0.25);
+}
+
+td.cell--excel-invalid {
+  outline: 2px solid rgba(220, 38, 38, 0.55);
+}
+
 .page__notice {
   margin-top: 0.75rem;
   padding: 0.65rem 0.75rem;
