@@ -1,10 +1,10 @@
 /* In-Transit — 고밀도 SCM 편집 화면 (가로 스크롤 최소화) */
 
 .page--transit-compact {
-  max-width: none;
+  max-width: min(1920px, 100%);
   width: 100%;
   margin: 0 auto;
-  padding: 0.55rem 0.85rem 1.25rem;
+  padding: 0.45rem 0.65rem 1rem;
   box-sizing: border-box;
 }
 
@@ -65,25 +65,32 @@
   table-layout: fixed;
   width: 100%;
   border-collapse: collapse;
-  font-size: 0.7rem;
+  font-size: 0.78rem;
 }
 
 .transit-page__table th,
 .transit-page__table td {
-  padding: 0.18rem 0.22rem;
+  padding: 0.12rem 0.16rem;
   border-bottom: 1px solid var(--border);
   vertical-align: middle;
-  line-height: 1.2;
+  line-height: 1.18;
 }
 
 .transit-page__table thead th {
-  font-size: 0.65rem;
+  font-size: 0.72rem;
   font-weight: 600;
   color: var(--muted);
   background: rgba(0, 0, 0, 0.03);
   white-space: normal;
-  line-height: 1.15;
+  line-height: 1.12;
   letter-spacing: -0.01em;
+}
+
+.transit-page__table thead th.transit-page__th--en {
+  font-size: 0.7rem;
+  letter-spacing: 0.02em;
+  text-transform: none;
+  white-space: nowrap;
 }
 
 .transit-page__table tbody tr:hover td {
@@ -93,10 +100,10 @@
 .transit-page__table .cell-input {
   width: 100%;
   min-width: 0;
-  padding: 0.16rem 0.22rem;
-  font-size: 0.7rem;
+  padding: 0.12rem 0.18rem;
+  font-size: 0.78rem;
   border-radius: 3px;
-  line-height: 1.15;
+  line-height: 1.18;
 }
 
 .transit-page__table .cell-input--num {
@@ -126,55 +133,57 @@
 }
 
 .transit-page__table .transit-page__btn-del {
-  padding: 0.12rem 0.28rem;
-  font-size: 0.65rem;
+  padding: 0.1rem 0.22rem;
+  font-size: 0.72rem;
   line-height: 1.1;
   white-space: nowrap;
 }
 
-/* colgroup — % 합계 ~100% (액션 열 고정) */
+/*
+ * colgroup — 합계 100% (1920 기준 한 화면, 비고·부품번호 축소)
+ */
 .transit-page__col--container {
-  width: 9.5%;
+  width: 15%;
 }
 
 .transit-page__col--model {
-  width: 6.25%;
+  width: 8.5%;
 }
 
 .transit-page__col--part {
-  width: 10.5%;
+  width: 5.8%;
 }
 
 .transit-page__col--qty {
-  width: 4.25%;
+  width: 3.8%;
 }
 
 .transit-page__col--arrived {
-  width: 2.75%;
+  width: 2.5%;
 }
 
 .transit-page__col--date {
-  width: 5.4%;
+  width: 6.6%;
 }
 
 .transit-page__col--eta-wh {
-  width: 5.25%;
+  width: 6%;
 }
 
 .transit-page__col--delivery {
-  width: 7.5%;
+  width: 17%;
 }
 
 .transit-page__col--remark {
-  width: 24%;
+  width: 4.5%;
 }
 
 .transit-page__col--tctech {
-  width: 6.5%;
+  width: 12.5%;
 }
 
 .transit-page__col--actions {
-  width: 3.25%;
+  width: 4.6%;
 }
 
 .transit-page__table td .cell-input {

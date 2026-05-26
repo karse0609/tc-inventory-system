@@ -170,14 +170,14 @@ export default function InTransitPage({ inTransit, setInTransit, setMasterItems 
               <th>{koEn(L.model)}</th>
               <th>{koEn(L.partNo)}</th>
               <th>{koEn(L.qty)}</th>
-              <th>{koEn(L.etdTcTech)}</th>
-              <th>{koEn(L.etdPort)}</th>
-              <th>{koEn(L.etaPort)}</th>
-              <th>{koEn(L.etaWh)}</th>
+              <th className="transit-page__th--en">ETD TC TECH</th>
+              <th className="transit-page__th--en">ETD Port</th>
+              <th className="transit-page__th--en">ETA Port</th>
+              <th className="transit-page__th--en">ETA W/H</th>
               <th>{koEn(L.deliveryLocation)}</th>
               <th>{koEn(L.arrived)}</th>
               <th>{koEn(L.remark)}</th>
-              <th>{koEn(L.tcTechNo)}</th>
+              <th className="transit-page__th--en">TC TECH No.</th>
               <th>{koEn({ ko: '작업', en: 'Act' })}</th>
             </tr>
           </thead>
