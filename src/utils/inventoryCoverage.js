@@ -2,7 +2,7 @@ import {
   getCoverageStatus,
   MIN_MANAGEMENT_WEEKS,
 } from '../config/inventoryPolicy'
-import { getFutureDeliveryPlans } from './logisticsMetrics'
+import { getFutureDeliveryPlans, isInTransitRowActive } from './logisticsMetrics'
 
 export function getWeeklyDemandSeries(itemDeliveryPlans, asOfDate) {
   const future = getFutureDeliveryPlans(itemDeliveryPlans, asOfDate)
@@ -11,7 +11,7 @@ export function getWeeklyDemandSeries(itemDeliveryPlans, asOfDate) {
 
 export function sumInTransitByPart(containers, partNo) {
   return containers
-    .filter((c) => c.partNo === partNo && !['Delivered', 'Arrived'].includes(c.status))
+    .filter((c) => c.partNo === partNo && isInTransitRowActive(c))
     .reduce((sum, c) => sum + c.qty, 0)
 }
 

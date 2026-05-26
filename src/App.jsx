@@ -10,6 +10,7 @@ import {
   weeklyPlans as sampleWeeklyPlans,
 } from './data/sampleInventoryData'
 import { loadJson, saveJson, storageKeys } from './utils/appPersistence'
+import { migrateInTransitRows } from './utils/inTransitMigrate'
 import {
   authenticate,
   clearAllAuthStorage,
@@ -64,7 +65,10 @@ function App() {
   })
   const [inTransit, setInTransit] = useState(() => {
     const loaded = loadJson(storageKeys.transit)
-    return Array.isArray(loaded) && loaded.length ? loaded : buildSeedInTransit()
+    if (Array.isArray(loaded) && loaded.length) {
+      return migrateInTransitRows(loaded)
+    }
+    return buildSeedInTransit()
   })
   const [opsMeta, setOpsMeta] = useState(() => {
     const loaded = loadJson(storageKeys.ops)
@@ -262,7 +266,13 @@ function App() {
           setDeliveryPlans={setDeliveryPlans}
         />
       )}
-      {view === 'transit' && <InTransitPage inTransit={inTransit} setInTransit={setInTransit} />}
+      {view === 'transit' && (
+        <InTransitPage
+          inTransit={inTransit}
+          setInTransit={setInTransit}
+          setMasterItems={setMasterItems}
+        />
+      )}
       {view === 'forecast' && (
         <ForecastUploadPage
           masterItems={masterItems}

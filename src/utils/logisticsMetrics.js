@@ -32,6 +32,14 @@ export function filterByModel(records, modelName) {
   return records.filter((row) => row.modelName === modelName)
 }
 
+/** 운송중 집계·표시에 포함할 행 (입고 완료·레거시 종료 상태 제외) */
+export function isInTransitRowActive(row) {
+  if (!row) return false
+  if (row.arrived) return false
+  if (['Delivered', 'Arrived'].includes(row.status)) return false
+  return true
+}
+
 export function sumWeeklyDemandForModel(masterItems, modelName) {
   return filterByModel(masterItems, modelName)
     .filter((row) => row.status !== 'Inactive')
@@ -53,13 +61,11 @@ export function buildTodayStatus({
     .filter((row) => isToday(row.etdTcTech, asOfDate))
     .reduce((sum, row) => sum + row.qty, 0)
 
-  const inTransit = inTransitContainers.filter(
-    (row) => !['Delivered', 'Arrived'].includes(row.status),
-  )
+  const inTransit = inTransitContainers.filter(isInTransitRowActive)
   const inTransitQty = inTransit.reduce((sum, row) => sum + row.qty, 0)
 
-  const thisWeekEtaRows = inTransitContainers.filter((row) =>
-    isThisWeek(row.etaPort, asOfDate),
+  const thisWeekEtaRows = inTransitContainers.filter(
+    (row) => isInTransitRowActive(row) && isThisWeek(row.etaPort, asOfDate),
   )
   const thisWeekEtaQty = thisWeekEtaRows.reduce((sum, row) => sum + row.qty, 0)
 
@@ -88,8 +94,9 @@ export function buildTodayStatus({
 
 export function getThisWeekEtaRows(containers, asOfDate) {
   return containers
+    .filter(isInTransitRowActive)
     .filter((row) => isThisWeek(row.etaPort, asOfDate))
-    .sort((a, b) => a.etaPort.localeCompare(b.etaPort))
+    .sort((a, b) => String(a.etaPort).localeCompare(String(b.etaPort)))
 }
 
 export function getFutureDeliveryPlans(plans, asOfDate) {

@@ -20,12 +20,12 @@ export default function ThisWeekEta({ rows, weekRange }) {
         ) : (
           rows.map((row) => (
             <article
-              key={row.containerNo}
-              className={`eta-card ${row.delayed ? 'eta-card--delay' : ''}`}
+              key={row.id ?? row.containerNo}
+              className={`eta-card ${row.remark ? 'eta-card--delay' : ''}`}
             >
               <div className="eta-card__head">
                 <code>{row.containerNo}</code>
-                {row.delayed ? (
+                {row.remark ? (
                   <span className="delay-badge">
                     <BilingualLabel label={L.delayWarning} as="span" />
                   </span>
@@ -44,17 +44,21 @@ export default function ThisWeekEta({ rows, weekRange }) {
                   <dd>{row.etaPort}</dd>
                 </div>
                 <div>
+                  <dt><BilingualLabel label={L.etaWh} /></dt>
+                  <dd>{row.etaWh || '—'}</dd>
+                </div>
+                <div>
                   <dt><BilingualLabel label={L.qty} /></dt>
                   <dd>{formatNumber(row.qty)}</dd>
                 </div>
                 <div>
-                  <dt><BilingualLabel label={L.status} /></dt>
-                  <dd>{row.status}</dd>
+                  <dt><BilingualLabel label={L.deliveryLocation} /></dt>
+                  <dd>{row.deliveryLocation || '—'}</dd>
                 </div>
               </dl>
-              {row.delayed && row.delayReason && (
-                <p className="eta-card__reason">⚠ {row.delayReason}</p>
-              )}
+              {row.remark ? (
+                <p className="eta-card__reason">{row.remark}</p>
+              ) : null}
             </article>
           ))
         )}

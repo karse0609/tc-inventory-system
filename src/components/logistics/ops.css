@@ -168,6 +168,12 @@
   text-align: right;
 }
 
+.cell--muted {
+  font-size: 0.8rem;
+  color: var(--muted);
+  max-width: 12rem;
+}
+
 .cell-sub {
   display: block;
   font-size: 0.7rem;
