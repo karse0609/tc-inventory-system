@@ -186,3 +186,100 @@
   padding: 0.12rem 0.35rem;
   font-size: 0.68rem;
 }
+
+/* 우측 고정: 행 삭제 */
+.dp-grid .dp-th-actions,
+.dp-grid .dp-td-actions {
+  position: sticky;
+  right: 0;
+  z-index: 2;
+  width: 4.75rem;
+  min-width: 4.75rem;
+  max-width: 4.75rem;
+  text-align: center;
+  vertical-align: middle;
+  background: var(--bg, #fff);
+  box-shadow: -1px 0 0 var(--border);
+}
+
+.dp-grid thead th.dp-th-actions {
+  z-index: 5;
+}
+
+.dp-grid tbody tr:hover td.dp-td-actions {
+  background: rgba(37, 99, 235, 0.04);
+}
+
+.dp-btn-delete-row {
+  font-size: 0.68rem !important;
+  padding: 0.15rem 0.35rem !important;
+  color: #b91c1c !important;
+}
+
+.dp-btn-delete-row:disabled {
+  opacity: 0.45;
+  color: var(--muted) !important;
+}
+
+/* 삭제 확인 */
+.dp-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  background: rgba(15, 23, 42, 0.45);
+}
+
+.dp-modal {
+  width: 100%;
+  max-width: 26rem;
+  border-radius: 8px;
+  padding: 1rem 1.15rem 1.1rem;
+  background: var(--bg, #fff);
+  color: var(--text-h, #0f172a);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.18);
+  border: 1px solid var(--border, #e2e8f0);
+}
+
+.dp-modal__title {
+  margin: 0 0 0.65rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.dp-modal__body {
+  font-size: 0.8rem;
+  line-height: 1.45;
+  margin-bottom: 1rem;
+}
+
+.dp-modal__body p {
+  margin: 0 0 0.5rem;
+}
+
+.dp-modal__body p:last-child {
+  margin-bottom: 0;
+}
+
+.dp-modal__body-en {
+  color: var(--muted, #64748b);
+}
+
+.dp-modal__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}
+
+.dp-btn-delete-confirm {
+  background: #b91c1c !important;
+  border-color: #991b1b !important;
+  color: #fff !important;
+}
+
+.dp-btn-delete-confirm:hover {
+  filter: brightness(1.05);
+}

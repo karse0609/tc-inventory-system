@@ -1,5 +1,7 @@
-import { useCallback, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
+import BilingualLabel from '../BilingualLabel'
 import { operationsMeta } from '../../data/logisticsSampleData'
+import { formatKoEn, L } from '../../i18n/labels'
 import { saveJson, storageKeys } from '../../utils/appPersistence'
 import { buildWeekHorizon, planWeekMonday } from '../../utils/deliveryPlanHorizon'
 import { getWeekRange } from '../../utils/logisticsMetrics'
@@ -98,6 +100,7 @@ function WeekCell({ col, plan, disabled, asOfDate, onQtyChange }) {
   const lockedByPolicy = FUTURE_WEEKS_LOCKED && isFutureWeek
   const readOnly = disabled || lockedByRow || lockedByPolicy
   const val = plan?.qty ?? ''
+  const ariaWeek = `${formatKoEn(L.deliveryPlanWeeklyQty)} · ${col.headerShort}`
 
   return (
     <td className="dp-week-cell dp-week-col" title={`${col.week} · ${mon}`}>
@@ -107,7 +110,7 @@ function WeekCell({ col, plan, disabled, asOfDate, onQtyChange }) {
         min={0}
         step={1}
         disabled={readOnly}
-        aria-label={`Weekly qty ${col.headerShort}`}
+        aria-label={ariaWeek}
         value={val === '' ? '' : val}
         onChange={(e) => onQtyChange(col, e.target.value)}
       />
@@ -127,6 +130,7 @@ export default function DeliveryPlanPage({
   const [weekOffset, setWeekOffset] = useState(0)
   const [draftRows, setDraftRows] = useState([])
   const [saveHint, setSaveHint] = useState('')
+  const [deleteTarget, setDeleteTarget] = useState(null)
 
   const columns = useMemo(
     () => buildWeekHorizon(asOfDate, pastWeeks, futureWeeks, weekOffset),
@@ -149,6 +153,15 @@ export default function DeliveryPlanPage({
     [masterItems, deliveryPlans, draftRows],
   )
 
+  useEffect(() => {
+    if (!deleteTarget) return undefined
+    const onKey = (e) => {
+      if (e.key === 'Escape') setDeleteTarget(null)
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [deleteTarget])
+
   const onQtyChange = useCallback(
     (modelName, partNo) => (col, raw) => {
       if (!modelName || !partNo) return
@@ -160,7 +173,7 @@ export default function DeliveryPlanPage({
 
   function handleSave() {
     saveJson(storageKeys.plans, deliveryPlans)
-    setSaveHint('Saved to browser storage')
+    setSaveHint('saved')
     setTimeout(() => setSaveHint(''), 2500)
   }
 
@@ -176,6 +189,29 @@ export default function DeliveryPlanPage({
     setDraftRows((rows) => rows.filter((d) => d.id !== draftId))
   }
 
+  function requestDeleteRow(spec) {
+    const { modelName, partNo, kind, draftId } = spec
+    if (kind === 'draft' && (!String(modelName || '').trim() || !String(partNo || '').trim())) {
+      removeDraft(draftId)
+      return
+    }
+    setDeleteTarget({ modelName, partNo, kind, draftId })
+  }
+
+  function confirmDeletePartPlans() {
+    if (!deleteTarget) return
+    const { modelName, partNo, kind, draftId } = deleteTarget
+    setDeliveryPlans((plans) =>
+      plans.filter((p) => !(p.modelName === modelName && p.partNo === partNo)),
+    )
+    if (kind === 'draft' && draftId) removeDraft(draftId)
+    setDeleteTarget(null)
+  }
+
+  function cancelDeletePartPlans() {
+    setDeleteTarget(null)
+  }
+
   const pastOptions = useMemo(
     () => Array.from({ length: MAX_PAST_WEEKS + 1 }, (_, i) => i),
     [],
@@ -184,18 +220,19 @@ export default function DeliveryPlanPage({
   return (
     <div className="page delivery-plan-page">
       <header className="page__header">
-        <h1>Delivery Plan</h1>
+        <h1>
+          <BilingualLabel label={L.deliveryPlanScreenTitle} compact as="span" />
+        </h1>
         <p className="page__desc">
-          품번(행) × 주차(열) 가로형 그리드. 주 셀에는 주간 납품 수량(qty)만 입력합니다. 기준일 주간을
-          포함해 과거는 최대 52주까지 넓혀 조회할 수 있으며, 데이터는 브라우저 저장소에 유지됩니다.
-          Inventory Projection의 Weekly Delivery은 이 수량을 사용합니다.
+          <BilingualLabel label={L.deliveryPlanPageDesc} compact as="span" />
         </p>
         <div className="delivery-plan-page__toolbar">
           <label>
-            이전 주(표시)
+            <BilingualLabel label={L.previousWeeksShown} compact as="span" />
             <select
               value={pastWeeks}
               onChange={(e) => setPastWeeks(Number(e.target.value))}
+              aria-label={formatKoEn(L.previousWeeksShown)}
             >
               {pastOptions.map((n) => (
                 <option key={n} value={n}>
@@ -205,10 +242,11 @@ export default function DeliveryPlanPage({
             </select>
           </label>
           <label>
-            이후 주(표시)
+            <BilingualLabel label={L.futureWeeksShown} compact as="span" />
             <select
               value={futureWeeks}
               onChange={(e) => setFutureWeeks(Number(e.target.value))}
+              aria-label={formatKoEn(L.futureWeeksShown)}
             >
               <option value={12}>12</option>
               <option value={18}>18</option>
@@ -223,14 +261,14 @@ export default function DeliveryPlanPage({
               className="btn btn--ghost"
               onClick={() => setWeekOffset((o) => o - 12)}
             >
-              이전 12주
+              {formatKoEn(L.previous12Weeks)}
             </button>
             <button
               type="button"
               className="btn btn--ghost"
               onClick={() => setWeekOffset((o) => o + 12)}
             >
-              다음 12주
+              {formatKoEn(L.next12Weeks)}
             </button>
             <button
               type="button"
@@ -241,35 +279,74 @@ export default function DeliveryPlanPage({
                 setFutureWeeks(DEFAULT_FUTURE)
               }}
             >
-              현재 기준으로
+              {formatKoEn(L.currentBaseline)}
             </button>
           </div>
           <span className="page__hint" style={{ margin: 0 }}>
-            기준일: <strong>{asOfDate}</strong> · 열 {columns.length}주
-            {weekOffset !== 0 ? ` · 뷰 오프셋 ${weekOffset > 0 ? '+' : ''}${weekOffset}주` : ''}
+            {formatKoEn(L.asOfDate)}: <strong>{asOfDate}</strong> · {formatKoEn(L.columnsCount)}{' '}
+            {columns.length} {formatKoEn(L.weeks)}
+            {weekOffset !== 0
+              ? ` · ${formatKoEn(L.viewOffsetWeeks)} ${weekOffset > 0 ? '+' : ''}${weekOffset} ${formatKoEn(L.weeks)}`
+              : ''}
           </span>
           <div className="page__actions" style={{ marginLeft: 'auto' }}>
             <button type="button" className="btn btn--ghost" onClick={addDraftRow}>
-              Add SKU row
+              {formatKoEn(L.addSkuRow)}
             </button>
             <button type="button" className="btn btn--primary" onClick={handleSave}>
-              Save
+              {formatKoEn(L.save)}
             </button>
           </div>
         </div>
         {saveHint && (
           <p className="page__hint" role="status">
-            {saveHint}
+            <BilingualLabel label={L.savedToBrowserStorage} compact as="span" />
           </p>
         )}
       </header>
+
+      {deleteTarget && (
+        <div
+          className="dp-modal-backdrop"
+          role="presentation"
+          onClick={cancelDeletePartPlans}
+        >
+          <div
+            className="dp-modal"
+            role="alertdialog"
+            aria-modal="true"
+            aria-labelledby="dp-delete-title"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h2 id="dp-delete-title" className="dp-modal__title">
+              <BilingualLabel label={L.deletePartPlansTitle} compact as="span" />
+            </h2>
+            <div className="dp-modal__body">
+              <p>{L.deletePartPlansConfirm.ko}</p>
+              <p className="dp-modal__body-en">{L.deletePartPlansConfirm.en}</p>
+            </div>
+            <div className="dp-modal__actions">
+              <button type="button" className="btn btn--ghost" onClick={cancelDeletePartPlans}>
+                {formatKoEn(L.actionCancel)}
+              </button>
+              <button type="button" className="btn btn--primary dp-btn-delete-confirm" onClick={confirmDeletePartPlans}>
+                {formatKoEn(L.actionDelete)}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className="dp-table-wrap page__table">
         <table className="dp-grid">
           <thead>
             <tr>
-              <th className="dp-th--sticky dp-col-model">Model</th>
-              <th className="dp-th--sticky-end dp-col-part">Part No</th>
+              <th className="dp-th--sticky dp-col-model">
+                <BilingualLabel label={L.model} compact as="span" />
+              </th>
+              <th className="dp-th--sticky-end dp-col-part">
+                <BilingualLabel label={L.partNo} compact as="span" />
+              </th>
               {columns.map((c) => {
                 const wk = weekStartFromCol(c)
                 return (
@@ -278,6 +355,9 @@ export default function DeliveryPlanPage({
                   </th>
                 )
               })}
+              <th className="dp-th-actions" scope="col" aria-label={formatKoEn(L.actionDelete)}>
+                <BilingualLabel label={L.actionDelete} compact as="span" />
+              </th>
             </tr>
           </thead>
           <tbody>
@@ -287,6 +367,15 @@ export default function DeliveryPlanPage({
                 (kind === 'draft' && (!modelName || !partNo)) ||
                 (kind === 'plan' && (!modelName || !partNo))
               const masterFrozen = kind === 'master'
+              const canQuickRemoveDraft =
+                kind === 'draft' && (!String(modelName || '').trim() || !String(partNo || '').trim())
+              const showDeleteConfirm =
+                kind === 'master' ||
+                kind === 'plan' ||
+                (kind === 'draft' && !canQuickRemoveDraft)
+              const deleteDisabled =
+                kind === 'draft' && canQuickRemoveDraft ? false : !modelName || !partNo
+
               return (
                 <tr key={rowKey}>
                   <td className="dp-td--sticky dp-col-model">
@@ -301,7 +390,7 @@ export default function DeliveryPlanPage({
                       <input
                         className="dp-input"
                         value={modelName}
-                        placeholder="Model"
+                        placeholder={formatKoEn(L.model)}
                         onChange={(e) => {
                           if (kind === 'draft') updateDraft(draftId, { modelName: e.target.value })
                           else
@@ -325,28 +414,17 @@ export default function DeliveryPlanPage({
                         value={partNo}
                       />
                     ) : kind === 'draft' ? (
-                      <div style={{ display: 'flex', gap: '0.25rem', alignItems: 'center' }}>
-                        <input
-                          className="dp-input"
-                          style={{ flex: 1 }}
-                          value={partNo}
-                          placeholder="Part No"
-                          onChange={(e) => updateDraft(draftId, { partNo: e.target.value })}
-                        />
-                        <button
-                          type="button"
-                          className="btn btn--ghost dp-actions"
-                          title="Remove row"
-                          onClick={() => removeDraft(draftId)}
-                        >
-                          ×
-                        </button>
-                      </div>
+                      <input
+                        className="dp-input"
+                        value={partNo}
+                        placeholder={formatKoEn(L.partNo)}
+                        onChange={(e) => updateDraft(draftId, { partNo: e.target.value })}
+                      />
                     ) : (
                       <input
                         className="dp-input"
                         value={partNo}
-                        placeholder="Part No"
+                        placeholder={formatKoEn(L.partNo)}
                         onChange={(e) => {
                           setDeliveryPlans((plans) =>
                             plans.map((p) =>
@@ -373,6 +451,22 @@ export default function DeliveryPlanPage({
                       />
                     )
                   })}
+                  <td className="dp-td-actions">
+                    <button
+                      type="button"
+                      className="btn btn--ghost dp-btn-delete-row"
+                      disabled={deleteDisabled}
+                      title={formatKoEn(L.actionDelete)}
+                      aria-label={formatKoEn(L.actionDelete)}
+                      onClick={() => {
+                        if (deleteDisabled) return
+                        if (showDeleteConfirm) requestDeleteRow(spec)
+                        else removeDraft(draftId)
+                      }}
+                    >
+                      {formatKoEn(L.actionDelete)}
+                    </button>
+                  </td>
                 </tr>
               )
             })}

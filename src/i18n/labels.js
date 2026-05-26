@@ -98,4 +98,42 @@ export const L = {
 
   containers: { ko: '컨테이너', en: 'containers' },
   weeks: { ko: '주', en: 'weeks' },
+
+  /** 공통 버튼 */
+  actionCancel: { ko: '취소', en: 'Cancel' },
+  actionDelete: { ko: '삭제', en: 'Delete' },
+
+  /** Delivery Plan 화면 */
+  deliveryPlanScreenTitle: { ko: '납품 계획', en: 'Delivery Plan' },
+  deliveryPlanPageDesc: {
+    ko:
+      '품번(행) × 주차(열) 가로형 그리드입니다. 각 셀에는 주간 납품 수량만 입력합니다. 기준일이 속한 주를 포함해 과거 최대 52주까지 표시 범위를 넓힐 수 있으며, 데이터는 브라우저 저장소에 보관됩니다. 재고 예측(Inventory Projection)의 주간 납품 수량은 이 값을 사용합니다.',
+    en:
+      'Horizontal grid: parts (rows) × weeks (columns). Enter weekly delivery qty per cell. You can widen the past window up to 52 weeks including the week of the as-of date; data is kept in browser storage. Inventory Projection uses these values as weekly delivery qty.',
+  },
+  previousWeeksShown: { ko: '이전 주(표시)', en: 'Past weeks (shown)' },
+  futureWeeksShown: { ko: '이후 주(표시)', en: 'Future weeks (shown)' },
+  previous12Weeks: { ko: '이전 12주', en: 'Previous 12 weeks' },
+  next12Weeks: { ko: '다음 12주', en: 'Next 12 weeks' },
+  currentBaseline: { ko: '현재 기준으로', en: 'Current baseline' },
+  addSkuRow: { ko: '행 추가', en: 'Add row' },
+  save: { ko: '저장', en: 'Save' },
+  savedToBrowserStorage: {
+    ko: '브라우저 저장소에 저장되었습니다.',
+    en: 'Saved to browser storage.',
+  },
+  columnsCount: { ko: '열', en: 'Columns' },
+  viewOffsetWeeks: { ko: '뷰 오프셋', en: 'View offset' },
+  deliveryPlanWeeklyQty: { ko: '주간 수량', en: 'Weekly qty' },
+  deletePartPlansConfirm: {
+    ko: '해당 품번의 주차별 납품계획이 모두 삭제됩니다. 계속 진행하시겠습니까?',
+    en: 'All weekly delivery plan data for this part will be deleted. Do you want to continue?',
+  },
+  deletePartPlansTitle: { ko: '납품 계획 삭제', en: 'Delete delivery plan' },
+}
+
+/** 한글(English) 단일 문자열 — 버튼·짧은 메뉴 등 */
+export function formatKoEn(label) {
+  if (!label?.ko) return ''
+  return label.en ? `${label.ko}(${label.en})` : label.ko
 }
