@@ -262,16 +262,16 @@ export default function InTransitPage({ inTransit, setInTransit, setMasterItems 
                     title="입고 완료 후 저장 시 Master 재고 반영·행 제거"
                   />
                 </td>
-                <td>
+                <td className="transit-page__td--remark">
                   <input
-                    className="cell-input"
+                    className="cell-input transit-page__cell-input--remark"
                     value={row.remark ?? ''}
                     onChange={(e) => updateRow(row.id, { remark: e.target.value })}
                   />
                 </td>
                 <td>
                   <input
-                    className="cell-input"
+                    className="cell-input transit-page__cell-input--tctech"
                     value={row.tcTechNo ?? ''}
                     onChange={(e) => updateRow(row.id, { tcTechNo: e.target.value })}
                   />

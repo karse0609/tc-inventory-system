@@ -140,10 +140,11 @@
 }
 
 /*
- * colgroup — 합계 100% (1920 기준 한 화면, 비고·부품번호 축소)
+ * colgroup — 합계 100% (1920 기준)
+ * Container·배송지·TC TECH 축소 → 비고(Remark) 확대 (긴 문구 줄바꿈 표시)
  */
 .transit-page__col--container {
-  width: 15%;
+  width: 11%;
 }
 
 .transit-page__col--model {
@@ -171,15 +172,15 @@
 }
 
 .transit-page__col--delivery {
-  width: 17%;
+  width: 8.5%;
 }
 
 .transit-page__col--remark {
-  width: 4.5%;
+  width: 25%;
 }
 
 .transit-page__col--tctech {
-  width: 12.5%;
+  width: 4.5%;
 }
 
 .transit-page__col--actions {
@@ -189,4 +190,22 @@
 .transit-page__table td .cell-input {
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+.transit-page__table td.transit-page__td--remark {
+  vertical-align: top;
+}
+
+.transit-page__table td .cell-input.transit-page__cell-input--remark {
+  overflow: visible;
+  text-overflow: clip;
+  white-space: normal;
+  word-break: break-word;
+  min-height: 1.6rem;
+}
+
+.transit-page__table td .cell-input.transit-page__cell-input--tctech {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
