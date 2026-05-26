@@ -1,0 +1,195 @@
+/* Delivery Plan — 주차 가로형 SCM 그리드 */
+
+.delivery-plan-page {
+  max-width: min(1920px, 100%);
+  margin: 0 auto;
+  padding: 0.5rem 0.65rem 1.25rem;
+  box-sizing: border-box;
+}
+
+.delivery-plan-page .page__header h1 {
+  font-size: 1.05rem;
+  margin: 0 0 0.2rem;
+}
+
+.delivery-plan-page .page__desc {
+  font-size: 0.78rem;
+  margin-bottom: 0.45rem;
+}
+
+.delivery-plan-page__toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 1rem;
+  margin-bottom: 0.4rem;
+}
+
+.delivery-plan-page__toolbar label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.72rem;
+  color: var(--muted);
+}
+
+.delivery-plan-page__toolbar select {
+  font-size: 0.72rem;
+  padding: 0.2rem 0.4rem;
+  border-radius: 4px;
+  border: 1px solid var(--border);
+  background: var(--bg);
+}
+
+.dp-table-wrap {
+  max-width: 100%;
+  overflow-x: auto;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg, #fff);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
+.dp-grid {
+  width: max-content;
+  min-width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 0.76rem;
+  table-layout: auto;
+}
+
+.dp-grid th,
+.dp-grid td {
+  padding: 0.14rem 0.2rem;
+  border-bottom: 1px solid var(--border);
+  border-right: 1px solid var(--border);
+  vertical-align: middle;
+  line-height: 1.15;
+}
+
+.dp-grid thead th {
+  position: sticky;
+  top: 0;
+  z-index: 3;
+  background: rgba(0, 0, 0, 0.04);
+  font-weight: 600;
+  font-size: 0.68rem;
+  color: var(--muted);
+  white-space: nowrap;
+  text-align: center;
+}
+
+.dp-grid thead th.dp-th--sticky {
+  z-index: 4;
+  text-align: left;
+}
+
+.dp-grid tbody td.dp-td--sticky {
+  background: var(--bg, #fff);
+  font-weight: 500;
+}
+
+.dp-grid tbody tr:hover td {
+  background: rgba(37, 99, 235, 0.04);
+}
+
+.dp-grid tbody tr:hover td.dp-td--sticky {
+  background: rgba(37, 99, 235, 0.07);
+}
+
+.dp-grid .dp-th--sticky,
+.dp-grid .dp-td--sticky {
+  position: sticky;
+  left: 0;
+  box-shadow: 1px 0 0 var(--border);
+}
+
+.dp-grid .dp-th--sticky-end,
+.dp-grid .dp-td--sticky-end {
+  left: 5.75rem;
+}
+
+.dp-col-model {
+  width: 5.75rem;
+  min-width: 5.75rem;
+  max-width: 5.75rem;
+}
+
+.dp-col-part {
+  width: 7.25rem;
+  min-width: 7.25rem;
+  max-width: 7.25rem;
+}
+
+.dp-week-col {
+  min-width: 3.15rem;
+  max-width: 3.35rem;
+}
+
+.dp-week-cell {
+  padding: 0.1rem 0.15rem !important;
+  vertical-align: middle;
+}
+
+.dp-week-cell__stack {
+  display: flex;
+  flex-direction: column;
+  gap: 0.08rem;
+}
+
+.dp-input {
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  border: 1px solid var(--border);
+  border-radius: 2px;
+  font-size: 0.74rem;
+  padding: 0.1rem 0.2rem;
+  line-height: 1.1;
+  background: var(--bg);
+  color: var(--text-h);
+}
+
+.dp-input--planned {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.dp-input--planned:focus {
+  outline: 2px solid rgba(37, 99, 235, 0.35);
+  border-color: rgba(37, 99, 235, 0.5);
+}
+
+.dp-input--confirmed {
+  text-align: right;
+  font-size: 0.68rem;
+  font-variant-numeric: tabular-nums;
+  background: rgba(14, 116, 144, 0.08);
+  border-color: rgba(14, 116, 144, 0.28);
+  color: rgb(14, 91, 108);
+}
+
+.dp-input--confirmed:focus {
+  outline: 2px solid rgba(14, 116, 144, 0.35);
+}
+
+.dp-input--readonly {
+  background: rgba(0, 0, 0, 0.03);
+  color: var(--text-h);
+  border-style: dashed;
+}
+
+.dp-input::placeholder {
+  color: var(--muted);
+  opacity: 0.65;
+}
+
+.dp-actions {
+  white-space: nowrap;
+}
+
+.dp-actions .btn {
+  padding: 0.12rem 0.35rem;
+  font-size: 0.68rem;
+}

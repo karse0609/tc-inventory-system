@@ -264,6 +264,7 @@ function App() {
           masterItems={masterItems}
           deliveryPlans={deliveryPlans}
           setDeliveryPlans={setDeliveryPlans}
+          opsMeta={opsMeta}
         />
       )}
       {view === 'transit' && (

@@ -27,12 +27,15 @@ export function migrateInTransitRow(row) {
 
   const {
     status,
-    delayed: _delayed,
+    delayed,
     delayReason,
-    forwarder: _forwarder,
-    hbl: _hbl,
+    forwarder,
+    hbl,
     ...rest
   } = row
+  void delayed
+  void forwarder
+  void hbl
 
   return {
     ...rest,
