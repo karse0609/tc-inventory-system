@@ -24,7 +24,12 @@ export default function LoginPage({ onLogin }) {
   return (
     <div className="login-page">
       <div className="login-page__card card">
-        <h1 className="login-page__title">TC Inventory</h1>
+        <h1 className="login-page__title-block">
+          <span className="login-page__title-ko">TC TECH 실시간 해외재고</span>
+          <span className="login-page__title-en">
+            Overseas Inventory &amp; Logistics Operations Dashboard
+          </span>
+        </h1>
         <p className="login-page__subtitle">Sign in to continue</p>
         <form className="login-page__form" onSubmit={handleSubmit}>
           <label className="login-page__label">
@@ -57,7 +62,6 @@ export default function LoginPage({ onLogin }) {
             {loading ? 'Signing in…' : 'Sign in'}
           </button>
         </form>
-        <p className="login-page__hint">Default admin: <code>admin</code> / <code>1234</code></p>
       </div>
     </div>
   )
