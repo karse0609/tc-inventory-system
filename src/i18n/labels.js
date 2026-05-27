@@ -122,8 +122,12 @@ export const L = {
     en: 'Stock ÷ Weekly Demand',
   },
   flowCoverageHeroHint: {
-    ko: '모델 합산: 입고예정·납품계획 누적',
-    en: 'Model total: inbound & delivery plan (flow)',
+    ko: '다음 ETA+7 도착 주까지 입·출고 반영',
+    en: 'To next ETA+7 arrival week: in & out',
+  },
+  coverageNextArrivalMeta: {
+    ko: '다음 도착 기준',
+    en: 'Next arrival window',
   },
   plannedDelivery: { ko: '계획 납품', en: 'Planned Delivery' },
   confirmedDelivery: { ko: '확정 납품', en: 'Confirmed Delivery' },

@@ -16,8 +16,8 @@ function formatCurrency(value, currency = 'USD') {
 
 export default function TodayStatus({ metrics, unit, currency = 'USD' }) {
   const cov = metrics.coverageWeeks
-  const covFinite = Number.isFinite(cov)
-  const covDisplay = covFinite ? cov.toFixed(1) : '∞'
+  const covFinite = cov != null && Number.isFinite(cov)
+  const covDisplay = covFinite ? cov.toFixed(1) : '—'
   const covStatus = getCoverageStatus(cov)
 
   const demandSum = metrics.modelWeeklyDemandTotal ?? 0
@@ -66,7 +66,12 @@ export default function TodayStatus({ metrics, unit, currency = 'USD' }) {
     {
       label: L.coverageWeeks,
       value: covDisplay,
-      meta: `${L.weeks.en} · min`,
+      meta: (
+        <span className="today-status__meta-inline">
+          <BilingualLabel label={L.weeks} as="span" /> ·{' '}
+          <BilingualLabel label={L.coverageNextArrivalMeta} as="span" />
+        </span>
+      ),
       covTone: covStatus,
     },
     {

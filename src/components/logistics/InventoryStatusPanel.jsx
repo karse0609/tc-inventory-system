@@ -7,7 +7,7 @@ function formatNumber(value) {
 }
 
 function formatDecimal(value, digits = 1) {
-  if (!Number.isFinite(value)) return '∞'
+  if (value == null || !Number.isFinite(value)) return '—'
   return value.toFixed(digits)
 }
 
@@ -51,7 +51,7 @@ export default function InventoryStatusPanel({
     )
   }
 
-  const headlineCoverage = summary?.portfolioCoverageWeeks ?? summary?.minCoverageWeeks ?? 0
+  const headlineCoverage = summary?.portfolioCoverageWeeks ?? summary?.minCoverageWeeks
   const headlineStatus = getCoverageStatus(headlineCoverage)
 
   return (

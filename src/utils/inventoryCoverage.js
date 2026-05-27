@@ -2,21 +2,24 @@ import {
   getCoverageStatus,
   MIN_MANAGEMENT_WEEKS,
 } from '../config/inventoryPolicy'
+import { addDaysIso } from './deliveryPlanHorizon'
 import {
-  collectFutureFlowWeekMondays,
+  filterByModel,
   getFutureDeliveryPlans,
+  getWeekRange,
   inboundQtyForWeek,
   isInTransitRowActive,
   planRowWeekStart,
+  warehouseReceiptDateFromEtaPort,
 } from './logisticsMetrics'
 import { planQty, outboundQtyForSimulation } from './deliveryPlanModel'
 
+/** ETA+7 도착이 없을 때 출고 합산·평균 주간 수요용 기본 기간(주) */
+const FALLBACK_COVERAGE_PERIOD_WEEKS = 8
+
 /**
  * 주차별 입고·출고(출고계획) 누적 반영 후, 향후 출고계획을 몇 주(분수 포함)까지 버틸 수 있는지.
- * 각 주: 가용재고 += 입고, 출고 O>0 이면 min(1, S/O) 주만큼 커버; 부족 시 마지막 주는 S/O 로 분수.
- *
- * @param {number} initialWarehouseStock 조회 시점 창고재고
- * @param {{ inbound: number, outbound: number }[]} weeklyFlows 기준일 주(포함) 이후 시간순
+ * (재고 예측 화면 등 — 대시보드 커버리지와는 별도)
  */
 export function calculateFlowCoverageWeeks(initialWarehouseStock, weeklyFlows) {
   const flows = Array.isArray(weeklyFlows) ? weeklyFlows : []
@@ -48,7 +51,7 @@ export function calculateFlowCoverageWeeks(initialWarehouseStock, weeklyFlows) {
 }
 
 /**
- * 레거시: 마스터 안전재고·단숀 비율용 (커버리지 KPI에는 사용하지 않음)
+ * 레거시: 마스터 안전재고·단순 비율용
  */
 export function calculateDemandBasedCoverageWeeks(currentStock, weeklyDemand) {
   const demand = Math.max(0, weeklyDemand)
@@ -71,54 +74,140 @@ function outboundPlanQtyForWeek(planRows, modelName, partNo, mondayIso) {
   return sum
 }
 
-function buildWeeklyFlowsForSku({
-  weekMondays,
-  deliveryPlans,
-  inTransitContainers,
-  modelName,
-  partNo,
-}) {
-  return weekMondays.map((mon) => ({
-    inbound: inboundQtyForWeek(inTransitContainers, modelName, partNo, mon),
-    outbound: outboundPlanQtyForWeek(deliveryPlans, modelName, partNo, mon),
-  }))
+/** 조회 기준일 이후(당일 포함) 가장 이른 창고입고 예정일(ETA Port + 7일) */
+function nextWarehouseReceiptOnOrAfterForSku(inTransitRows, modelName, partNo, asOfDate) {
+  let best = null
+  for (const t of inTransitRows || []) {
+    if (t.modelName !== modelName || t.partNo !== partNo) continue
+    if (!isInTransitRowActive(t)) continue
+    const r = warehouseReceiptDateFromEtaPort(t)
+    if (!r || r < asOfDate) continue
+    if (best == null || r < best) best = r
+  }
+  return best
+}
+
+function nextWarehouseReceiptOnOrAfterForModel(inTransitRows, modelName, asOfDate) {
+  let best = null
+  for (const t of filterByModel(inTransitRows || [], modelName)) {
+    if (!isInTransitRowActive(t)) continue
+    const r = warehouseReceiptDateFromEtaPort(t)
+    if (!r || r < asOfDate) continue
+    if (best == null || r < best) best = r
+  }
+  return best
+}
+
+/** startMonday ~ endMonday(포함) 매주 월요일 ISO 목록 */
+function inclusiveWeekMondaysFromTo(startMonday, endMonday) {
+  if (!startMonday) return []
+  if (!endMonday || startMonday > endMonday) return [startMonday]
+  const out = []
+  for (let d = startMonday; d <= endMonday; d = addDaysIso(d, 7)) {
+    out.push(d)
+  }
+  return out
 }
 
 /**
- * 선택 모델(또는 전체) 기준: 총 창고재고 + 주차별 총 입고 − 총 출고계획 누적으로 커버리지(주).
+ * 대시보드·마스터 품번별 커버리지:
+ * 다음 ETA+7 도착이 속한 주(없으면 고정 N주)까지 기간의 입고·출고 합으로
+ * projectedStock / (기간 출고합 / 기간 주수)
+ * @returns {number|null} 출고 합 0이면 null (표시 "—")
  */
-export function computePortfolioFlowCoverageWeeks({
+export function computeArrivalHorizonCoverageWeeksForSku({
+  asOfDate,
+  warehouseStock,
+  modelName,
+  partNo,
+  deliveryPlans,
+  inTransitContainers,
+  fallbackPeriodWeeks = FALLBACK_COVERAGE_PERIOD_WEEKS,
+}) {
+  const startMonday = getWeekRange(asOfDate).start
+  const nextReceipt = nextWarehouseReceiptOnOrAfterForSku(
+    inTransitContainers,
+    modelName,
+    partNo,
+    asOfDate,
+  )
+
+  let endMonday
+  if (nextReceipt) {
+    endMonday = getWeekRange(nextReceipt).start
+    if (endMonday < startMonday) endMonday = startMonday
+  } else {
+    endMonday = addDaysIso(startMonday, 7 * (fallbackPeriodWeeks - 1))
+  }
+
+  const weekMondays = inclusiveWeekMondaysFromTo(startMonday, endMonday)
+  const periodWeeks = Math.max(1, weekMondays.length)
+
+  let totalInbound = 0
+  let totalOutbound = 0
+  for (const mon of weekMondays) {
+    totalInbound += inboundQtyForWeek(inTransitContainers, modelName, partNo, mon)
+    totalOutbound += outboundPlanQtyForWeek(deliveryPlans, modelName, partNo, mon)
+  }
+
+  if (totalOutbound <= 0) return null
+
+  const stock = Math.max(0, Number(warehouseStock) || 0)
+  const projectedStock = stock + totalInbound - totalOutbound
+  const averageWeeklyDemand = totalOutbound / periodWeeks
+  if (averageWeeklyDemand <= 0) return null
+  return projectedStock / averageWeeklyDemand
+}
+
+/**
+ * 선택 모델: 품번 전체 합산 재고·입고·출고, 모델 내 가장 이른 다음 도착일까지(없으면 N주) 동일 식.
+ */
+export function computePortfolioArrivalHorizonCoverageWeeks({
   masterItems,
   deliveryPlans,
   inTransitContainers,
   asOfDate,
   modelName,
   getWarehouseStockQty,
+  fallbackPeriodWeeks = FALLBACK_COVERAGE_PERIOD_WEEKS,
 }) {
   const items = (masterItems || []).filter((m) => m.status !== 'Inactive')
-  if (!items.length) return 0
+  if (!items.length) return null
 
-  const weekMondays = collectFutureFlowWeekMondays(
-    deliveryPlans,
+  const startMonday = getWeekRange(asOfDate).start
+  const nextReceipt = nextWarehouseReceiptOnOrAfterForModel(
     inTransitContainers,
-    asOfDate,
     modelName,
-    null,
+    asOfDate,
   )
 
-  const initial = items.reduce((s, it) => s + Math.max(0, Number(getWarehouseStockQty(it)) || 0), 0)
+  let endMonday
+  if (nextReceipt) {
+    endMonday = getWeekRange(nextReceipt).start
+    if (endMonday < startMonday) endMonday = startMonday
+  } else {
+    endMonday = addDaysIso(startMonday, 7 * (fallbackPeriodWeeks - 1))
+  }
 
-  const weeklyFlows = weekMondays.map((mon) => {
-    let inbound = 0
-    let outbound = 0
+  const weekMondays = inclusiveWeekMondaysFromTo(startMonday, endMonday)
+  const periodWeeks = Math.max(1, weekMondays.length)
+
+  let totalInbound = 0
+  let totalOutbound = 0
+  for (const mon of weekMondays) {
     for (const it of items) {
-      inbound += inboundQtyForWeek(inTransitContainers, it.modelName, it.partNo, mon)
-      outbound += outboundPlanQtyForWeek(deliveryPlans, it.modelName, it.partNo, mon)
+      totalInbound += inboundQtyForWeek(inTransitContainers, it.modelName, it.partNo, mon)
+      totalOutbound += outboundPlanQtyForWeek(deliveryPlans, it.modelName, it.partNo, mon)
     }
-    return { inbound, outbound }
-  })
+  }
 
-  return calculateFlowCoverageWeeks(initial, weeklyFlows)
+  if (totalOutbound <= 0) return null
+
+  const initial = items.reduce((s, it) => s + Math.max(0, Number(getWarehouseStockQty(it)) || 0), 0)
+  const projectedStock = initial + totalInbound - totalOutbound
+  const averageWeeklyDemand = totalOutbound / periodWeeks
+  if (averageWeeklyDemand <= 0) return null
+  return projectedStock / averageWeeklyDemand
 }
 
 export function sumInTransitByPart(containers, modelName, partNo) {
@@ -164,21 +253,14 @@ export function buildItemInventoryStatus({
       ? Math.max(0, Number(warehouseStockQty))
       : Number(item.currentStock) || 0
 
-  const weekMondays = collectFutureFlowWeekMondays(
-    itemDeliveryPlans,
-    inTransitContainers,
+  const coverageWeeks = computeArrivalHorizonCoverageWeeksForSku({
     asOfDate,
-    item.modelName,
-    { modelName: item.modelName, partNo: item.partNo },
-  )
-  const weeklyFlows = buildWeeklyFlowsForSku({
-    weekMondays,
-    deliveryPlans: itemDeliveryPlans,
-    inTransitContainers,
+    warehouseStock,
     modelName: item.modelName,
     partNo: item.partNo,
+    deliveryPlans: itemDeliveryPlans,
+    inTransitContainers,
   })
-  const coverageWeeks = calculateFlowCoverageWeeks(warehouseStock, weeklyFlows)
 
   const safetyWeeks =
     item.safetyStockWeeks != null && item.safetyStockWeeks !== ''
@@ -218,25 +300,17 @@ export function buildInventorySummary(itemRows, options = {}) {
   const totalStock = itemRows.reduce((s, r) => s + r.currentStock, 0)
   const totalInTransit = itemRows.reduce((s, r) => s + r.inTransitQty, 0)
 
-  const coverageValues = itemRows.map((r) => r.coverageWeeks)
-  const finiteVals = coverageValues.filter(Number.isFinite)
-  const minCoverage =
-    finiteVals.length > 0
-      ? Math.min(...finiteVals)
-      : coverageValues.some((v) => v === Infinity)
-        ? Infinity
-        : 0
+  const finiteVals = itemRows
+    .map((r) => r.coverageWeeks)
+    .filter((v) => v != null && Number.isFinite(v))
+  const minCoverage = finiteVals.length > 0 ? Math.min(...finiteVals) : null
   const avgFinite =
-    finiteVals.length > 0
-      ? finiteVals.reduce((a, b) => a + b, 0) / finiteVals.length
-      : 0
+    finiteVals.length > 0 ? finiteVals.reduce((a, b) => a + b, 0) / finiteVals.length : 0
 
   const portfolio =
     portfolioCoverageWeeks != null && Number.isFinite(portfolioCoverageWeeks)
       ? portfolioCoverageWeeks
-      : portfolioCoverageWeeks === Infinity
-        ? Infinity
-        : null
+      : null
 
   return {
     warehouseValue,
@@ -245,7 +319,6 @@ export function buildInventorySummary(itemRows, options = {}) {
     totalStock,
     totalInTransit,
     minCoverageWeeks: minCoverage,
-    /** 모델 선택 시 총 재고·총 입고·총 출고계획 누적 커버리지 (KPI용) */
     portfolioCoverageWeeks: portfolio,
     avgCoverageWeeks: avgFinite,
     itemCount: itemRows.length,

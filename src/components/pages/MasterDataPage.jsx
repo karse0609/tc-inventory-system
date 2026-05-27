@@ -100,8 +100,7 @@ function applyMasterPasteFromDisplay(prev, matrix, dispRow, dispCol, appliedSear
 }
 
 function formatCoverageWeeks(weeks) {
-  if (weeks === Infinity) return '∞'
-  if (!Number.isFinite(weeks)) return '—'
+  if (weeks == null || !Number.isFinite(weeks)) return '—'
   return `${weeks.toFixed(1)}`
 }
 

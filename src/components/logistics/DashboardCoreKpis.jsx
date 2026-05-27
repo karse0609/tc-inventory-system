@@ -8,6 +8,9 @@ function formatNumber(value) {
 }
 
 function coverageCardClass(coverageWeeks) {
+  if (coverageWeeks == null || !Number.isFinite(coverageWeeks)) {
+    return 'dash-kpi__card--cov-neutral'
+  }
   const status = getCoverageStatus(coverageWeeks)
   const map = {
     critical: 'dash-kpi__card--cov-critical',
@@ -19,7 +22,7 @@ function coverageCardClass(coverageWeeks) {
 }
 
 function coverageDisplay(coverageWeeks) {
-  if (!Number.isFinite(coverageWeeks)) return '∞'
+  if (coverageWeeks == null || !Number.isFinite(coverageWeeks)) return '—'
   return coverageWeeks.toFixed(1)
 }
 
