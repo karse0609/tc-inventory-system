@@ -9,8 +9,9 @@ import { planWeekMonday } from './deliveryPlanHorizon'
  * @property {number} confirmedQty — 창고에 반영된 확정 수량(저장 직후 확정이면 `planQty`와 동일)
  *
  * 업로드로 반영할 때: `shipped: true`, `planQty`/`qty`, `confirmedQty`를 목표 상태로 맞춘 뒤
- * `normalizeDeliveryPlansForPersist` → `computeStockDeltasBySku(loadJson(plans), normalized)`로
- * 이전 저장본 대비 delta만 창고에 적용하면 됩니다.
+ * `normalizeDeliveryPlansForPersist` → `computeStockDeltasBySku(직전 재고반영 스냅샷, normalized)`로
+ * 이전 저장본 대비 delta만 창고에 적용하면 됩니다. (브라우저 저장소는 편집 중간값으로 덮일 수 있으므로
+ * 출고계획 화면에서는 `serializeWarehouseBaselinePlansSnapshot` ref 기준 prev를 사용합니다.)
  */
 
 /** 주차 셀 계획 수량 (qty / planQty / plannedQty 호환) */
@@ -131,4 +132,73 @@ export function normalizeDeliveryPlansForPersist(plans) {
       locked: p.locked === true,
     }
   })
+}
+
+/** 재고 delta 계산용 직전 스냅샷 직렬화(항상 normalize 후 stringify) */
+export function serializeWarehouseBaselinePlansSnapshot(plans) {
+  return JSON.stringify(normalizeDeliveryPlansForPersist(plans || []))
+}
+
+export function parseWarehouseBaselinePlansSnapshot(json) {
+  try {
+    const arr = JSON.parse(String(json || '[]'))
+    return Array.isArray(arr) ? arr : []
+  } catch {
+    return []
+  }
+}
+
+/**
+ * 저장 시 디버그: 셀별 prev/next 확정분·delta·SKU 창고(누적 반영 후 잔고)
+ */
+export function logDeliveryPlanSaveWarehouseDebug({ prevPlans, nextPlans, masterItems }) {
+  const prevM = new Map()
+  const nextM = new Map()
+  for (const p of prevPlans || []) {
+    const k = deliveryPlanCellKey(p)
+    if (k) prevM.set(k, p)
+  }
+  for (const p of nextPlans || []) {
+    const k = deliveryPlanCellKey(p)
+    if (k) nextM.set(k, p)
+  }
+  const keys = [...new Set([...prevM.keys(), ...nextM.keys()])].sort()
+  const runningSku = new Map()
+
+  for (const key of keys) {
+    const prev = prevM.get(key)
+    const next = nextM.get(key)
+    const prevCommitted = committedQtyOnRecord(prev)
+    const newCommittedQty = nextCommittedQtyForSave(next)
+    const cellDelta = newCommittedQty - prevCommitted
+    const hasShipContext =
+      cellDelta !== 0 ||
+      (prev && isPlanShipped(prev)) ||
+      (next && isPlanShipped(next)) ||
+      (next && planQty(next) > 0) ||
+      (prev && planQty(prev) > 0)
+    if (!hasShipContext) continue
+
+    const segs = key.split('\t')
+    const modelName = segs[0] || ''
+    const partNo = segs[1] || ''
+    const week = segs[2] || ''
+    const sku = `${modelName}\t${partNo}`
+    const m = (masterItems || []).find((x) => x.modelName === modelName && x.partNo === partNo)
+    const stockBefore = Number(m?.currentStock) || 0
+    runningSku.set(sku, (runningSku.get(sku) || 0) + cellDelta)
+    const stockAfter = Math.max(0, stockBefore - runningSku.get(sku))
+
+    console.log('[tc-inv delivery-save]', {
+      modelName,
+      partNo,
+      week,
+      planQty: next ? planQty(next) : planQty(prev || {}),
+      previousConfirmedQty: prevCommitted,
+      newConfirmedQty: newCommittedQty,
+      delta: cellDelta,
+      stockBefore,
+      stockAfter,
+    })
+  }
 }

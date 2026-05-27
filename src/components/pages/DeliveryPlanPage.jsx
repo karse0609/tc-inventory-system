@@ -18,6 +18,9 @@ import {
   normalizeDeliveryPlansForPersist,
   applyStockDeltasToMasterItems,
   findInsufficientStockForDeltas,
+  serializeWarehouseBaselinePlansSnapshot,
+  parseWarehouseBaselinePlansSnapshot,
+  logDeliveryPlanSaveWarehouseDebug,
 } from '../../utils/deliveryPlanModel'
 import PageDataToolbar from '../grid/PageDataToolbar.jsx'
 import '../logistics/ops.css'
@@ -219,6 +222,8 @@ export default function DeliveryPlanPage({
   const [appliedPartSearch, setAppliedPartSearch] = useState(() => ({ ...EMPTY_PART_SEARCH }))
   /** 붙여넣기 시작 위치: 행 인덱스 + 열 앵커(모델/부품/주차) */
   const pasteAnchorRef = useRef({ rowIndex: 0, colKind: 'week', weekColIndex: 0 })
+  /** 직전 출고저장(재고 반영 기준) 스냅샷 — loadJson만 쓰면 자동 저장 중간값으로 prev가 깨져 중복 차감됨 */
+  const lastWarehouseBaselineRef = useRef(serializeWarehouseBaselinePlansSnapshot(deliveryPlans))
   const dpTableRef = useRef(null)
 
   const columns = useMemo(
@@ -275,7 +280,7 @@ export default function DeliveryPlanPage({
   )
 
   function handleSave() {
-    const prevPlans = loadJson(storageKeys.plans, null) || []
+    const prevPlans = parseWarehouseBaselinePlansSnapshot(lastWarehouseBaselineRef.current)
     const nextRaw = deliveryPlans
     const deltas = computeStockDeltasBySku(prevPlans, nextRaw)
     const bad = findInsufficientStockForDeltas(masterItems, deltas)
@@ -290,9 +295,11 @@ export default function DeliveryPlanPage({
       return
     }
     const normalized = normalizeDeliveryPlansForPersist(nextRaw)
+    logDeliveryPlanSaveWarehouseDebug({ prevPlans, nextPlans: nextRaw, masterItems })
     setMasterItems((prev) => applyStockDeltasToMasterItems(prev, deltas))
     setDeliveryPlans(normalized)
     saveJson(storageKeys.plans, normalized)
+    lastWarehouseBaselineRef.current = serializeWarehouseBaselinePlansSnapshot(normalized)
     setSaveHint(
       formatKoEn(inventoryRemoteSyncEnabled() ? L.savedAfterEditWithRemote : L.savedToBrowserStorage),
     )
@@ -329,7 +336,9 @@ export default function DeliveryPlanPage({
     if (deltas.size) {
       setMasterItems((prev) => applyStockDeltasToMasterItems(prev, deltas))
     }
-    setDeliveryPlans(nextPlans)
+    const normalizedNext = normalizeDeliveryPlansForPersist(nextPlans)
+    setDeliveryPlans(normalizedNext)
+    lastWarehouseBaselineRef.current = serializeWarehouseBaselinePlansSnapshot(normalizedNext)
     if (kind === 'draft' && draftId) removeDraft(draftId)
     setDeleteTarget(null)
     if (typeof onRequestRemoteSync === 'function') onRequestRemoteSync()
