@@ -6,7 +6,7 @@ import { computeWarehouseQtyAsOf, sumWarehouseStockForModelWithAsOf } from '../u
 import {
   buildInventorySummary,
   buildItemInventoryStatus,
-  computePortfolioThisWeekCoverageWeeks,
+  computePortfolioFourWeekAverageCoverageWeeks,
 } from '../utils/inventoryCoverage'
 import {
   buildTodayStatus,
@@ -113,11 +113,10 @@ export default function Dashboard({
   )
 
   const inventorySummary = useMemo(() => {
-    const portfolioCoverageWeeks = computePortfolioThisWeekCoverageWeeks({
+    const portfolioCoverageWeeks = computePortfolioFourWeekAverageCoverageWeeks({
       masterItems: itemsForModel,
       deliveryPlans: itemPlansForModel,
       asOfDate,
-      modelName: selectedModelName,
       getWarehouseStockQty: (it) =>
         computeWarehouseQtyAsOf({
           item: it,
@@ -133,7 +132,6 @@ export default function Dashboard({
     itemsForModel,
     itemPlansForModel,
     asOfDate,
-    selectedModelName,
     deliveryPlans,
     arrivalLedger,
     referenceDate,
