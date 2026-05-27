@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { ALL_MODELS_VALUE, getEnabledProducts } from '../config/products'
+import { ALL_MODELS_VALUE } from '../config/products'
 import { todayShipments as sampleTodayShipments } from '../data/logisticsSampleData'
 import { L, formatKoEnInline } from '../i18n/labels'
 import { computeWarehouseQtyAsOf, sumWarehouseStockForModelWithAsOf } from '../utils/inventoryAsOf'
@@ -17,6 +17,7 @@ import {
 } from '../utils/logisticsMetrics'
 import { formatKstDateTime, formatSeattleDateTime, getKoreaCalendarDate } from '../utils/timeZones'
 import { inventoryRemoteSyncEnabled } from '../utils/inventoryRemoteSync'
+import { collectOperationalModelNames } from '../utils/dashboardModelOptions'
 import BilingualLabel from './BilingualLabel'
 import DashboardCoreKpis from './logistics/DashboardCoreKpis'
 import InventoryStatusPanel from './logistics/InventoryStatusPanel'
@@ -224,7 +225,28 @@ export default function Dashboard({
     asOfDate &&
     asOfDate < referenceDate
 
-  const enabledProducts = getEnabledProducts()
+  const dashboardModelNames = useMemo(
+    () =>
+      collectOperationalModelNames({
+        masterItems,
+        inTransitContainers,
+        deliveryPlans,
+      }),
+    [masterItems, inTransitContainers, deliveryPlans],
+  )
+
+  const dashboardModelSelectOptions = useMemo(() => {
+    const names = [...dashboardModelNames]
+    if (
+      selectedModelName !== ALL_MODELS_VALUE &&
+      selectedModelName &&
+      !names.includes(selectedModelName)
+    ) {
+      names.push(selectedModelName)
+      names.sort((a, b) => a.localeCompare(b, 'en', { sensitivity: 'base' }))
+    }
+    return names
+  }, [dashboardModelNames, selectedModelName])
 
   return (
     <div
@@ -295,10 +317,9 @@ export default function Dashboard({
               <option value={ALL_MODELS_VALUE} title={formatKoEnInline(L.dashboardModelAll)}>
                 {L.dashboardModelAll.ko}
               </option>
-              {enabledProducts.map((p) => (
-                <option key={p.modelName} value={p.modelName}>
-                  {p.displayName}
-                  {p.pilot ? ' (Pilot)' : ''}
+              {dashboardModelSelectOptions.map((name) => (
+                <option key={name} value={name}>
+                  {name}
                 </option>
               ))}
             </select>
