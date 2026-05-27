@@ -1,6 +1,7 @@
 import { AUTH_STORAGE_KEYS, saveUsersToStorage } from './auth'
-import { saveJson, storageKeys } from './appPersistence'
+import { saveJson, loadJson, storageKeys } from './appPersistence'
 import { operationsMeta as defaultOpsMeta } from '../data/logisticsSampleData'
+import { parsePlansStorageValue, toPlansStorageValue } from './deliveryPlanModel'
 import { migrateDeliveryPlansToSimple } from './deliveryPlanMigrate'
 import { migrateInTransitRows } from './inTransitMigrate'
 import { getKoreaCalendarDate } from './timeZones'
@@ -12,6 +13,7 @@ export const APP_DATA_EXPORT_VERSION = 1
  * @param {{
  *   masterItems: unknown[]
  *   deliveryPlans: unknown[]
+ *   weekConfirmations?: Record<string, boolean>
  *   inTransit: unknown[]
  *   opsMeta: object
  *   weeklyPlans: unknown[]
@@ -26,7 +28,12 @@ export const APP_DATA_EXPORT_VERSION = 1
 export function buildAppDataSnapshot(state) {
   return {
     [storageKeys.master]: state.masterItems,
-    [storageKeys.plans]: state.deliveryPlans,
+    [storageKeys.plans]: toPlansStorageValue(
+      state.deliveryPlans,
+      state.weekConfirmations && typeof state.weekConfirmations === 'object'
+        ? state.weekConfirmations
+        : {},
+    ),
     [storageKeys.transit]: state.inTransit,
     [storageKeys.ops]: state.opsMeta,
     [storageKeys.weekly]: state.weeklyPlans,
@@ -64,8 +71,10 @@ export function parseAppDataImport(raw) {
   if (Array.isArray(p[storageKeys.master])) {
     patch.masterItems = p[storageKeys.master]
   }
-  if (Array.isArray(p[storageKeys.plans])) {
-    patch.deliveryPlans = migrateDeliveryPlansToSimple(p[storageKeys.plans])
+  if (p[storageKeys.plans] != null) {
+    const { cells, weekConfirmations } = parsePlansStorageValue(p[storageKeys.plans])
+    patch.deliveryPlans = migrateDeliveryPlansToSimple(cells)
+    patch.weekConfirmations = weekConfirmations
   }
   if (Array.isArray(p[storageKeys.transit])) {
     patch.inTransit = migrateInTransitRows(p[storageKeys.transit])
@@ -103,6 +112,7 @@ export function parseAppDataImport(raw) {
   const hasAny =
     patch.masterItems != null ||
     patch.deliveryPlans != null ||
+    patch.weekConfirmations != null ||
     patch.inTransit != null ||
     patch.opsMeta != null ||
     patch.weeklyPlans != null ||
@@ -129,7 +139,16 @@ export function persistInventoryPatchToLocalStorage(patch) {
   if (!patch || typeof patch !== 'object') return
   try {
     if (patch.masterItems != null) saveJson(storageKeys.master, patch.masterItems)
-    if (patch.deliveryPlans != null) saveJson(storageKeys.plans, patch.deliveryPlans)
+    if (patch.deliveryPlans != null || patch.weekConfirmations != null) {
+      const cur = parsePlansStorageValue(loadJson(storageKeys.plans))
+      saveJson(
+        storageKeys.plans,
+        toPlansStorageValue(
+          patch.deliveryPlans != null ? migrateDeliveryPlansToSimple(patch.deliveryPlans) : cur.cells,
+          patch.weekConfirmations != null ? patch.weekConfirmations : cur.weekConfirmations,
+        ),
+      )
+    }
     if (patch.inTransit != null) saveJson(storageKeys.transit, patch.inTransit)
     if (patch.opsMeta != null) saveJson(storageKeys.ops, patch.opsMeta)
     if (patch.weeklyPlans != null) saveJson(storageKeys.weekly, patch.weeklyPlans)

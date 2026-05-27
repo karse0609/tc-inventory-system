@@ -16,14 +16,14 @@ import { outboundQtyForSimulation } from './deliveryPlanModel'
  */
 
 /** 납품 계획 누적 출고: 주 시작일(월) ≤ through 일까지 합계 */
-export function sumOutboundThroughDate(plans, modelName, partNo, throughInclusive) {
+export function sumOutboundThroughDate(plans, modelName, partNo, throughInclusive, weekConfirmations = {}) {
   if (!throughInclusive) return 0
   let sum = 0
   for (const row of plans) {
     if (row.modelName !== modelName || row.partNo !== partNo) continue
     const w = planRowWeekStart(row)
     if (!w || w > throughInclusive) continue
-    sum += outboundQtyForSimulation(row)
+    sum += outboundQtyForSimulation(row, weekConfirmations)
   }
   return sum
 }
@@ -51,6 +51,7 @@ function sumArrivalsBetweenExclusiveToInclusive(ledger, modelName, partNo, fromE
 export function computeWarehouseQtyAsOf({
   item,
   deliveryPlans,
+  weekConfirmations = {},
   arrivalLedger,
   asOfDate,
   referenceDate,
@@ -66,8 +67,8 @@ export function computeWarehouseQtyAsOf({
   const m = item.modelName
   const p = item.partNo
   const arrivals = sumArrivalsBetweenExclusiveToInclusive(arrivalLedger || [], m, p, asOf, ref)
-  const oRef = sumOutboundThroughDate(deliveryPlans, m, p, ref)
-  const oAsOf = sumOutboundThroughDate(deliveryPlans, m, p, asOf)
+  const oRef = sumOutboundThroughDate(deliveryPlans, m, p, ref, weekConfirmations)
+  const oAsOf = sumOutboundThroughDate(deliveryPlans, m, p, asOf, weekConfirmations)
   const outboundDelta = oRef - oAsOf
   return Math.max(0, wNow - arrivals + outboundDelta)
 }
@@ -77,6 +78,7 @@ export function sumWarehouseStockForModelWithAsOf(
   modelName,
   unitCostKrwBySku,
   deliveryPlans,
+  weekConfirmations,
   arrivalLedger,
   asOfDate,
   referenceDate,
@@ -89,6 +91,7 @@ export function sumWarehouseStockForModelWithAsOf(
     const q = computeWarehouseQtyAsOf({
       item: r,
       deliveryPlans,
+      weekConfirmations,
       arrivalLedger,
       asOfDate,
       referenceDate,

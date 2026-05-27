@@ -40,6 +40,7 @@ function rowMatchesProj(row, applied) {
 export default function InventoryProjectionPage({
   masterItems,
   deliveryPlans,
+  weekConfirmations = {},
   inTransit,
   opsMeta,
 }) {
@@ -57,8 +58,15 @@ export default function InventoryProjectionPage({
   )
 
   const rows = useMemo(
-    () => buildInventoryProjectionRows(masterItems, deliveryPlans, inTransit, weekColumns),
-    [masterItems, deliveryPlans, inTransit, weekColumns],
+    () =>
+      buildInventoryProjectionRows(
+        masterItems,
+        deliveryPlans,
+        weekConfirmations,
+        inTransit,
+        weekColumns,
+      ),
+    [masterItems, deliveryPlans, weekConfirmations, inTransit, weekColumns],
   )
 
   const displayedRows = useMemo(

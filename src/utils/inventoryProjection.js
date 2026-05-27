@@ -19,12 +19,12 @@ export function shortWeekLabel(weekId) {
   return String(weekId).replace(/^\d{4}-/i, '')
 }
 
-function deliveryQtyForWeek(planRows, modelName, partNo, mondayIso) {
+function deliveryQtyForWeek(planRows, weekConfirmations, modelName, partNo, mondayIso) {
   let sum = 0
   for (const p of planRows) {
     if (p.modelName !== modelName || p.partNo !== partNo) continue
     if (planWeekMonday(p) !== mondayIso) continue
-    sum += outboundQtyForSimulation(p)
+    sum += outboundQtyForSimulation(p, weekConfirmations)
   }
   return sum
 }
@@ -60,10 +60,17 @@ export function lastInboundMondayFromTransit(transitRows, modelName, partNo) {
 /**
  * @param {object[]} masterItems
  * @param {object[]} deliveryPlans
+ * @param {Record<string, boolean>} weekConfirmations
  * @param {object[]} inTransitRows
  * @param {{ periodStart: string, week: string }[]} weekColumns 시간순
  */
-export function buildInventoryProjectionRows(masterItems, deliveryPlans, inTransitRows, weekColumns) {
+export function buildInventoryProjectionRows(
+  masterItems,
+  deliveryPlans,
+  weekConfirmations,
+  inTransitRows,
+  weekColumns,
+) {
   const items = masterItems.filter((m) => m.status !== 'Inactive')
   const sortedWeeks = [...weekColumns].sort((a, b) => a.periodStart.localeCompare(b.periodStart))
 
@@ -96,6 +103,7 @@ export function buildInventoryProjectionRows(masterItems, deliveryPlans, inTrans
       )
       const outbound = deliveryQtyForWeek(
         deliveryPlans,
+        weekConfirmations,
         item.modelName,
         item.partNo,
         col.periodStart,

@@ -2,7 +2,6 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import BilingualLabel from '../BilingualLabel'
 import { operationsMeta } from '../../data/logisticsSampleData'
 import { formatKoEn, formatKoEnInline, L } from '../../i18n/labels'
-import { saveJson, storageKeys, loadJson } from '../../utils/appPersistence'
 import { buildWeekHorizon, planWeekMonday } from '../../utils/deliveryPlanHorizon'
 import { getWeekRange } from '../../utils/logisticsMetrics'
 import useGridNativePaste from '../../hooks/useGridNativePaste'
@@ -12,8 +11,8 @@ import { useMobileSimpleLayout } from '../../utils/mobileLayout'
 import { newId } from '../../utils/newId'
 import { inventoryRemoteSyncEnabled } from '../../utils/inventoryRemoteSync'
 import {
-  planQty,
-  isPlanShipped,
+  committedQtyOnRecord,
+  isWeekConfirmed,
   computeStockDeltasBySku,
   normalizeDeliveryPlansForPersist,
   applyStockDeltasToMasterItems,
@@ -74,25 +73,11 @@ function mergeCellUpdate(plans, modelName, partNo, weekStartDate, rawValue) {
     weekStartDate,
     qty,
     planQty: qty,
-    shipped: idx >= 0 ? prev.shipped === true : false,
-    confirmedQty: idx >= 0 && prev.shipped === true ? Number(prev.confirmedQty) || 0 : 0,
+    confirmedQty: idx >= 0 ? committedQtyOnRecord(prev) : 0,
     locked: idx >= 0 ? prev.locked === true : false,
   }
   if (idx >= 0) return plans.map((p, i) => (i === idx ? row : p))
   return [...plans, row]
-}
-
-function mergeShippedUpdate(plans, modelName, partNo, weekStartDate, shipped) {
-  const idx = plans.findIndex(
-    (p) =>
-      p.modelName === modelName &&
-      p.partNo === partNo &&
-      planWeekMonday(p) === weekStartDate,
-  )
-  if (idx < 0) return plans
-  const prev = plans[idx]
-  if (shipped && planQty(prev) <= 0) return plans
-  return plans.map((p, i) => (i === idx ? { ...p, shipped: shipped === true } : p))
 }
 
 function buildPartRows(masterItems, deliveryPlans, draftRows) {
@@ -143,10 +128,10 @@ function WeekCell({
   disabled,
   asOfDate,
   onQtyChange,
-  onShippedChange,
   onFocusAnchor,
   rowIndex,
   weekIdx,
+  weekConfirmed,
 }) {
   const mon = weekStartFromCol(col)
   const weekRange = getWeekRange(asOfDate)
@@ -154,15 +139,12 @@ function WeekCell({
   const lockedByRow = plan?.locked === true
   const lockedByPolicy = FUTURE_WEEKS_LOCKED && isFutureWeek
   const readOnly = disabled || lockedByRow || lockedByPolicy
-  const q = planQty(plan || {})
   const val = plan?.qty ?? ''
-  const shipped = isPlanShipped(plan)
-  const canShipCheck = q > 0 && !readOnly
   const ariaWeek = `${formatKoEnInline(L.deliveryPlanWeeklyQty)} · ${col.headerShort}`
 
   return (
     <td
-      className={`dp-week-cell dp-week-col${shipped ? ' dp-week-cell--shipped' : ''}`.trim()}
+      className={`dp-week-cell dp-week-col${weekConfirmed ? ' dp-week-cell--week-confirmed' : ''}`.trim()}
       title={`${col.week} · ${mon}`}
     >
       <div className="dp-week-cell-inner">
@@ -181,18 +163,6 @@ function WeekCell({
           onChange={(e) => onQtyChange(col, e.target.value)}
           onFocus={() => onFocusAnchor?.()}
         />
-        <label className="dp-week-ship">
-          <input
-            type="checkbox"
-            checked={shipped}
-            disabled={!canShipCheck}
-            onChange={(e) => onShippedChange(col, e.target.checked)}
-            aria-label={formatKoEnInline(L.deliveryPlanShipConfirmCheckbox)}
-          />
-          <span className="dp-week-ship-label">
-            <BilingualLabel label={L.deliveryPlanShipShort} as="span" compact />
-          </span>
-        </label>
       </div>
     </td>
   )
@@ -203,6 +173,8 @@ export default function DeliveryPlanPage({
   setMasterItems,
   deliveryPlans,
   setDeliveryPlans,
+  weekConfirmations,
+  setWeekConfirmations,
   opsMeta,
   onRequestRemoteSync,
 }) {
@@ -222,8 +194,10 @@ export default function DeliveryPlanPage({
   const [appliedPartSearch, setAppliedPartSearch] = useState(() => ({ ...EMPTY_PART_SEARCH }))
   /** 붙여넣기 시작 위치: 행 인덱스 + 열 앵커(모델/부품/주차) */
   const pasteAnchorRef = useRef({ rowIndex: 0, colKind: 'week', weekColIndex: 0 })
-  /** 직전 출고저장(재고 반영 기준) 스냅샷 — loadJson만 쓰면 자동 저장 중간값으로 prev가 깨져 중복 차감됨 */
-  const lastWarehouseBaselineRef = useRef(serializeWarehouseBaselinePlansSnapshot(deliveryPlans))
+  /** 직전 출고저장(재고 반영 기준) 스냅샷 — 자동 저장 중간값으로 prev가 깨져 중복 차감되지 않도록 ref 유지 */
+  const lastWarehouseBaselineRef = useRef(
+    serializeWarehouseBaselinePlansSnapshot(deliveryPlans, weekConfirmations),
+  )
   const dpTableRef = useRef(null)
 
   const columns = useMemo(
@@ -261,13 +235,16 @@ export default function DeliveryPlanPage({
     return () => window.removeEventListener('keydown', onKey)
   }, [deleteTarget])
 
-  const onShippedChange = useCallback(
-    (modelName, partNo) => (col, shipped) => {
-      if (!modelName || !partNo) return
-      const wk = weekStartFromCol(col)
-      setDeliveryPlans((plans) => mergeShippedUpdate(plans, modelName, partNo, wk, shipped))
+  const onWeekHeaderConfirmChange = useCallback(
+    (weekMonday, checked) => {
+      setWeekConfirmations((prev) => {
+        const next = { ...prev }
+        if (checked) next[weekMonday] = true
+        else delete next[weekMonday]
+        return next
+      })
     },
-    [setDeliveryPlans],
+    [setWeekConfirmations],
   )
 
   const onQtyChange = useCallback(
@@ -280,9 +257,9 @@ export default function DeliveryPlanPage({
   )
 
   function handleSave() {
-    const prevPlans = parseWarehouseBaselinePlansSnapshot(lastWarehouseBaselineRef.current)
+    const prev = parseWarehouseBaselinePlansSnapshot(lastWarehouseBaselineRef.current)
     const nextRaw = deliveryPlans
-    const deltas = computeStockDeltasBySku(prevPlans, nextRaw)
+    const deltas = computeStockDeltasBySku(prev.cells, nextRaw, weekConfirmations)
     const bad = findInsufficientStockForDeltas(masterItems, deltas)
     if (bad.length) {
       const lines = bad.map((b) =>
@@ -294,12 +271,19 @@ export default function DeliveryPlanPage({
       window.alert(`${formatKoEnInline(L.deliveryPlanInsufficientStock)}\n\n${lines.join('\n')}`)
       return
     }
-    const normalized = normalizeDeliveryPlansForPersist(nextRaw)
-    logDeliveryPlanSaveWarehouseDebug({ prevPlans, nextPlans: nextRaw, masterItems })
+    const normalized = normalizeDeliveryPlansForPersist(nextRaw, weekConfirmations)
+    logDeliveryPlanSaveWarehouseDebug({
+      prevPlans: prev.cells,
+      nextPlans: nextRaw,
+      nextWeekConfirmations: weekConfirmations,
+      masterItems,
+    })
     setMasterItems((prev) => applyStockDeltasToMasterItems(prev, deltas))
     setDeliveryPlans(normalized)
-    saveJson(storageKeys.plans, normalized)
-    lastWarehouseBaselineRef.current = serializeWarehouseBaselinePlansSnapshot(normalized)
+    lastWarehouseBaselineRef.current = serializeWarehouseBaselinePlansSnapshot(
+      normalized,
+      weekConfirmations,
+    )
     setSaveHint(
       formatKoEn(inventoryRemoteSyncEnabled() ? L.savedAfterEditWithRemote : L.savedToBrowserStorage),
     )
@@ -332,13 +316,16 @@ export default function DeliveryPlanPage({
     if (!deleteTarget) return
     const { modelName, partNo, kind, draftId } = deleteTarget
     const nextPlans = deliveryPlans.filter((p) => !(p.modelName === modelName && p.partNo === partNo))
-    const deltas = computeStockDeltasBySku(deliveryPlans, nextPlans)
+    const deltas = computeStockDeltasBySku(deliveryPlans, nextPlans, weekConfirmations)
     if (deltas.size) {
       setMasterItems((prev) => applyStockDeltasToMasterItems(prev, deltas))
     }
-    const normalizedNext = normalizeDeliveryPlansForPersist(nextPlans)
+    const normalizedNext = normalizeDeliveryPlansForPersist(nextPlans, weekConfirmations)
     setDeliveryPlans(normalizedNext)
-    lastWarehouseBaselineRef.current = serializeWarehouseBaselinePlansSnapshot(normalizedNext)
+    lastWarehouseBaselineRef.current = serializeWarehouseBaselinePlansSnapshot(
+      normalizedNext,
+      weekConfirmations,
+    )
     if (kind === 'draft' && draftId) removeDraft(draftId)
     setDeleteTarget(null)
     if (typeof onRequestRemoteSync === 'function') onRequestRemoteSync()
@@ -817,9 +804,31 @@ export default function DeliveryPlanPage({
               </th>
               {columns.map((c) => {
                 const wk = weekStartFromCol(c)
+                const weekRangeHdr = getWeekRange(asOfDate)
+                const isFutureWeekHdr = wk > weekRangeHdr.end
+                const headerLocked = FUTURE_WEEKS_LOCKED && isFutureWeekHdr
+                const weekConfirmed = isWeekConfirmed(weekConfirmations, wk)
                 return (
-                  <th key={wk} className="dp-week-col" title={`${c.week} · ${wk}`}>
-                    {c.headerShort}
+                  <th
+                    key={wk}
+                    className={`dp-week-col${weekConfirmed ? ' dp-week-col--confirmed' : ''}`.trim()}
+                    title={`${c.week} · ${wk}`}
+                  >
+                    <div className="dp-week-head">
+                      <span className="dp-week-head__date">{c.headerShort}</span>
+                      <label className="dp-week-head__confirm">
+                        <input
+                          type="checkbox"
+                          checked={weekConfirmed}
+                          disabled={headerLocked}
+                          onChange={(e) => onWeekHeaderConfirmChange(wk, e.target.checked)}
+                          aria-label={formatKoEnInline(L.deliveryPlanWeekShipConfirm)}
+                        />
+                        <span className="dp-week-head__confirm-text">
+                          <BilingualLabel label={L.deliveryPlanWeekShipConfirm} as="span" compact />
+                        </span>
+                      </label>
+                    </div>
                   </th>
                 )
               })}
@@ -940,6 +949,7 @@ export default function DeliveryPlanPage({
                   {columns.map((col, weekIdx) => {
                     const wk = weekStartFromCol(col)
                     const plan = planByKey.get(`${modelName}\t${partNo}\t${wk}`)
+                    const weekConfirmed = isWeekConfirmed(weekConfirmations, wk)
                     return (
                       <WeekCell
                         key={wk}
@@ -949,8 +959,8 @@ export default function DeliveryPlanPage({
                         disabled={cellDisabled}
                         rowIndex={rowIndex}
                         weekIdx={weekIdx}
+                        weekConfirmed={weekConfirmed}
                         onQtyChange={onQtyChange(modelName, partNo)}
-                        onShippedChange={onShippedChange(modelName, partNo)}
                         onFocusAnchor={() => {
                           pasteAnchorRef.current = {
                             rowIndex,

@@ -190,15 +190,15 @@ export const L = {
   },
   deliveryPlanPageDesc: {
     ko:
-      '기준일 기준 주차(열) × 품목(행)에 주차별 출고(납품) 수량을 입력합니다. 주차별「확정」에 체크 후 저장하면 해당 수량이 창고 재고에서 차감되며, 재저장 시에는 이전 확정분과의 차이만 반영됩니다(체크 해제 시 복원). 데이터는 브라우저에 저장되며 재고 예측·역산은 확정 반영분을 이중 차감하지 않도록 계산합니다.',
+      '기준일 기준 주차(열) × 품목(행)에 주차별 출고(납품) 수량을 입력합니다. 각 주차 열 헤더의「출고확정」에 체크한 뒤 저장하면 해당 주에 입력된 모든 품번 수량이 창고 재고에서 차감되며, 재저장 시에는 이전 확정분과의 차이만 반영됩니다(헤더 체크 해제 후 저장 시 해당 주 전체 복원). 데이터는 브라우저에 저장되며 재고 예측·역산은 확정 반영분을 이중 차감하지 않도록 계산합니다.',
     en:
-      'Grid: parts × weeks from as-of date. Enter weekly outbound qty; check Confirm for a week and Save to deduct that qty from warehouse stock. Re-save applies only the delta vs the last saved confirmation; clearing the check restores stock. Plans persist in the browser. Projection and as-of math treat confirmed qty as already reflected in warehouse so it is not subtracted twice.',
+      'Grid: parts × weeks from as-of date. Enter weekly outbound qty; use the week-column header “Ship confirm”, then Save to deduct all SKUs in that week from warehouse stock. Re-save applies only the delta vs the last saved confirmation; clearing the week header check and Save restores stock for that week. Plans persist in the browser. Projection and as-of math treat confirmed qty as already reflected in warehouse so it is not subtracted twice.',
   },
   deliveryPlanPageDescRemote: {
     ko:
-      '기준일 기준 주차(열) × 품목(행)에 주차별 출고(납품) 수량을 입력합니다. 주차별「확정」체크 후 저장 시 창고 재고에 반영되며(차이만 재반영), 서버 동기화가 켜져 있으면 공유 스냅샷에도 반영됩니다.',
+      '기준일 기준 주차(열) × 품목(행)에 주차별 출고(납품) 수량을 입력합니다. 주차 헤더「출고확정」체크 후 저장 시 해당 주 전체 품번이 창고 재고에 반영되며(차이만 재반영), 서버 동기화가 켜져 있으면 공유 스냅샷에도 반영됩니다.',
     en:
-      'Grid: parts × weeks. Confirm per week and Save to update warehouse stock (delta-based). With server sync on, edits merge into the shared snapshot.',
+      'Grid: parts × weeks. Use the week header Ship confirm and Save to update warehouse stock for all SKUs in that week (delta-based). With server sync on, edits merge into the shared snapshot.',
   },
   previousWeeksShown: { ko: '이전 주(표시)', en: 'Past weeks (shown)' },
   futureWeeksShown: { ko: '이후 주(표시)', en: 'Future weeks (shown)' },
@@ -218,6 +218,10 @@ export const L = {
   columnsCount: { ko: '열', en: 'Columns' },
   viewOffsetWeeks: { ko: '뷰 오프셋', en: 'View offset' },
   deliveryPlanWeeklyQty: { ko: '주간 수량', en: 'Weekly qty' },
+  deliveryPlanWeekShipConfirm: {
+    ko: '출고확정',
+    en: 'Ship confirm',
+  },
   deliveryPlanShipShort: { ko: '확정', en: 'Ship' },
   deliveryPlanShipConfirmCheckbox: {
     ko: '이 주차 출고 확정(저장 시 창고 재고 반영)',

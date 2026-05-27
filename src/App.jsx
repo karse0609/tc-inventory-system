@@ -15,6 +15,7 @@ import { TRANSIT_ROW_STATUS, transitRowIdKey, isTransitRowReceived } from './uti
 import { newId } from './utils/newId'
 import { getKoreaCalendarDate } from './utils/timeZones'
 import { migrateDeliveryPlansToSimple } from './utils/deliveryPlanMigrate'
+import { parsePlansStorageValue, toPlansStorageValue } from './utils/deliveryPlanModel'
 import { migrateInTransitRows } from './utils/inTransitMigrate'
 import {
   authenticate,
@@ -83,11 +84,34 @@ function App() {
     const loaded = loadJson(storageKeys.master)
     return Array.isArray(loaded) && loaded.length ? loaded : buildSeedMasterItems()
   })
-  const [deliveryPlans, setDeliveryPlans] = useState(() => {
-    const loaded = loadJson(storageKeys.plans)
-    const base = Array.isArray(loaded) && loaded.length ? loaded : buildSeedDeliveryPlans()
-    return migrateDeliveryPlansToSimple(base)
+  const [planStore, setPlanStore] = useState(() => {
+    const raw = loadJson(storageKeys.plans)
+    const { cells, weekConfirmations } = parsePlansStorageValue(raw)
+    if (cells.length) {
+      return {
+        cells: migrateDeliveryPlansToSimple(cells),
+        weekConfirmations: weekConfirmations && typeof weekConfirmations === 'object' ? weekConfirmations : {},
+      }
+    }
+    return {
+      cells: migrateDeliveryPlansToSimple(buildSeedDeliveryPlans()),
+      weekConfirmations: {},
+    }
   })
+  const deliveryPlans = planStore.cells
+  const weekConfirmations = planStore.weekConfirmations
+  const setDeliveryPlans = useCallback((next) => {
+    setPlanStore((s) => ({
+      ...s,
+      cells: typeof next === 'function' ? next(s.cells) : next,
+    }))
+  }, [])
+  const setWeekConfirmations = useCallback((next) => {
+    setPlanStore((s) => ({
+      ...s,
+      weekConfirmations: typeof next === 'function' ? next(s.weekConfirmations) : { ...next },
+    }))
+  }, [])
   const [inTransit, setInTransit] = useState(() => {
     const loaded = loadJson(storageKeys.transit)
     if (Array.isArray(loaded) && loaded.length) {
@@ -229,8 +253,8 @@ function App() {
     saveJson(storageKeys.master, masterItems)
   }, [masterItems])
   useEffect(() => {
-    saveJson(storageKeys.plans, deliveryPlans)
-  }, [deliveryPlans])
+    saveJson(storageKeys.plans, toPlansStorageValue(planStore.cells, planStore.weekConfirmations))
+  }, [planStore])
   useEffect(() => {
     saveJson(storageKeys.transit, inTransit)
   }, [inTransit])
@@ -259,7 +283,10 @@ function App() {
   const resetAllData = useCallback(() => {
     Object.values(storageKeys).forEach((k) => localStorage.removeItem(k))
     setMasterItems(buildSeedMasterItems())
-    setDeliveryPlans(migrateDeliveryPlansToSimple(buildSeedDeliveryPlans()))
+    setPlanStore({
+      cells: migrateDeliveryPlansToSimple(buildSeedDeliveryPlans()),
+      weekConfirmations: {},
+    })
     setInTransit(buildSeedInTransit())
     setOpsMeta({ ...defaultOpsMeta, asOfDate: getKoreaCalendarDate() })
     setWeeklyPlans(sampleWeeklyPlans)
@@ -274,6 +301,7 @@ function App() {
     const payload = buildAppDataSnapshot({
       masterItems,
       deliveryPlans,
+      weekConfirmations,
       inTransit,
       opsMeta,
       weeklyPlans,
@@ -303,6 +331,7 @@ function App() {
   }, [
     masterItems,
     deliveryPlans,
+    weekConfirmations,
     inTransit,
     opsMeta,
     weeklyPlans,
@@ -330,6 +359,11 @@ function App() {
     const mergeSummary = {}
     if (Array.isArray(patch.masterItems)) mergeSummary.masterItems = patch.masterItems.length
     if (Array.isArray(patch.deliveryPlans)) mergeSummary.deliveryPlans = patch.deliveryPlans.length
+    if (patch.weekConfirmations != null && typeof patch.weekConfirmations === 'object') {
+      mergeSummary.weekConfirmations = Object.keys(patch.weekConfirmations).filter(
+        (k) => patch.weekConfirmations[k] === true,
+      ).length
+    }
     if (Array.isArray(patch.inTransit)) mergeSummary.inTransit = patch.inTransit.length
     if (Array.isArray(patch.weeklyPlans)) mergeSummary.weeklyPlans = patch.weeklyPlans.length
     if (Array.isArray(patch.arrivalLedger)) mergeSummary.arrivalLedger = patch.arrivalLedger.length
@@ -338,7 +372,13 @@ function App() {
     if (patch.opsMeta) mergeSummary.opsMeta = true
     logRemoteSync('merge:from-server', { syncSource, mergeSummary, appliedKeys })
     if (patch.masterItems != null) setMasterItems(patch.masterItems)
-    if (patch.deliveryPlans != null) setDeliveryPlans(patch.deliveryPlans)
+    if (patch.deliveryPlans != null || patch.weekConfirmations != null) {
+      setPlanStore((s) => ({
+        cells: patch.deliveryPlans != null ? patch.deliveryPlans : s.cells,
+        weekConfirmations:
+          patch.weekConfirmations != null ? patch.weekConfirmations : s.weekConfirmations,
+      }))
+    }
     if (patch.inTransit != null) setInTransit(patch.inTransit)
     if (patch.opsMeta != null) setOpsMeta(patch.opsMeta)
     if (patch.weeklyPlans != null) setWeeklyPlans(patch.weeklyPlans)
@@ -446,6 +486,7 @@ function App() {
         buildAppDataSnapshot({
           masterItems,
           deliveryPlans,
+          weekConfirmations,
           inTransit,
           opsMeta,
           weeklyPlans,
@@ -460,6 +501,7 @@ function App() {
     [
       masterItems,
       deliveryPlans,
+      weekConfirmations,
       inTransit,
       opsMeta,
       weeklyPlans,
@@ -804,6 +846,7 @@ function App() {
         <Dashboard
           masterItems={masterItems}
           deliveryPlans={deliveryPlans}
+          weekConfirmations={weekConfirmations}
           inTransitContainers={inTransit}
           opsMeta={opsMeta}
           setOpsMeta={isMobileWarehouseNav ? undefined : setOpsMeta}
@@ -827,6 +870,8 @@ function App() {
           setMasterItems={setMasterItems}
           deliveryPlans={deliveryPlans}
           setDeliveryPlans={setDeliveryPlans}
+          weekConfirmations={weekConfirmations}
+          setWeekConfirmations={setWeekConfirmations}
           opsMeta={opsMeta}
           onRequestRemoteSync={scheduleRemoteSyncAfterMutation}
         />
@@ -849,6 +894,7 @@ function App() {
         <InventoryProjectionPage
           masterItems={masterItems}
           deliveryPlans={deliveryPlans}
+          weekConfirmations={weekConfirmations}
           inTransit={inTransit}
           opsMeta={opsMeta}
         />

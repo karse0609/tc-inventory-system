@@ -32,6 +32,7 @@ function formatInt(n) {
 export default function Dashboard({
   masterItems,
   deliveryPlans,
+  weekConfirmations = {},
   inTransitContainers,
   opsMeta,
   setOpsMeta,
@@ -84,6 +85,7 @@ export default function Dashboard({
         const warehouseStockQty = computeWarehouseQtyAsOf({
           item,
           deliveryPlans,
+          weekConfirmations,
           arrivalLedger,
           asOfDate,
           referenceDate,
@@ -96,7 +98,7 @@ export default function Dashboard({
           warehouseStockQty,
         })
       }),
-    [itemsForModel, containersAsOf, asOfDate, deliveryPlans, arrivalLedger, referenceDate],
+    [itemsForModel, containersAsOf, asOfDate, deliveryPlans, weekConfirmations, arrivalLedger, referenceDate],
   )
 
   const inventorySummary = useMemo(() => {
@@ -106,6 +108,7 @@ export default function Dashboard({
         computeWarehouseQtyAsOf({
           item: it,
           deliveryPlans,
+          weekConfirmations,
           arrivalLedger,
           asOfDate,
           referenceDate,
@@ -116,6 +119,7 @@ export default function Dashboard({
     itemInventoryRows,
     itemsForModel,
     deliveryPlans,
+    weekConfirmations,
     arrivalLedger,
     referenceDate,
   ])
@@ -154,6 +158,7 @@ export default function Dashboard({
         selectedModelName,
         unitCostKrwBySku,
         deliveryPlans,
+        weekConfirmations,
         arrivalLedger,
         asOfDate,
         referenceDate,
@@ -163,6 +168,7 @@ export default function Dashboard({
       selectedModelName,
       unitCostKrwBySku,
       deliveryPlans,
+      weekConfirmations,
       arrivalLedger,
       asOfDate,
       referenceDate,
