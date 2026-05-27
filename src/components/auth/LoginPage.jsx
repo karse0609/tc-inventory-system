@@ -25,7 +25,7 @@ export default function LoginPage({ onLogin }) {
     <div className="login-page">
       <div className="login-page__card card">
         <h1 className="login-page__title-block">
-          <span className="login-page__title-ko">TC TECH 실시간 해외재고</span>
+          <span className="login-page__title-ko">TC TECH 실시간 해외 물류·재고 관리</span>
           <span className="login-page__title-en">
             Overseas Inventory &amp; Logistics Operations Dashboard
           </span>
