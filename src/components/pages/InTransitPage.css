@@ -169,10 +169,6 @@
   padding: 0.04rem 0.12rem;
 }
 
-.transit-page__table .cell-input--date-text {
-  letter-spacing: -0.025em;
-}
-
 /* native date: 컬럼 폭에 맞춤 */
 .transit-page__table input[type='date'].cell-input--date {
   min-width: 0;
@@ -212,10 +208,6 @@
 /*
  * colgroup — 비고 축소, 컨테이너·날짜 가독성
  */
-.transit-page__col--eta-wh {
-  width: 6.5%;
-}
-
 .transit-page__col--container {
   width: 11%;
 }
@@ -262,7 +254,7 @@
 }
 
 .transit-page__table td.transit-page__td--remark {
-  vertical-align: top;
+  vertical-align: middle;
 }
 
 .transit-page__table td .cell-input.transit-page__cell-input--remark {
@@ -270,9 +262,11 @@
   text-overflow: clip;
   white-space: normal;
   word-break: break-word;
-  min-height: 1.22rem;
+  min-height: 1.28rem;
+  padding: 0.06rem 0.16rem;
   font-size: 0.72rem;
   font-weight: 500;
+  line-height: 1.14;
 }
 
 .transit-page__table td .cell-input.transit-page__cell-input--tctech {

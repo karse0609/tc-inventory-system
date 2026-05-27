@@ -787,7 +787,7 @@ export default function InTransitPage({
               <col className="transit-page__col--date" />
               <col className="transit-page__col--date" />
               <col className="transit-page__col--date" />
-              <col className="transit-page__col--eta-wh" />
+              <col className="transit-page__col--date" />
               <col className="transit-page__col--delivery" />
               <col className="transit-page__col--arrived" />
               <col className="transit-page__col--remark" />
@@ -919,13 +919,13 @@ export default function InTransitPage({
                   </td>
                   <td>
                     <input
-                      className="cell-input cell-input--date cell-input--date-text"
+                      className="cell-input cell-input--date"
                       data-excel-paste
                       data-excel-row={rowIdx}
                       data-excel-col={7}
-                      value={row.etaWh ?? ''}
+                      type="date"
+                      value={row.etaWh || ''}
                       onChange={(e) => updateRow(row.id, { etaWh: e.target.value })}
-                      placeholder="YYYY-MM-DD"
                     />
                   </td>
                   <td>
@@ -994,7 +994,7 @@ export default function InTransitPage({
               <col className="transit-page__col--date" />
               <col className="transit-page__col--date" />
               <col className="transit-page__col--date" />
-              <col className="transit-page__col--eta-wh" />
+              <col className="transit-page__col--date" />
               <col className="transit-page__col--delivery" />
               <col className="transit-page__col--arrived" />
               <col className="transit-page__col--date" />
