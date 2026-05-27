@@ -1,5 +1,18 @@
 import { planWeekMonday } from './deliveryPlanHorizon'
 
+/**
+ * 주차 셀 스키마 (Daily Delivery Excel 업로드 등에서 동일 필드로 채울 수 있도록 유지)
+ *
+ * @typedef {object} DeliveryPlanCell
+ * @property {number} planQty — 화면 계획 수량 (`qty`와 동기 권장)
+ * @property {boolean} shipped — 출고 확정 여부
+ * @property {number} confirmedQty — 창고에 반영된 확정 수량(저장 직후 확정이면 `planQty`와 동일)
+ *
+ * 업로드로 반영할 때: `shipped: true`, `planQty`/`qty`, `confirmedQty`를 목표 상태로 맞춘 뒤
+ * `normalizeDeliveryPlansForPersist` → `computeStockDeltasBySku(loadJson(plans), normalized)`로
+ * 이전 저장본 대비 delta만 창고에 적용하면 됩니다.
+ */
+
 /** 주차 셀 계획 수량 (qty / planQty / plannedQty 호환) */
 export function planQty(p) {
   if (!p || typeof p !== 'object') return 0
@@ -28,9 +41,28 @@ export function deliveryPlanCellKey(p) {
 }
 
 /**
- * 이전 저장본 vs 저장 예정본 비교 → SKU(모델+품번)별 창고 조정량 (+복원, −추가 차감)
- * @param {object[]} prevPlans
- * @param {object[]} nextPlans
+ * 저장 스냅샷 기준: 창고에 이미 반영된 확정 수량 (미확정이면 0)
+ */
+export function committedQtyOnRecord(row) {
+  if (!row || typeof row !== 'object' || !isPlanShipped(row)) return 0
+  const c = Number(row.confirmedQty)
+  if (Number.isFinite(c) && c >= 0) return Math.floor(c)
+  return planQty(row)
+}
+
+/**
+ * 이번 저장에서 반영할 “새 확정 수량”: 확정이면 현재 계획 수량, 아니면 0
+ */
+export function nextCommittedQtyForSave(row) {
+  if (!row || typeof row !== 'object' || !isPlanShipped(row)) return 0
+  return planQty(row)
+}
+
+/**
+ * 이전 저장본 vs 저장 예정본 → SKU별 창고 조정량
+ * delta = Σ( newConfirmedQty - previousConfirmedQty ) per cell
+ * 적용: warehouseStock = warehouseStock - delta  (delta>0 이면 추가 출고 확정으로 재고 감소)
+ *
  * @returns {Map<string, number>} key = modelName\tpartNo
  */
 export function computeStockDeltasBySku(prevPlans, nextPlans) {
@@ -49,17 +81,13 @@ export function computeStockDeltasBySku(prevPlans, nextPlans) {
   for (const key of keys) {
     const prev = prevM.get(key)
     const next = nextM.get(key)
-    const pShipped = isPlanShipped(prev)
-    const nShipped = isPlanShipped(next)
-    const pConf = Number(prev?.confirmedQty) || 0
-    const nQty = planQty(next || {})
+    const prevCommitted = committedQtyOnRecord(prev)
+    const nextCommitted = nextCommittedQtyForSave(next)
+    const cellDelta = nextCommitted - prevCommitted
+    if (cellDelta === 0) continue
     const parts = key.split('\t')
     const sku = `${parts[0]}\t${parts[1]}`
-    let cellDelta = 0
-    if (pShipped && !nShipped) cellDelta = pConf
-    else if (!pShipped && nShipped) cellDelta = -nQty
-    else if (pShipped && nShipped) cellDelta = pConf - nQty
-    if (cellDelta !== 0) deltas.set(sku, (deltas.get(sku) || 0) + cellDelta)
+    deltas.set(sku, (deltas.get(sku) || 0) + cellDelta)
   }
   return deltas
 }
@@ -70,20 +98,21 @@ export function applyStockDeltasToMasterItems(masterItems, deltas) {
     const k = `${m.modelName}\t${m.partNo}`
     if (!deltas.has(k)) return m
     const d = deltas.get(k) || 0
-    const nextStock = Math.max(0, (Number(m.currentStock) || 0) + d)
+    const nextStock = Math.max(0, (Number(m.currentStock) || 0) - d)
     return { ...m, currentStock: nextStock }
   })
 }
 
+/** delta>0: 추가 출고 확정분만큼 재고가 있어야 함 */
 export function findInsufficientStockForDeltas(masterItems, deltas) {
   if (!deltas?.size) return []
   const bad = []
   for (const [sku, delta] of deltas) {
-    if (delta >= 0) continue
+    if (delta <= 0) continue
     const [modelName, partNo] = sku.split('\t')
     const m = masterItems.find((x) => x.modelName === modelName && x.partNo === partNo)
     const stock = Number(m?.currentStock) || 0
-    if (stock + delta < 0) bad.push({ modelName, partNo, stock, need: -(stock + delta) })
+    if (stock < delta) bad.push({ modelName, partNo, stock, need: delta - stock })
   }
   return bad
 }
@@ -102,16 +131,4 @@ export function normalizeDeliveryPlansForPersist(plans) {
       locked: p.locked === true,
     }
   })
-}
-
-/** 부품 행 삭제 등으로 제거되는 확정 행 → 창고 복원량 */
-export function stockRestoreDeltasFromRemovingPlans(removingPlans) {
-  const deltas = new Map()
-  for (const p of removingPlans || []) {
-    if (!isPlanShipped(p)) continue
-    const sku = `${p.modelName}\t${p.partNo}`
-    const c = Number(p.confirmedQty) || planQty(p)
-    deltas.set(sku, (deltas.get(sku) || 0) + c)
-  }
-  return deltas
 }

@@ -20,6 +20,7 @@ function fmtInt(n) {
 }
 
 function fmtCov(n) {
+  if (n === Infinity) return '∞'
   if (n == null || !Number.isFinite(n)) return '—'
   return `${n.toFixed(1)} w`
 }

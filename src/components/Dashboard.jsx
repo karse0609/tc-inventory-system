@@ -6,6 +6,7 @@ import { computeWarehouseQtyAsOf, sumWarehouseStockForModelWithAsOf } from '../u
 import {
   buildInventorySummary,
   buildItemInventoryStatus,
+  computePortfolioFlowCoverageWeeks,
 } from '../utils/inventoryCoverage'
 import {
   buildTodayStatus,
@@ -111,10 +112,34 @@ export default function Dashboard({
     ],
   )
 
-  const inventorySummary = useMemo(
-    () => buildInventorySummary(itemInventoryRows),
-    [itemInventoryRows],
-  )
+  const inventorySummary = useMemo(() => {
+    const portfolioCoverageWeeks = computePortfolioFlowCoverageWeeks({
+      masterItems: itemsForModel,
+      deliveryPlans: itemPlansForModel,
+      inTransitContainers: containersAsOf,
+      asOfDate,
+      modelName: selectedModelName,
+      getWarehouseStockQty: (it) =>
+        computeWarehouseQtyAsOf({
+          item: it,
+          deliveryPlans,
+          arrivalLedger,
+          asOfDate,
+          referenceDate,
+        }),
+    })
+    return buildInventorySummary(itemInventoryRows, { portfolioCoverageWeeks })
+  }, [
+    itemInventoryRows,
+    itemsForModel,
+    itemPlansForModel,
+    containersAsOf,
+    asOfDate,
+    selectedModelName,
+    deliveryPlans,
+    arrivalLedger,
+    referenceDate,
+  ])
 
   const masterItemsForModel = useMemo(
     () => filterByModel(masterItems, selectedModelName),
@@ -285,7 +310,9 @@ export default function Dashboard({
         inTransitValue={inTransitTotals.value}
         thisWeekEtaQty={todayMetrics.thisWeekEtaQty}
         thisWeekEtaContainerCount={todayMetrics.thisWeekEtaContainerCount}
-        coverageWeeks={inventorySummary.minCoverageWeeks}
+        coverageWeeks={
+          inventorySummary.portfolioCoverageWeeks ?? inventorySummary.minCoverageWeeks
+        }
         unit={opsMeta.unit}
       />
       <p className="dashboard__kpi-footnote page__hint">

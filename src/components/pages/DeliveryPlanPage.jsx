@@ -18,7 +18,6 @@ import {
   normalizeDeliveryPlansForPersist,
   applyStockDeltasToMasterItems,
   findInsufficientStockForDeltas,
-  stockRestoreDeltasFromRemovingPlans,
 } from '../../utils/deliveryPlanModel'
 import PageDataToolbar from '../grid/PageDataToolbar.jsx'
 import '../logistics/ops.css'
@@ -325,14 +324,12 @@ export default function DeliveryPlanPage({
   function confirmDeletePartPlans() {
     if (!deleteTarget) return
     const { modelName, partNo, kind, draftId } = deleteTarget
-    const removing = deliveryPlans.filter((p) => p.modelName === modelName && p.partNo === partNo)
-    const restoreDeltas = stockRestoreDeltasFromRemovingPlans(removing)
-    if (restoreDeltas.size) {
-      setMasterItems((prev) => applyStockDeltasToMasterItems(prev, restoreDeltas))
+    const nextPlans = deliveryPlans.filter((p) => !(p.modelName === modelName && p.partNo === partNo))
+    const deltas = computeStockDeltasBySku(deliveryPlans, nextPlans)
+    if (deltas.size) {
+      setMasterItems((prev) => applyStockDeltasToMasterItems(prev, deltas))
     }
-    setDeliveryPlans((plans) =>
-      plans.filter((p) => !(p.modelName === modelName && p.partNo === partNo)),
-    )
+    setDeliveryPlans(nextPlans)
     if (kind === 'draft' && draftId) removeDraft(draftId)
     setDeleteTarget(null)
     if (typeof onRequestRemoteSync === 'function') onRequestRemoteSync()

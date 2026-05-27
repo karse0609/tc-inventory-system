@@ -121,6 +121,10 @@ export const L = {
     ko: '재고 ÷ 주간 수요',
     en: 'Stock ÷ Weekly Demand',
   },
+  flowCoverageHeroHint: {
+    ko: '모델 합산: 입고예정·납품계획 누적',
+    en: 'Model total: inbound & delivery plan (flow)',
+  },
   plannedDelivery: { ko: '계획 납품', en: 'Planned Delivery' },
   confirmedDelivery: { ko: '확정 납품', en: 'Confirmed Delivery' },
   weeklyDemandShort: { ko: '주간 수요', en: 'Weekly Demand' },
@@ -322,9 +326,9 @@ export const L = {
   inventoryProjectionScreen: { ko: '재고 예측', en: 'Inventory Projection' },
   inventoryProjectionSubtitle: {
     ko:
-      '주차별로 창고 재고에 운송중 입고(ETA 주)를 더하고 출고 계획을 뺀 예상 재고와 주수(커버리지)를 봅니다. 안전재고 주수와 리드타임(일→주)으로 안정·주의·위험을 표시합니다.',
+      '주차별로 창고 재고에 운송중 입고(ETA Port+7일 해당 주)를 더하고 출고 계획을 뺀 예상 재고를 봅니다. 커버리지(주)는 그 주 이후 남은 입고·출고를 누적 반영해 몇 주분 납품을 버틸 수 있는지(분수 주 포함)로 계산합니다.',
     en:
-      'Per week: warehouse + in-transit arrivals by ETA − outbound from Delivery Plan; coverage weeks. Status uses safety weeks + lead time.',
+      'Per week: warehouse + in-transit (ETA Port + 7 in that week) − outbound from Delivery Plan. Coverage weeks uses forward flow from that week’s projected balance (fractional last week).',
   },
   inventoryProjectionSubtitleRemote: {
     ko:

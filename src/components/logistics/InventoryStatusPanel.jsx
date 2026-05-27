@@ -1,4 +1,4 @@
-import { getCoverageStatusLabel } from '../../config/inventoryPolicy'
+import { getCoverageStatus, getCoverageStatusLabel } from '../../config/inventoryPolicy'
 import { L } from '../../i18n/labels'
 import BilingualLabel from '../BilingualLabel'
 
@@ -51,11 +51,8 @@ export default function InventoryStatusPanel({
     )
   }
 
-  const headlineCoverage = summary?.minCoverageWeeks ?? 0
-  const headlineStatus = itemRows.reduce((worst, row) => {
-    const order = { critical: 0, warning: 1, stable: 2, overstock: 3 }
-    return order[row.status] < order[worst] ? row.status : worst
-  }, 'overstock')
+  const headlineCoverage = summary?.portfolioCoverageWeeks ?? summary?.minCoverageWeeks ?? 0
+  const headlineStatus = getCoverageStatus(headlineCoverage)
 
   return (
     <section
@@ -72,12 +69,12 @@ export default function InventoryStatusPanel({
               <span className="inv-hero__label">
                 <BilingualLabel label={L.coverageWeeks} as="span" />
                 <span className="inv-hero__hint">
-                  (<BilingualLabel label={L.demandBasedCoverage} as="span" />)
+                  (<BilingualLabel label={L.flowCoverageHeroHint} as="span" />)
                 </span>
               </span>
               <strong className="inv-hero__value">{formatDecimal(headlineCoverage)}</strong>
               <span className="inv-hero__unit">
-                <BilingualLabel label={L.weeks} as="span" /> · min across parts
+                <BilingualLabel label={L.weeks} as="span" />
               </span>
             </div>
             <CoverageBadge status={headlineStatus} />

@@ -134,7 +134,8 @@ export function buildTodayStatus({
     thisWeekEtaContainerCount,
     thisWeekDeliveryQty,
     currentInventory: inventorySummary?.totalStock ?? 0,
-    coverageWeeks: inventorySummary?.minCoverageWeeks ?? 0,
+    coverageWeeks:
+      inventorySummary?.portfolioCoverageWeeks ?? inventorySummary?.minCoverageWeeks ?? 0,
     totalInventoryValue: inventorySummary?.totalInventoryValue ?? 0,
     modelWeeklyDemandTotal,
     weekRange,
@@ -175,6 +176,75 @@ export function getFutureDeliveryPlans(plans, asOfDate) {
       return mon && mon >= range.start
     })
     .sort((a, b) => planRowWeekStart(a).localeCompare(planRowWeekStart(b)))
+}
+
+/** deliveryPlanHorizon.addDaysIso와 동일 로직 (순환 import 방지) */
+function addDaysIsoLocal(isoDateStr, deltaDays) {
+  const [y, m, d] = String(isoDateStr)
+    .split('-')
+    .map(Number)
+  const dt = new Date(y, m - 1, d + deltaDays, 12, 0, 0, 0)
+  const yy = dt.getFullYear()
+  const mm = String(dt.getMonth() + 1).padStart(2, '0')
+  const dd = String(dt.getDate()).padStart(2, '0')
+  return `${yy}-${mm}-${dd}`
+}
+
+/**
+ * 운송중 행의 창고 입고 예상일 = ETA Port(YYYY-MM-DD) + 7일.
+ * ETA Port가 없거나 형식이 아니면 반환하지 않음.
+ */
+export function warehouseReceiptDateFromEtaPort(row) {
+  const p = String(row?.etaPort ?? '').trim()
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(p)) return ''
+  return addDaysIsoLocal(p, 7)
+}
+
+/**
+ * 입고 예정일(ETA Port + 7일)이 해당 주(월요일 periodStart 기준 월~일) 안에 들어오는 활성 운송중 수량.
+ */
+export function inboundQtyForWeek(transitRows, modelName, partNo, periodStartMonday) {
+  const { start, end } = getWeekRange(periodStartMonday)
+  let sum = 0
+  for (const t of transitRows || []) {
+    if (!isInTransitRowActive(t)) continue
+    if (t.modelName !== modelName || t.partNo !== partNo) continue
+    const receipt = warehouseReceiptDateFromEtaPort(t)
+    if (!receipt) continue
+    if (!isDateInRange(receipt, start, end)) continue
+    sum += Number(t.qty) || 0
+  }
+  return sum
+}
+
+/**
+ * 조회 기준일이 속한 주의 월요일부터, 출고계획·입고예정(ETA+7)이 존재하는 미래 주차 월요일 목록(시간순).
+ * @param {{ modelName?: string, partNo?: string } | null} sku — null이면 modelName 범위 내 전체 품번
+ */
+export function collectFutureFlowWeekMondays(
+  deliveryPlans,
+  inTransitContainers,
+  asOfDate,
+  modelName,
+  sku = null,
+) {
+  const range = getWeekRange(asOfDate)
+  const weeks = new Set()
+
+  for (const p of filterByModel(deliveryPlans || [], modelName)) {
+    if (sku && (p.modelName !== sku.modelName || p.partNo !== sku.partNo)) continue
+    const mon = planRowWeekStart(p)
+    if (mon && mon >= range.start) weeks.add(mon)
+  }
+  for (const t of filterByModel(inTransitContainers || [], modelName)) {
+    if (sku && (t.modelName !== sku.modelName || t.partNo !== sku.partNo)) continue
+    if (!isInTransitRowActive(t)) continue
+    const receipt = warehouseReceiptDateFromEtaPort(t)
+    if (!receipt) continue
+    const mon = getWeekRange(receipt).start
+    if (mon && mon >= range.start) weeks.add(mon)
+  }
+  return [...weeks].sort((a, b) => a.localeCompare(b))
 }
 
 /**

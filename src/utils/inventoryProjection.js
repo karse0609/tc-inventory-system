@@ -1,8 +1,15 @@
 import { getCoverageStatus, MIN_MANAGEMENT_WEEKS } from '../config/inventoryPolicy'
-import { calculateDemandBasedCoverageWeeks } from './inventoryCoverage'
-import { addDaysIso, planWeekMonday } from './deliveryPlanHorizon'
+import { calculateFlowCoverageWeeks } from './inventoryCoverage'
+import { planWeekMonday } from './deliveryPlanHorizon'
 import { outboundQtyForSimulation } from './deliveryPlanModel'
-import { getWeekRange, isDateInRange, isInTransitRowActive } from './logisticsMetrics'
+import {
+  getWeekRange,
+  inboundQtyForWeek,
+  isInTransitRowActive,
+  warehouseReceiptDateFromEtaPort,
+} from './logisticsMetrics'
+
+export { warehouseReceiptDateFromEtaPort }
 
 const PROJECTION_DEBUG =
   typeof import.meta !== 'undefined' && import.meta.env?.VITE_DEBUG_INVENTORY_PROJECTION === 'true'
@@ -19,31 +26,6 @@ function deliveryQtyForWeek(planRows, modelName, partNo, mondayIso) {
     if (p.modelName !== modelName || p.partNo !== partNo) continue
     if (planWeekMonday(p) !== mondayIso) continue
     sum += outboundQtyForSimulation(p)
-  }
-  return sum
-}
-
-/**
- * 운송중 행의 창고 입고 예상일 = ETA Port(YYYY-MM-DD) + 7일.
- * ETA Port가 없거나 형식이 아니면 반영하지 않음.
- */
-export function warehouseReceiptDateFromEtaPort(row) {
-  const p = String(row?.etaPort ?? '').trim()
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(p)) return ''
-  return addDaysIso(p, 7)
-}
-
-/** 입고 예정일이 해당 주(월요일 periodStart 기준 월~일) 안에 있으면 그 주 inbound */
-function inboundQtyForWeek(transitRows, modelName, partNo, periodStartMonday) {
-  const { start, end } = getWeekRange(periodStartMonday)
-  let sum = 0
-  for (const t of transitRows) {
-    if (!isInTransitRowActive(t)) continue
-    if (t.modelName !== modelName || t.partNo !== partNo) continue
-    const receipt = warehouseReceiptDateFromEtaPort(t)
-    if (!receipt) continue
-    if (!isDateInRange(receipt, start, end)) continue
-    sum += Number(t.qty) || 0
   }
   return sum
 }
@@ -104,7 +86,8 @@ export function buildInventoryProjectionRows(masterItems, deliveryPlans, inTrans
       item.partNo,
     )
 
-    for (const col of sortedWeeks) {
+    for (let idx = 0; idx < sortedWeeks.length; idx += 1) {
+      const col = sortedWeeks[idx]
       const previousStock = projected
       const inbound = inboundQtyForWeek(
         inTransitRows,
@@ -122,13 +105,28 @@ export function buildInventoryProjectionRows(masterItems, deliveryPlans, inTrans
 
       projected = previousStock + inbound - outbound
 
-      const coverageWeeks = weeklyOut > 0 ? projected / weeklyOut : null
+      const futureCols = sortedWeeks.slice(idx + 1)
+      const futureFlows = futureCols.map((fc) => ({
+        inbound: inboundQtyForWeek(
+          inTransitRows,
+          item.modelName,
+          item.partNo,
+          fc.periodStart,
+        ),
+        outbound: deliveryQtyForWeek(
+          deliveryPlans,
+          item.modelName,
+          item.partNo,
+          fc.periodStart,
+        ),
+      }))
+      const coverageWeeks = calculateFlowCoverageWeeks(projected, futureFlows)
+
       const safetyWForQty = safetyWeeks > 0 ? safetyWeeks : MIN_MANAGEMENT_WEEKS
       const safetyStockQty = weeklyOut * safetyWForQty
       const gap = projected - safetyStockQty
 
-      /** 대시보드 품번별 재고와 동일: 커버리지(주) 구간만 사용 */
-      const covForStatus = calculateDemandBasedCoverageWeeks(projected, weeklyOut)
+      const covForStatus = coverageWeeks
       const showStatusBadge =
         !!lastInboundMonday && String(col.periodStart).localeCompare(lastInboundMonday) <= 0
       const status = showStatusBadge ? getCoverageStatus(covForStatus) : null
@@ -143,6 +141,7 @@ export function buildInventoryProjectionRows(masterItems, deliveryPlans, inTrans
           inbound,
           outbound,
           projectedStock: projected,
+          coverageWeeks,
         })
       }
 
