@@ -122,8 +122,8 @@ export const L = {
     en: 'Stock ÷ Weekly Demand',
   },
   flowCoverageHeroHint: {
-    ko: '현재재고 ÷ (향후 4주 출고계획 합 ÷ 4)',
-    en: 'Stock ÷ (sum of next 4 weekly plans ÷ 4)',
+    ko: '현재재고 ÷ 마스터 주간 수요',
+    en: 'Current stock ÷ master weekly demand',
   },
   plannedDelivery: { ko: '계획 납품', en: 'Planned Delivery' },
   confirmedDelivery: { ko: '확정 납품', en: 'Confirmed Delivery' },

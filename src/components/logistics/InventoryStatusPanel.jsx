@@ -72,7 +72,11 @@ export default function InventoryStatusPanel({
                   (<BilingualLabel label={L.flowCoverageHeroHint} as="span" />)
                 </span>
               </span>
-              <strong className="inv-hero__value">{formatDecimal(headlineCoverage)}</strong>
+              <strong className="inv-hero__value">
+                {headlineCoverage != null && Number.isFinite(headlineCoverage)
+                  ? formatDecimal(headlineCoverage)
+                  : '—'}
+              </strong>
               <span className="inv-hero__unit">
                 <BilingualLabel label={L.weeks} as="span" />
               </span>
@@ -156,10 +160,23 @@ export default function InventoryStatusPanel({
                 <td className="cell--num">
                   <strong>{formatDecimal(row.coverageWeeks)}</strong>
                 </td>
-                {!compact && <td className="cell--num">{formatNumber(row.safetyStockQty)}</td>}
-                <td className={`cell--num ${row.gap < 0 ? 'text-warn' : 'cell--in'}`}>
-                  {row.gap >= 0 ? '+' : ''}
-                  {formatNumber(row.gap)}
+                {!compact && (
+                  <td className="cell--num">
+                    {row.safetyStockQty == null || !Number.isFinite(row.safetyStockQty)
+                      ? '—'
+                      : formatNumber(row.safetyStockQty)}
+                  </td>
+                )}
+                <td
+                  className={`cell--num ${
+                    row.gap != null && Number.isFinite(row.gap) && row.gap < 0
+                      ? 'text-warn'
+                      : 'cell--in'
+                  }`}
+                >
+                  {row.gap == null || !Number.isFinite(row.gap)
+                    ? '—'
+                    : `${row.gap >= 0 ? '+' : ''}${formatNumber(row.gap)}`}
                 </td>
                 <td>
                   <CoverageBadge status={row.status} />

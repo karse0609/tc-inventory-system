@@ -135,7 +135,9 @@ export function buildTodayStatus({
     thisWeekDeliveryQty,
     currentInventory: inventorySummary?.totalStock ?? 0,
     coverageWeeks:
-      inventorySummary?.portfolioCoverageWeeks ?? inventorySummary?.minCoverageWeeks ?? 0,
+      inventorySummary?.portfolioCoverageWeeks ??
+      inventorySummary?.minCoverageWeeks ??
+      null,
     totalInventoryValue: inventorySummary?.totalInventoryValue ?? 0,
     modelWeeklyDemandTotal,
     weekRange,

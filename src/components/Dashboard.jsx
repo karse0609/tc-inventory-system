@@ -6,7 +6,7 @@ import { computeWarehouseQtyAsOf, sumWarehouseStockForModelWithAsOf } from '../u
 import {
   buildInventorySummary,
   buildItemInventoryStatus,
-  computePortfolioFourWeekAverageCoverageWeeks,
+  computePortfolioWeeklyDemandCoverageWeeks,
 } from '../utils/inventoryCoverage'
 import {
   buildTodayStatus,
@@ -78,11 +78,6 @@ export default function Dashboard({
     [masterItems, selectedModelName],
   )
 
-  const itemPlansForModel = useMemo(
-    () => filterByModel(deliveryPlans, selectedModelName),
-    [deliveryPlans, selectedModelName],
-  )
-
   const itemInventoryRows = useMemo(
     () =>
       itemsForModel.map((item) => {
@@ -95,28 +90,18 @@ export default function Dashboard({
         })
         return buildItemInventoryStatus({
           item,
-          itemDeliveryPlans: itemPlansForModel,
+          itemDeliveryPlans: [],
           inTransitContainers: containersAsOf,
           asOfDate,
           warehouseStockQty,
         })
       }),
-    [
-      itemsForModel,
-      itemPlansForModel,
-      containersAsOf,
-      asOfDate,
-      deliveryPlans,
-      arrivalLedger,
-      referenceDate,
-    ],
+    [itemsForModel, containersAsOf, asOfDate, deliveryPlans, arrivalLedger, referenceDate],
   )
 
   const inventorySummary = useMemo(() => {
-    const portfolioCoverageWeeks = computePortfolioFourWeekAverageCoverageWeeks({
+    const portfolioCoverageWeeks = computePortfolioWeeklyDemandCoverageWeeks({
       masterItems: itemsForModel,
-      deliveryPlans: itemPlansForModel,
-      asOfDate,
       getWarehouseStockQty: (it) =>
         computeWarehouseQtyAsOf({
           item: it,
@@ -130,8 +115,6 @@ export default function Dashboard({
   }, [
     itemInventoryRows,
     itemsForModel,
-    itemPlansForModel,
-    asOfDate,
     deliveryPlans,
     arrivalLedger,
     referenceDate,

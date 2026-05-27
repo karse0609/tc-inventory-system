@@ -2,15 +2,10 @@ import {
   getCoverageStatus,
   MIN_MANAGEMENT_WEEKS,
 } from '../config/inventoryPolicy'
-import { addDaysIso } from './deliveryPlanHorizon'
-import { getWeekRange, isInTransitRowActive, planRowWeekStart } from './logisticsMetrics'
-import { outboundQtyForSimulation } from './deliveryPlanModel'
-
-/** 커버리지·Gap용 출고계획: 조회 주 포함 향후 이 주 수 */
-const COVERAGE_PLAN_WEEK_COUNT = 4
+import { isInTransitRowActive } from './logisticsMetrics'
 
 /**
- * 레거시: 마스터 안전재고·단순 비율용
+ * 레거시: 단순 비율 (다른 화면 호환)
  */
 export function calculateDemandBasedCoverageWeeks(currentStock, weeklyDemand) {
   const demand = Math.max(0, weeklyDemand)
@@ -18,85 +13,50 @@ export function calculateDemandBasedCoverageWeeks(currentStock, weeklyDemand) {
   return currentStock / demand
 }
 
-/** 안전재고 = 평균 주간 출고계획 × 안전재고 주수 */
-export function calculateSafetyStockFromWeeklyDemand(averageWeeklyDemand, weeks = MIN_MANAGEMENT_WEEKS) {
-  return Math.max(0, averageWeeklyDemand) * weeks
-}
-
-/** 특정 주(월요일) 출고계획 합계 */
-export function outboundPlanQtyForWeekMonday(planRows, modelName, partNo, weekMondayIso) {
-  let sum = 0
-  for (const p of planRows || []) {
-    if (p.modelName !== modelName || p.partNo !== partNo) continue
-    if (planRowWeekStart(p) !== weekMondayIso) continue
-    sum += outboundQtyForSimulation(p)
-  }
-  return sum
-}
-
-/** 조회 기준일이 속한 주(월요일)의 출고계획 합계 */
-export function outboundPlanQtyForAsOfWeek(planRows, modelName, partNo, asOfDate) {
-  const anchorMonday = getWeekRange(asOfDate).start
-  return outboundPlanQtyForWeekMonday(planRows, modelName, partNo, anchorMonday)
+/** 안전재고 = 주간 수요 × 안전재고 주수 */
+export function calculateSafetyStockFromWeeklyDemand(weeklyDemand, weeks = MIN_MANAGEMENT_WEEKS) {
+  if (weeklyDemand == null || !Number.isFinite(weeklyDemand) || weeklyDemand <= 0) return null
+  return Math.max(0, weeklyDemand) * weeks
 }
 
 /**
- * 조회 주(포함)부터 연속 N주 출고계획 합계 (비어 있으면 0)
+ * 창고재고(Master) 주간 수요: 양수만 커버리지·Gap에 사용.
+ * 0·비어 있음·NaN → null (coverage "—", gap "—", status unknown)
  */
-export function sumOutboundPlanNextWeeksFromAsOf(
-  planRows,
-  modelName,
-  partNo,
-  asOfDate,
-  weekCount = COVERAGE_PLAN_WEEK_COUNT,
-) {
-  let mon = getWeekRange(asOfDate).start
-  let total = 0
-  for (let i = 0; i < weekCount; i += 1) {
-    total += outboundPlanQtyForWeekMonday(planRows, modelName, partNo, mon)
-    mon = addDaysIso(mon, 7)
-  }
-  return total
+export function parseMasterWeeklyDemandForCoverage(item) {
+  if (!item || item.weeklyDemand == null || item.weeklyDemand === '') return null
+  const n = Number(item.weeklyDemand)
+  if (!Number.isFinite(n) || n <= 0) return null
+  return n
 }
 
 /**
- * 커버리지(주) = max(0, 현재재고 / (4주 출고계획 합 / 4))
- * 4주 합이 0이면 null (표시 "—", 상태 unknown)
+ * 커버리지(주) = max(0, 현재재고 / 주간수요)
+ * 주간수요 없음 → null
  */
-export function computeCoverageFromFourWeekPlanSum(warehouseStock, fourWeekOutboundSum) {
-  const sum4 = Math.max(0, Number(fourWeekOutboundSum) || 0)
-  if (sum4 <= 0) return null
-  const averageWeeklyDemand = sum4 / COVERAGE_PLAN_WEEK_COUNT
-  if (averageWeeklyDemand <= 0) return null
+export function computeCoverageFromMasterWeeklyDemand(warehouseStock, weeklyDemand) {
+  if (weeklyDemand == null || weeklyDemand <= 0) return null
   const stock = Math.max(0, Number(warehouseStock) || 0)
-  return Math.max(0, stock / averageWeeklyDemand)
+  return Math.max(0, stock / weeklyDemand)
 }
 
 /**
- * 모델 KPI: Σ현재재고 ÷ (모델 전체 4주 출고계획 합 / 4)
+ * 모델 KPI: 주간수요가 입력된 품목만 합산 — Σ재고 / Σ주간수요
  */
-export function computePortfolioFourWeekAverageCoverageWeeks({
-  masterItems,
-  deliveryPlans,
-  asOfDate,
-  getWarehouseStockQty,
-}) {
+export function computePortfolioWeeklyDemandCoverageWeeks({ masterItems, getWarehouseStockQty }) {
   const items = (masterItems || []).filter((m) => m.status !== 'Inactive')
   if (!items.length) return null
 
   let totalStock = 0
-  let totalFourWeekOutbound = 0
+  let totalDemand = 0
   for (const it of items) {
+    const d = parseMasterWeeklyDemandForCoverage(it)
+    if (d == null) continue
     totalStock += Math.max(0, Number(getWarehouseStockQty(it)) || 0)
-    totalFourWeekOutbound += sumOutboundPlanNextWeeksFromAsOf(
-      deliveryPlans,
-      it.modelName,
-      it.partNo,
-      asOfDate,
-      COVERAGE_PLAN_WEEK_COUNT,
-    )
+    totalDemand += d
   }
-  return computeCoverageFromFourWeekPlanSum(totalStock, totalFourWeekOutbound)
+  if (totalDemand <= 0) return null
+  return Math.max(0, totalStock / totalDemand)
 }
 
 export function sumInTransitByPart(containers, modelName, partNo) {
@@ -112,26 +72,22 @@ export function sumInTransitByPart(containers, modelName, partNo) {
 
 /**
  * Item 단위 재고 현황 (modelName + partNo)
+ * 커버리지·Gap은 Master의 Weekly Demand만 사용 (출고계획 미사용).
  */
 export function buildItemInventoryStatus({
   item,
-  itemDeliveryPlans,
+  itemDeliveryPlans: _itemDeliveryPlans,
   inTransitContainers,
-  asOfDate,
+  asOfDate: _asOfDate,
   /** 기준일 시점 창고 재고(없으면 item.currentStock) */
   warehouseStockQty,
 }) {
-  const fourWeekOutboundSum = sumOutboundPlanNextWeeksFromAsOf(
-    itemDeliveryPlans,
-    item.modelName,
-    item.partNo,
-    asOfDate,
-    COVERAGE_PLAN_WEEK_COUNT,
-  )
-  const averageWeeklyDemand = fourWeekOutboundSum / COVERAGE_PLAN_WEEK_COUNT
+  const masterWeeklyDemand = parseMasterWeeklyDemandForCoverage(item)
 
-  const weeklyDemand = averageWeeklyDemand
-  const plannedDelivery = fourWeekOutboundSum
+  /** 표시용: 주간수요 미입력·0이면 null → UI에서 "—" */
+  const weeklyDemand = masterWeeklyDemand
+  /** 대시보드 표: 출고계획 기반 아님 — 미표시 */
+  const plannedDelivery = null
   const confirmedDelivery = null
 
   const inTransitQty = sumInTransitByPart(inTransitContainers, item.modelName, item.partNo)
@@ -141,14 +97,22 @@ export function buildItemInventoryStatus({
       ? Math.max(0, Number(warehouseStockQty))
       : Number(item.currentStock) || 0
 
-  const coverageWeeks = computeCoverageFromFourWeekPlanSum(warehouseStock, fourWeekOutboundSum)
+  const coverageWeeks = computeCoverageFromMasterWeeklyDemand(warehouseStock, masterWeeklyDemand)
 
   const safetyWeeks =
     item.safetyStockWeeks != null && item.safetyStockWeeks !== ''
       ? Math.max(0, Number(item.safetyStockWeeks) || 0)
       : MIN_MANAGEMENT_WEEKS
-  const safetyStockQty = calculateSafetyStockFromWeeklyDemand(averageWeeklyDemand, safetyWeeks)
-  const gap = warehouseStock - safetyStockQty
+
+  const safetyStockQty =
+    masterWeeklyDemand != null
+      ? calculateSafetyStockFromWeeklyDemand(masterWeeklyDemand, safetyWeeks)
+      : null
+  const gap =
+    masterWeeklyDemand != null && safetyStockQty != null
+      ? warehouseStock - safetyStockQty
+      : null
+
   const status = getCoverageStatus(coverageWeeks)
 
   const warehouseValue = 0
