@@ -506,30 +506,72 @@
 
 .inv-th--in-transit {
   max-width: 4.25rem;
-  text-align: right;
 }
 
-.inv-th--in-transit__main {
-  display: block;
+.inv-th--current-stock {
+  max-width: 5.5rem;
 }
 
 .inv-td--in-transit {
   max-width: 4.25rem;
 }
 
-.inv-col-unit {
+/* 품번별 재고 표 — 운송중·현재재고: 한글 + EA 한 줄, (영문)만 둘째 줄 */
+.inv-th-unit-inline {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.06rem;
+  line-height: 1.12;
+  text-align: right;
+}
+
+.inv-th-unit-inline__row1 {
+  display: inline-flex;
+  flex-direction: row;
+  align-items: baseline;
+  justify-content: flex-end;
+  gap: 0.32rem;
+}
+
+.inv-th-unit-inline__ko {
+  font-weight: inherit;
+}
+
+.inv-th-unit-inline__suffix {
+  font-size: 10px;
+  color: #9ca3af;
+  font-weight: 400;
+  line-height: 1;
+}
+
+.inv-th-unit-inline__en {
   display: block;
   font-size: 0.65rem;
-  font-weight: 400;
   color: var(--muted);
-  margin-top: 0.08rem;
-  line-height: 1.1;
+  font-weight: 400;
+  line-height: 1.12;
+}
+
+.inv-item-table thead th {
+  padding: 0.3rem 0.45rem 0.26rem;
+  vertical-align: middle;
+  line-height: 1.12;
 }
 
 .inv-item-table th {
   white-space: normal;
-  vertical-align: bottom;
+  vertical-align: middle;
   max-width: 6.25rem;
+}
+
+.inv-status-panel--compact .inv-th-unit-inline {
+  align-items: center;
+  text-align: center;
+}
+
+.inv-status-panel--compact .inv-th-unit-inline__row1 {
+  justify-content: center;
 }
 
 .row--coverage-critical {

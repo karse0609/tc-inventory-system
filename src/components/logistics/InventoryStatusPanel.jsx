@@ -26,6 +26,24 @@ function CoverageBadge({ status }) {
   )
 }
 
+/** 한글 + 단위(EA) 한 줄, 영문 부제목만 다음 줄 — 헤더 높이 최소화 */
+function InvThWithOptionalUnit({ label, unitStr }) {
+  if (!label?.ko) return null
+  const u = String(unitStr ?? '').trim()
+  if (!u) {
+    return <BilingualLabel label={label} />
+  }
+  return (
+    <span className="inv-th-unit-inline">
+      <span className="inv-th-unit-inline__row1">
+        <span className="inv-th-unit-inline__ko">{label.ko}</span>
+        <span className="inv-th-unit-inline__suffix">{u}</span>
+      </span>
+      {label.en ? <span className="inv-th-unit-inline__en">({label.en})</span> : null}
+    </span>
+  )
+}
+
 /**
  * @param {{ variant?: 'default' | 'compact' }} props
  */
@@ -108,18 +126,15 @@ export default function InventoryStatusPanel({
                 <BilingualLabel label={L.partNo} />
               </th>
               <th className="inv-th--in-transit">
-                <span className="inv-th--in-transit__main">
-                  <BilingualLabel label={L.inventoryTableInTransit} />
-                </span>
-                {unitStr ? <span className="inv-col-unit">{unitStr}</span> : null}
+                <InvThWithOptionalUnit label={L.inventoryTableInTransit} unitStr={unitStr} />
               </th>
               {!compact && (
                 <th>
                   <BilingualLabel label={L.description} />
                 </th>
               )}
-              <th>
-                <BilingualLabel label={L.currentStock} />
+              <th className="inv-th--current-stock">
+                <InvThWithOptionalUnit label={L.currentStock} unitStr={unitStr} />
               </th>
               {!compact && (
                 <>
