@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import BilingualLabel from '../BilingualLabel'
 import { operationsMeta } from '../../data/logisticsSampleData'
 import { formatKoEn, formatKoEnInline, L } from '../../i18n/labels'
-import { saveJson, storageKeys } from '../../utils/appPersistence'
+import { saveJson, storageKeys, loadJson } from '../../utils/appPersistence'
 import { buildWeekHorizon, planWeekMonday } from '../../utils/deliveryPlanHorizon'
 import { getWeekRange } from '../../utils/logisticsMetrics'
 import useGridNativePaste from '../../hooks/useGridNativePaste'
@@ -11,6 +11,15 @@ import { downloadXlsxFromAoA, readXlsxFirstSheetMatrix } from '../../utils/excel
 import { useMobileSimpleLayout } from '../../utils/mobileLayout'
 import { newId } from '../../utils/newId'
 import { inventoryRemoteSyncEnabled } from '../../utils/inventoryRemoteSync'
+import {
+  planQty,
+  isPlanShipped,
+  computeStockDeltasBySku,
+  normalizeDeliveryPlansForPersist,
+  applyStockDeltasToMasterItems,
+  findInsufficientStockForDeltas,
+  stockRestoreDeltasFromRemovingPlans,
+} from '../../utils/deliveryPlanModel'
 import PageDataToolbar from '../grid/PageDataToolbar.jsx'
 import '../logistics/ops.css'
 import './pages.css'
@@ -62,10 +71,26 @@ function mergeCellUpdate(plans, modelName, partNo, weekStartDate, rawValue) {
     partNo,
     weekStartDate,
     qty,
+    planQty: qty,
+    shipped: idx >= 0 ? prev.shipped === true : false,
+    confirmedQty: idx >= 0 && prev.shipped === true ? Number(prev.confirmedQty) || 0 : 0,
     locked: idx >= 0 ? prev.locked === true : false,
   }
   if (idx >= 0) return plans.map((p, i) => (i === idx ? row : p))
   return [...plans, row]
+}
+
+function mergeShippedUpdate(plans, modelName, partNo, weekStartDate, shipped) {
+  const idx = plans.findIndex(
+    (p) =>
+      p.modelName === modelName &&
+      p.partNo === partNo &&
+      planWeekMonday(p) === weekStartDate,
+  )
+  if (idx < 0) return plans
+  const prev = plans[idx]
+  if (shipped && planQty(prev) <= 0) return plans
+  return plans.map((p, i) => (i === idx ? { ...p, shipped: shipped === true } : p))
 }
 
 function buildPartRows(masterItems, deliveryPlans, draftRows) {
@@ -110,42 +135,74 @@ function buildPartRows(masterItems, deliveryPlans, draftRows) {
   return rows
 }
 
-function WeekCell({ col, plan, disabled, asOfDate, onQtyChange, onFocusAnchor, rowIndex, weekIdx }) {
+function WeekCell({
+  col,
+  plan,
+  disabled,
+  asOfDate,
+  onQtyChange,
+  onShippedChange,
+  onFocusAnchor,
+  rowIndex,
+  weekIdx,
+}) {
   const mon = weekStartFromCol(col)
   const weekRange = getWeekRange(asOfDate)
   const isFutureWeek = mon > weekRange.end
   const lockedByRow = plan?.locked === true
   const lockedByPolicy = FUTURE_WEEKS_LOCKED && isFutureWeek
   const readOnly = disabled || lockedByRow || lockedByPolicy
+  const q = planQty(plan || {})
   const val = plan?.qty ?? ''
+  const shipped = isPlanShipped(plan)
+  const canShipCheck = q > 0 && !readOnly
   const ariaWeek = `${formatKoEnInline(L.deliveryPlanWeeklyQty)} · ${col.headerShort}`
 
   return (
-    <td className="dp-week-cell dp-week-col" title={`${col.week} · ${mon}`}>
-      <input
-        className="dp-input dp-input--qty"
-        type="number"
-        min={0}
-        step={1}
-        disabled={readOnly}
-        aria-label={ariaWeek}
-        value={val === '' ? '' : val}
-        data-excel-paste
-        data-dp-row={rowIndex}
-        data-dp-kind="week"
-        data-dp-week-idx={weekIdx}
-        onChange={(e) => onQtyChange(col, e.target.value)}
-        onFocus={() => onFocusAnchor?.()}
-      />
+    <td
+      className={`dp-week-cell dp-week-col${shipped ? ' dp-week-cell--shipped' : ''}`.trim()}
+      title={`${col.week} · ${mon}`}
+    >
+      <div className="dp-week-cell-inner">
+        <input
+          className="dp-input dp-input--qty"
+          type="number"
+          min={0}
+          step={1}
+          disabled={readOnly}
+          aria-label={ariaWeek}
+          value={val === '' ? '' : val}
+          data-excel-paste
+          data-dp-row={rowIndex}
+          data-dp-kind="week"
+          data-dp-week-idx={weekIdx}
+          onChange={(e) => onQtyChange(col, e.target.value)}
+          onFocus={() => onFocusAnchor?.()}
+        />
+        <label className="dp-week-ship">
+          <input
+            type="checkbox"
+            checked={shipped}
+            disabled={!canShipCheck}
+            onChange={(e) => onShippedChange(col, e.target.checked)}
+            aria-label={formatKoEnInline(L.deliveryPlanShipConfirmCheckbox)}
+          />
+          <span className="dp-week-ship-label">
+            <BilingualLabel label={L.deliveryPlanShipShort} as="span" compact />
+          </span>
+        </label>
+      </div>
     </td>
   )
 }
 
 export default function DeliveryPlanPage({
   masterItems,
+  setMasterItems,
   deliveryPlans,
   setDeliveryPlans,
   opsMeta,
+  onRequestRemoteSync,
 }) {
   const isMobile = useMobileSimpleLayout()
   const asOfDate = opsMeta?.asOfDate ?? operationsMeta.asOfDate
@@ -200,6 +257,15 @@ export default function DeliveryPlanPage({
     return () => window.removeEventListener('keydown', onKey)
   }, [deleteTarget])
 
+  const onShippedChange = useCallback(
+    (modelName, partNo) => (col, shipped) => {
+      if (!modelName || !partNo) return
+      const wk = weekStartFromCol(col)
+      setDeliveryPlans((plans) => mergeShippedUpdate(plans, modelName, partNo, wk, shipped))
+    },
+    [setDeliveryPlans],
+  )
+
   const onQtyChange = useCallback(
     (modelName, partNo) => (col, raw) => {
       if (!modelName || !partNo) return
@@ -210,11 +276,29 @@ export default function DeliveryPlanPage({
   )
 
   function handleSave() {
-    saveJson(storageKeys.plans, deliveryPlans)
+    const prevPlans = loadJson(storageKeys.plans, null) || []
+    const nextRaw = deliveryPlans
+    const deltas = computeStockDeltasBySku(prevPlans, nextRaw)
+    const bad = findInsufficientStockForDeltas(masterItems, deltas)
+    if (bad.length) {
+      const lines = bad.map((b) =>
+        `${b.modelName} / ${b.partNo} — ${formatKoEnInline({
+          ko: `재고 ${b.stock}, 부족 ${b.need}`,
+          en: `stock ${b.stock}, short by ${b.need}`,
+        })}`,
+      )
+      window.alert(`${formatKoEnInline(L.deliveryPlanInsufficientStock)}\n\n${lines.join('\n')}`)
+      return
+    }
+    const normalized = normalizeDeliveryPlansForPersist(nextRaw)
+    setMasterItems((prev) => applyStockDeltasToMasterItems(prev, deltas))
+    setDeliveryPlans(normalized)
+    saveJson(storageKeys.plans, normalized)
     setSaveHint(
       formatKoEn(inventoryRemoteSyncEnabled() ? L.savedAfterEditWithRemote : L.savedToBrowserStorage),
     )
     setTimeout(() => setSaveHint(''), 2500)
+    if (typeof onRequestRemoteSync === 'function') onRequestRemoteSync()
   }
 
   function addDraftRow() {
@@ -241,11 +325,17 @@ export default function DeliveryPlanPage({
   function confirmDeletePartPlans() {
     if (!deleteTarget) return
     const { modelName, partNo, kind, draftId } = deleteTarget
+    const removing = deliveryPlans.filter((p) => p.modelName === modelName && p.partNo === partNo)
+    const restoreDeltas = stockRestoreDeltasFromRemovingPlans(removing)
+    if (restoreDeltas.size) {
+      setMasterItems((prev) => applyStockDeltasToMasterItems(prev, restoreDeltas))
+    }
     setDeliveryPlans((plans) =>
       plans.filter((p) => !(p.modelName === modelName && p.partNo === partNo)),
     )
     if (kind === 'draft' && draftId) removeDraft(draftId)
     setDeleteTarget(null)
+    if (typeof onRequestRemoteSync === 'function') onRequestRemoteSync()
   }
 
   function cancelDeletePartPlans() {
@@ -854,6 +944,7 @@ export default function DeliveryPlanPage({
                         rowIndex={rowIndex}
                         weekIdx={weekIdx}
                         onQtyChange={onQtyChange(modelName, partNo)}
+                        onShippedChange={onShippedChange(modelName, partNo)}
                         onFocusAnchor={() => {
                           pasteAnchorRef.current = {
                             rowIndex,

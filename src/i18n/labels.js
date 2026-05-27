@@ -54,14 +54,12 @@ export const L = {
   dashboardModelAll: { ko: '전체', en: 'All' },
   dashboardWeekEtaWhCol: { ko: 'ETA 창고', en: 'ETA W/H' },
   dashboardWeekEtaDesc: {
-    ko:
-      '기준일 기준: ETA Port가 기준일 이전인 미입고(지연)와, 기준일 다음~7일 이내 도착 예정인 행만 표시합니다. Port ETA가 없으면 제외됩니다.',
-    en:
-      'As-of: overdue (Port ETA on/before as-of, not received) plus Port ETA within the next 7 days. Rows without Port ETA are omitted.',
+    ko: 'Port ETA가 조회 기준일 이전 또는 당일이고, 아직 입고 처리되지 않은 운송중 재고만 표시합니다.',
+    en: 'Shows only in-transit rows where Port ETA is on or before the query date and not yet received.',
   },
   dashboardWeekEtaEmpty: {
-    ko: '조건에 해당하는 도착 예정 컨테이너가 없습니다.',
-    en: 'No containers match the arrival window.',
+    ko: '조건에 해당하는 운송중 재고가 없습니다.',
+    en: 'No in-transit rows match this view.',
   },
   asOfDate: { ko: '기준일', en: 'As-of Date' },
   opsQueryDateKst: {
@@ -188,15 +186,15 @@ export const L = {
   },
   deliveryPlanPageDesc: {
     ko:
-      '기준일 기준 주차(열) × 품목(행) 그리드에 주차별 출고(납품) 수량을 입력합니다. 데이터는 브라우저에 저장되며, 재고 예측은 여기서 입력한 주간 출고와 운송중 입고·창고 재고를 함께 반영합니다.',
+      '기준일 기준 주차(열) × 품목(행)에 주차별 출고(납품) 수량을 입력합니다. 주차별「확정」에 체크 후 저장하면 해당 수량이 창고 재고에서 차감되며, 재저장 시에는 이전 확정분과의 차이만 반영됩니다(체크 해제 시 복원). 데이터는 브라우저에 저장되며 재고 예측·역산은 확정 반영분을 이중 차감하지 않도록 계산합니다.',
     en:
-      'Grid: parts × calendar weeks from as-of date. Weekly outbound qty per cell; stored in the browser. Inventory Projection combines this with warehouse stock and timed in-transit arrivals.',
+      'Grid: parts × weeks from as-of date. Enter weekly outbound qty; check Confirm for a week and Save to deduct that qty from warehouse stock. Re-save applies only the delta vs the last saved confirmation; clearing the check restores stock. Plans persist in the browser. Projection and as-of math treat confirmed qty as already reflected in warehouse so it is not subtracted twice.',
   },
   deliveryPlanPageDescRemote: {
     ko:
-      '기준일 기준 주차(열) × 품목(행) 그리드에 주차별 출고(납품) 수량을 입력합니다. 서버 동기화가 켜져 있으면 변경분이 공유 스냅샷에 반영되고 재고 예측·대시보드가 같은 데이터를 사용합니다.',
+      '기준일 기준 주차(열) × 품목(행)에 주차별 출고(납품) 수량을 입력합니다. 주차별「확정」체크 후 저장 시 창고 재고에 반영되며(차이만 재반영), 서버 동기화가 켜져 있으면 공유 스냅샷에도 반영됩니다.',
     en:
-      'Grid: parts × calendar weeks from as-of date. With server sync on, edits merge into the shared snapshot so Inventory Projection and the dashboard use the same dataset.',
+      'Grid: parts × weeks. Confirm per week and Save to update warehouse stock (delta-based). With server sync on, edits merge into the shared snapshot.',
   },
   previousWeeksShown: { ko: '이전 주(표시)', en: 'Past weeks (shown)' },
   futureWeeksShown: { ko: '이후 주(표시)', en: 'Future weeks (shown)' },
@@ -216,6 +214,15 @@ export const L = {
   columnsCount: { ko: '열', en: 'Columns' },
   viewOffsetWeeks: { ko: '뷰 오프셋', en: 'View offset' },
   deliveryPlanWeeklyQty: { ko: '주간 수량', en: 'Weekly qty' },
+  deliveryPlanShipShort: { ko: '확정', en: 'Ship' },
+  deliveryPlanShipConfirmCheckbox: {
+    ko: '이 주차 출고 확정(저장 시 창고 재고 반영)',
+    en: 'Confirm outbound for this week (warehouse applies on Save)',
+  },
+  deliveryPlanInsufficientStock: {
+    ko: '창고 재고가 부족하여 저장할 수 없습니다.',
+    en: 'Insufficient warehouse stock to save.',
+  },
   deletePartPlansConfirm: {
     ko: '해당 품번의 주차별 납품계획이 모두 삭제됩니다. 계속 진행하시겠습니까?',
     en: 'All weekly delivery plan data for this part will be deleted. Do you want to continue?',

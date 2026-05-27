@@ -2,7 +2,6 @@
 
 import { ALL_MODELS_VALUE } from '../config/products'
 import { isTransitRowReceived } from './inTransitStatus'
-import { addCalendarDaysIso } from './timeZones'
 import { formatWeekHeaderShort, isoWeekLabelFromMonday } from './weekIsoLabels'
 
 /** 납품 행의 주 시작일(월요일 YYYY-MM-DD) */
@@ -109,6 +108,14 @@ export function buildTodayStatus({
 
   const thisWeekEtaRows = getDashboardEtaPortWindowRows(inTransitContainers, asOfDate)
   const thisWeekEtaQty = thisWeekEtaRows.reduce((sum, row) => sum + (Number(row.qty) || 0), 0)
+  const thisWeekEtaContainerCount = (() => {
+    const s = new Set()
+    for (const row of thisWeekEtaRows) {
+      const cn = String(row?.containerNo ?? '').trim()
+      if (cn) s.add(cn)
+    }
+    return s.size
+  })()
 
   const thisWeekDeliveryQty = getThisWeekAggregatedDeliveryQty(
     itemDeliveryPlans,
@@ -124,6 +131,7 @@ export function buildTodayStatus({
     inTransitQty,
     thisWeekEtaCount: thisWeekEtaRows.length,
     thisWeekEtaQty,
+    thisWeekEtaContainerCount,
     thisWeekDeliveryQty,
     currentInventory: inventorySummary?.totalStock ?? 0,
     coverageWeeks: inventorySummary?.minCoverageWeeks ?? 0,
@@ -134,10 +142,7 @@ export function buildTodayStatus({
 }
 
 export function getThisWeekEtaRows(containers, asOfDate) {
-  return containers
-    .filter(isInTransitRowActive)
-    .filter((row) => isThisWeekInboundEta(row, asOfDate))
-    .sort((a, b) => rowInboundEtaDate(a).localeCompare(rowInboundEtaDate(b)))
+  return getDashboardEtaPortWindowRows(containers, asOfDate)
 }
 
 /** ETA Port만 사용 (YYYY-MM-DD) */
@@ -147,20 +152,17 @@ export function etaPortDateOnly(row) {
 }
 
 /**
- * 대시보드「도착 예정」: ETA Port가 기준일 이전(미입고 지연)이거나,
- * 기준일 초과~기준일+7일 이내인 미입고 행만.
+ * 대시보드「이번주 도착 예정」·KPI「이번주 ETA 수량」:
+ * Port ETA(YYYY-MM-DD)가 있고, 조회 기준일 이전·당일이며, 아직 입고 완료되지 않은 운송중 행만.
  */
 export function getDashboardEtaPortWindowRows(containers, asOfDate) {
   if (!asOfDate || !/^\d{4}-\d{2}-\d{2}$/.test(String(asOfDate))) return []
-  const limit = addCalendarDaysIso(asOfDate, 7)
-  if (!limit) return []
-  return containers
+  return (containers || [])
     .filter(isInTransitRowActive)
     .filter((row) => {
       const etaP = etaPortDateOnly(row)
       if (!etaP) return false
-      if (etaP <= asOfDate) return true
-      return etaP <= limit
+      return etaP <= asOfDate
     })
     .sort((a, b) => etaPortDateOnly(a).localeCompare(etaPortDateOnly(b)))
 }

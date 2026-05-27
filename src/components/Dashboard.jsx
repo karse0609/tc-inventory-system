@@ -284,6 +284,7 @@ export default function Dashboard({
         inTransitQty={inTransitTotals.qty}
         inTransitValue={inTransitTotals.value}
         thisWeekEtaQty={todayMetrics.thisWeekEtaQty}
+        thisWeekEtaContainerCount={todayMetrics.thisWeekEtaContainerCount}
         coverageWeeks={inventorySummary.minCoverageWeeks}
         unit={opsMeta.unit}
       />

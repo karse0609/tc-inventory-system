@@ -3,10 +3,11 @@ import {
   MIN_MANAGEMENT_WEEKS,
 } from '../config/inventoryPolicy'
 import { getFutureDeliveryPlans, isInTransitRowActive } from './logisticsMetrics'
+import { outboundQtyForSimulation, planQty } from './deliveryPlanModel'
 
 export function getWeeklyDemandSeries(itemDeliveryPlans, asOfDate) {
   const future = getFutureDeliveryPlans(itemDeliveryPlans, asOfDate)
-  return future.map((row) => Number(row.qty ?? row.plannedQty) || 0)
+  return future.map((row) => outboundQtyForSimulation(row))
 }
 
 export function sumInTransitByPart(containers, modelName, partNo) {
@@ -63,7 +64,7 @@ export function buildItemInventoryStatus({
       : (getWeeklyDemandSeries(partPlans, asOfDate)[0] ?? 0)
 
   const firstWeek = getFirstFutureWeekPlan(partPlans, asOfDate)
-  const plannedDelivery = Number(firstWeek?.qty ?? firstWeek?.plannedQty) || 0
+  const plannedDelivery = planQty(firstWeek || {})
   const confirmedDelivery = null
 
   const inTransitQty = sumInTransitByPart(

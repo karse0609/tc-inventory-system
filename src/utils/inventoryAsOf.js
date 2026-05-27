@@ -1,5 +1,6 @@
 import { filterByModel, planRowWeekStart } from './logisticsMetrics'
 import { skuCostKey } from './unitCostKrw'
+import { outboundQtyForSimulation } from './deliveryPlanModel'
 
 /**
  * @typedef {{
@@ -22,7 +23,7 @@ export function sumOutboundThroughDate(plans, modelName, partNo, throughInclusiv
     if (row.modelName !== modelName || row.partNo !== partNo) continue
     const w = planRowWeekStart(row)
     if (!w || w > throughInclusive) continue
-    sum += Number(row.qty ?? row.plannedQty) || 0
+    sum += outboundQtyForSimulation(row)
   }
   return sum
 }

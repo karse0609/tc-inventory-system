@@ -33,6 +33,7 @@ export default function DashboardCoreKpis({
   inTransitQty,
   inTransitValue,
   thisWeekEtaQty,
+  thisWeekEtaContainerCount,
   coverageWeeks,
   unit,
 }) {
@@ -58,7 +59,9 @@ export default function DashboardCoreKpis({
     },
     {
       label: L.dashboardThisWeekEtaQty,
+      kind: 'portEtaDue',
       value: formatNumber(thisWeekEtaQty),
+      value2: formatNumber(thisWeekEtaContainerCount ?? 0),
       meta: unit,
     },
     {
@@ -79,8 +82,19 @@ export default function DashboardCoreKpis({
           <span className="dash-kpi__label">
             <BilingualLabel label={card.label} as="span" />
           </span>
-          <strong className="dash-kpi__value">{card.value}</strong>
-          {card.meta != null && card.meta !== '' ? (
+          {card.kind === 'portEtaDue' ? (
+            <strong className="dash-kpi__value dash-kpi__value--eta-dual">
+              <span className="dash-kpi__eta-line">
+                {card.value} <span className="dash-kpi__eta-unit">{unit}</span>
+              </span>
+              <span className="dash-kpi__eta-line dash-kpi__eta-line--cntr">
+                {card.value2} <span className="dash-kpi__eta-unit">CNTR</span>
+              </span>
+            </strong>
+          ) : (
+            <strong className="dash-kpi__value">{card.value}</strong>
+          )}
+          {card.meta != null && card.meta !== '' && card.kind !== 'portEtaDue' ? (
             <span className="dash-kpi__meta">{card.meta}</span>
           ) : null}
         </article>

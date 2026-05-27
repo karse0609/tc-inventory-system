@@ -824,9 +824,11 @@ function App() {
       {view === 'delivery' && (
         <DeliveryPlanPage
           masterItems={masterItems}
+          setMasterItems={setMasterItems}
           deliveryPlans={deliveryPlans}
           setDeliveryPlans={setDeliveryPlans}
           opsMeta={opsMeta}
+          onRequestRemoteSync={scheduleRemoteSyncAfterMutation}
         />
       )}
       {view === 'transit' && (

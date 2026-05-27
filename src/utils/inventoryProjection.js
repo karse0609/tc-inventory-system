@@ -1,6 +1,7 @@
 import { getCoverageStatus, MIN_MANAGEMENT_WEEKS } from '../config/inventoryPolicy'
 import { calculateDemandBasedCoverageWeeks } from './inventoryCoverage'
 import { addDaysIso, planWeekMonday } from './deliveryPlanHorizon'
+import { outboundQtyForSimulation } from './deliveryPlanModel'
 import { getWeekRange, isDateInRange, isInTransitRowActive } from './logisticsMetrics'
 
 const PROJECTION_DEBUG =
@@ -17,7 +18,7 @@ function deliveryQtyForWeek(planRows, modelName, partNo, mondayIso) {
   for (const p of planRows) {
     if (p.modelName !== modelName || p.partNo !== partNo) continue
     if (planWeekMonday(p) !== mondayIso) continue
-    sum += Number(p.qty ?? p.plannedQty) || 0
+    sum += outboundQtyForSimulation(p)
   }
   return sum
 }
