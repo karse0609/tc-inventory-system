@@ -1,5 +1,4 @@
 import { getCoverageStatus, MIN_MANAGEMENT_WEEKS } from '../config/inventoryPolicy'
-import { calculateFlowCoverageWeeks } from './inventoryCoverage'
 import { planWeekMonday } from './deliveryPlanHorizon'
 import { outboundQtyForSimulation } from './deliveryPlanModel'
 import {
@@ -105,31 +104,17 @@ export function buildInventoryProjectionRows(masterItems, deliveryPlans, inTrans
 
       projected = previousStock + inbound - outbound
 
-      const futureCols = sortedWeeks.slice(idx + 1)
-      const futureFlows = futureCols.map((fc) => ({
-        inbound: inboundQtyForWeek(
-          inTransitRows,
-          item.modelName,
-          item.partNo,
-          fc.periodStart,
-        ),
-        outbound: deliveryQtyForWeek(
-          deliveryPlans,
-          item.modelName,
-          item.partNo,
-          fc.periodStart,
-        ),
-      }))
-      const coverageWeeks = calculateFlowCoverageWeeks(projected, futureFlows)
+      const coverageWeeks =
+        outbound > 0 ? Math.max(0, projected) / outbound : null
 
       const safetyWForQty = safetyWeeks > 0 ? safetyWeeks : MIN_MANAGEMENT_WEEKS
       const safetyStockQty = weeklyOut * safetyWForQty
       const gap = projected - safetyStockQty
 
-      const covForStatus = coverageWeeks
+      const covForStatus = coverageWeeks != null ? getCoverageStatus(coverageWeeks) : null
       const showStatusBadge =
         !!lastInboundMonday && String(col.periodStart).localeCompare(lastInboundMonday) <= 0
-      const status = showStatusBadge ? getCoverageStatus(covForStatus) : null
+      const status = showStatusBadge && covForStatus != null ? covForStatus : null
 
       if (PROJECTION_DEBUG) {
         console.log('[tc-inv projection] cell', {

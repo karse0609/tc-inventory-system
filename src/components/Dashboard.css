@@ -992,6 +992,10 @@ tbody tr:hover {
   background: rgba(59, 130, 246, 0.04);
 }
 
+.inv-status-panel--compact .row--coverage-unknown {
+  background: rgba(148, 163, 184, 0.06);
+}
+
 @media (max-width: 960px) {
   .dashboard__kpis {
     grid-template-columns: repeat(2, 1fr);

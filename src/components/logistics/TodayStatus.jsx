@@ -69,7 +69,7 @@ export default function TodayStatus({ metrics, unit, currency = 'USD' }) {
       meta: (
         <span className="today-status__meta-inline">
           <BilingualLabel label={L.weeks} as="span" /> ·{' '}
-          <BilingualLabel label={L.coverageNextArrivalMeta} as="span" />
+          <BilingualLabel label={L.flowCoverageHeroHint} as="span" />
         </span>
       ),
       covTone: covStatus,

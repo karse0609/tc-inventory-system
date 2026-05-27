@@ -373,6 +373,11 @@
   background: rgba(120, 53, 15, 0.06);
 }
 
+.inv-hero--unknown {
+  border-color: rgba(100, 116, 139, 0.35);
+  background: rgba(148, 163, 184, 0.08);
+}
+
 .inv-hero__main {
   flex: 1;
   min-width: 160px;
@@ -447,6 +452,11 @@
   color: #78350f;
 }
 
+.coverage-badge--unknown {
+  background: rgba(148, 163, 184, 0.22);
+  color: #64748b;
+}
+
 .inv-value-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -516,6 +526,10 @@
   background: rgba(120, 53, 15, 0.055);
 }
 
+.row--coverage-unknown {
+  background: rgba(148, 163, 184, 0.06);
+}
+
 .today-status__card--critical {
   border-color: rgba(220, 38, 38, 0.5);
   background: rgba(220, 38, 38, 0.08);
@@ -534,6 +548,11 @@
 .today-status__card--overstock {
   border-color: rgba(120, 53, 15, 0.45);
   background: rgba(120, 53, 15, 0.08);
+}
+
+.today-status__card--unknown {
+  border-color: rgba(100, 116, 139, 0.4);
+  background: rgba(148, 163, 184, 0.1);
 }
 
 .empty-block {

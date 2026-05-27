@@ -550,7 +550,7 @@ export default function MasterDataPage({
                       }
                     />
                   </td>
-                  <td className="cell--num cell--muted" title={formatKoEn(L.demandBasedCoverage)}>
+                  <td className="cell--num cell--muted" title={formatKoEn(L.flowCoverageHeroHint)}>
                     {formatCoverageWeeks(cov)}
                   </td>
                   <td>

@@ -17,11 +17,12 @@ export const COVERAGE_THRESHOLDS = {
 }
 
 /**
- * @returns {'critical' | 'warning' | 'stable' | 'overstock'}
+ * @returns {'critical' | 'warning' | 'stable' | 'overstock' | 'unknown'}
  */
 export function getCoverageStatus(coverageWeeks) {
+  if (coverageWeeks == null) return 'unknown'
   if (coverageWeeks === Infinity) return 'overstock'
-  if (!Number.isFinite(coverageWeeks)) return 'stable'
+  if (!Number.isFinite(coverageWeeks)) return 'unknown'
   if (coverageWeeks < COVERAGE_THRESHOLDS.criticalMax) return 'critical'
   if (coverageWeeks < COVERAGE_THRESHOLDS.warningMax) return 'warning'
   if (coverageWeeks < COVERAGE_THRESHOLDS.stableMax) return 'stable'
@@ -34,6 +35,7 @@ export function getCoverageStatusLabel(status) {
     warning: { ko: '주의', en: 'Warning' },
     stable: { ko: '안정', en: 'Stable' },
     overstock: { ko: '과잉', en: 'Overstock' },
+    unknown: { ko: '판단불가', en: 'N/A' },
   }
   return labels[status] ?? { ko: status, en: status }
 }
