@@ -76,6 +76,14 @@ function lc(s) {
   return String(s ?? '').toLowerCase()
 }
 
+/** ETA W/H·이력: 가능하면 항상 YYYY-MM-DD로 표시 */
+function formatEtaWhDisplay(raw) {
+  const s = String(raw ?? '').trim()
+  if (!s) return ''
+  const iso = parseDateForInput(s)
+  return iso || s
+}
+
 /** 배송지(Location) 구분용 — 운영 화면용 차분한 텍스트 톤 클래스 */
 function deliveryLocationToneClass(raw) {
   const s = String(raw ?? '').trim()
@@ -787,7 +795,7 @@ export default function InTransitPage({
               <col className="transit-page__col--date" />
               <col className="transit-page__col--date" />
               <col className="transit-page__col--date" />
-              <col className="transit-page__col--date" />
+              <col className="transit-page__col--date-eta-wh" />
               <col className="transit-page__col--delivery" />
               <col className="transit-page__col--arrived" />
               <col className="transit-page__col--remark" />
@@ -919,11 +927,12 @@ export default function InTransitPage({
                   </td>
                   <td>
                     <input
-                      className="cell-input cell-input--date"
+                      className="cell-input cell-input--date cell-input--date-eta-wh"
                       data-excel-paste
                       data-excel-row={rowIdx}
                       data-excel-col={7}
                       type="date"
+                      lang="en-CA"
                       value={row.etaWh || ''}
                       onChange={(e) => updateRow(row.id, { etaWh: e.target.value })}
                     />
@@ -994,7 +1003,7 @@ export default function InTransitPage({
               <col className="transit-page__col--date" />
               <col className="transit-page__col--date" />
               <col className="transit-page__col--date" />
-              <col className="transit-page__col--date" />
+              <col className="transit-page__col--date-eta-wh" />
               <col className="transit-page__col--delivery" />
               <col className="transit-page__col--arrived" />
               <col className="transit-page__col--date" />
@@ -1072,7 +1081,7 @@ export default function InTransitPage({
                     <td className="transit-page__cell-readonly">{row.etdTcTech ?? ''}</td>
                     <td className="transit-page__cell-readonly">{row.etdPort ?? ''}</td>
                     <td className="transit-page__cell-readonly">{row.etaPort ?? ''}</td>
-                    <td className="transit-page__cell-readonly">{row.etaWh ?? ''}</td>
+                    <td className="transit-page__cell-readonly">{formatEtaWhDisplay(row.etaWh)}</td>
                     <td
                       className={`transit-page__cell-readonly ${deliveryLocationToneClass(
                         row.deliveryLocation,
@@ -1165,7 +1174,7 @@ export default function InTransitPage({
                       <dt>
                         <BilingualLabel label={L.etaWh} as="span" />
                       </dt>
-                      <dd>{row.etaWh || '—'}</dd>
+                      <dd>{formatEtaWhDisplay(row.etaWh) || '—'}</dd>
                     </div>
                     <div>
                       <dt>

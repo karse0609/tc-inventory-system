@@ -169,6 +169,11 @@
   padding: 0.04rem 0.12rem;
 }
 
+/* ETA W/H: 열 폭에 맞춰 잘림 방지 (스타일은 다른 date 열과 동일) */
+.transit-page__table .cell-input--date.cell-input--date-eta-wh {
+  max-width: none;
+}
+
 /* native date: 컬럼 폭에 맞춤 */
 .transit-page__table input[type='date'].cell-input--date {
   min-width: 0;
@@ -229,7 +234,12 @@
 }
 
 .transit-page__col--date {
-  width: 6.75%;
+  width: 6.65%;
+}
+
+/* ETA W/H — YYYY-MM-DD 가독성(달력 UI 유지), 다른 날짜 열보다 약간 넓게 */
+.transit-page__col--date-eta-wh {
+  width: 8.05%;
 }
 
 .transit-page__col--delivery {
@@ -237,7 +247,7 @@
 }
 
 .transit-page__col--remark {
-  width: 14%;
+  width: 13%;
 }
 
 .transit-page__col--tctech {
