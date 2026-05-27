@@ -1,7 +1,7 @@
 /**
  * 한국어(English) 병기 라벨
  * @param {{ label: { ko: string, en: string }, as?: keyof JSX.IntrinsicElements, className?: string, enClassName?: string, compact?: boolean }} props
- * @param compact true이면 공백 없이 `한글(English)` 형식 (메뉴·버튼 등)
+ * @param compact true: 한 줄 `한글(English)` / false(기본): 한글 위 + 작은 `(English)` 아래
  */
 export default function BilingualLabel({
   label,
@@ -21,15 +21,14 @@ export default function BilingualLabel({
     )
   }
 
-  return (
-    <Tag className={className}>
-      {label.ko}
-      {label.en ? (
-        <>
-          {' '}
-          <span className={enClassName}>({label.en})</span>
-        </>
-      ) : null}
-    </Tag>
-  )
+  if (label.en) {
+    return (
+      <Tag className={`bilingual bilingual--stacked ${className}`.trim()}>
+        <span className="bilingual__ko-line">{label.ko}</span>
+        <span className={`bilingual__en-line ${enClassName}`.trim()}>({label.en})</span>
+      </Tag>
+    )
+  }
+
+  return <Tag className={className}>{label.ko}</Tag>
 }

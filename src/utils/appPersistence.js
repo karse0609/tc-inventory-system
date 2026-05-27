@@ -10,6 +10,8 @@ const KEYS = {
   unitCostsKrw: 'tc-inv-unit-cost-krw-by-sku',
   /** 운송중 입고 확정 이력(기준일 역산용) */
   arrivalLedger: 'tc-inv-arrival-ledger',
+  /** 입고 취소 감사 로그(대시보드·추적 연동용) */
+  receiptCancelLedger: 'tc-inv-receipt-cancel-ledger',
 }
 
 export function loadJson(key, fallback = null) {

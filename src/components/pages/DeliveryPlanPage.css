@@ -25,6 +25,11 @@
   margin-bottom: 0.4rem;
 }
 
+.delivery-plan-page__toolbar--inline {
+  margin: 0;
+  gap: 0.35rem 0.55rem;
+}
+
 .delivery-plan-page__nav {
   display: inline-flex;
   flex-wrap: wrap;
@@ -282,4 +287,42 @@
 
 .dp-btn-delete-confirm:hover {
   filter: brightness(1.05);
+}
+
+@media (max-width: 700px) {
+  .delivery-plan-page {
+    padding: 0.38rem 0.45rem 0.9rem;
+    max-width: 100%;
+  }
+
+  .delivery-plan-page .page__header {
+    margin-bottom: 0.4rem;
+  }
+
+  .delivery-plan-page .page__header h1 {
+    font-size: 0.98rem;
+    line-height: 1.18;
+  }
+
+  .delivery-plan-page .page__desc,
+  .delivery-plan-page .page__desc--secondary {
+    font-size: 0.68rem;
+    line-height: 1.24;
+    max-height: 2.7em;
+    overflow: hidden;
+  }
+
+  .delivery-plan-page .page__desc--secondary {
+    font-size: 0.64rem;
+    max-height: 2.6em;
+  }
+
+  .delivery-plan-page__toolbar {
+    gap: 0.32rem 0.45rem;
+    margin-bottom: 0.32rem;
+  }
+
+  .dp-table-wrap {
+    border-radius: 4px;
+  }
 }

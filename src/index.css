@@ -10,7 +10,8 @@
   --success: #16a34a;
   --warning: #d97706;
   --danger: #dc2626;
-  --sans: 'Segoe UI', system-ui, sans-serif;
+  --sans: 'Inter', 'Pretendard Variable', Pretendard, -apple-system, BlinkMacSystemFont, system-ui, 'Segoe UI',
+    sans-serif;
   --mono: ui-monospace, Consolas, monospace;
 
   font-family: var(--sans);
@@ -42,15 +43,22 @@
   box-sizing: border-box;
 }
 
+html {
+  overflow-x: hidden;
+}
+
 body {
   margin: 0;
+  overflow-x: hidden;
+  max-width: 100vw;
 }
 
 #root {
   width: 100%;
-  max-width: none;
+  max-width: 100vw;
   margin: 0;
   text-align: left;
   border: none;
   min-height: 100svh;
+  overflow-x: hidden;
 }

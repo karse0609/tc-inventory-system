@@ -1,6 +1,7 @@
 /** 물류 운영 KPI · 주차/지연 판단 */
 
 import { ALL_MODELS_VALUE } from '../config/products'
+import { isTransitRowReceived } from './inTransitStatus'
 import { addCalendarDaysIso } from './timeZones'
 import { formatWeekHeaderShort, isoWeekLabelFromMonday } from './weekIsoLabels'
 
@@ -62,8 +63,8 @@ export function isThisWeekInboundEta(row, asOfDate) {
 /** 운송중 집계·표시에 포함할 행 (입고 완료·레거시 종료 상태 제외) */
 export function isInTransitRowActive(row) {
   if (!row) return false
+  if (isTransitRowReceived(row)) return false
   if (row.arrived) return false
-  if (['Delivered', 'Arrived'].includes(row.status)) return false
   return true
 }
 

@@ -1,4 +1,6 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
+import BilingualLabel from '../BilingualLabel'
+import PageDataToolbar from '../grid/PageDataToolbar.jsx'
 import {
   VIEW_IDS,
   VIEW_MENU_LABELS,
@@ -6,6 +8,9 @@ import {
 } from '../../utils/permissions'
 import { hashPassword } from '../../utils/auth'
 import { newId } from '../../utils/newId'
+import { downloadXlsxFromAoA } from '../../utils/excelFile'
+import { useMobileSimpleLayout } from '../../utils/mobileLayout'
+import { L, formatKoEn, formatKoEnInline } from '../../i18n/labels'
 import '../logistics/ops.css'
 import './pages.css'
 
@@ -15,9 +20,28 @@ function countActiveAdmins(users) {
   return users.filter((u) => u.role === 'Admin' && u.active !== false).length
 }
 
+function lc(s) {
+  return String(s ?? '').toLowerCase()
+}
+
 export default function UserManagementPage({ users, setUsers, currentUserId }) {
+  const isMobile = useMobileSimpleLayout()
   const [message, setMessage] = useState('')
   const [error, setError] = useState('')
+  const [searchText, setSearchText] = useState('')
+  const [appliedSearch, setAppliedSearch] = useState('')
+  const [excelMsg, setExcelMsg] = useState('')
+
+  const displayedUsers = useMemo(() => {
+    const q = appliedSearch.trim().toLowerCase()
+    if (!q) return users
+    return users.filter(
+      (u) =>
+        lc(u.userId).includes(q) ||
+        lc(u.name).includes(q) ||
+        lc(u.role).includes(q),
+    )
+  }, [users, appliedSearch])
 
   function flash(msg) {
     setMessage(msg)
@@ -122,11 +146,27 @@ export default function UserManagementPage({ users, setUsers, currentUserId }) {
     flash('User saved.')
   }
 
+  function handleDownloadUsers() {
+    setExcelMsg('')
+    const header = ['User ID', 'Name', 'Role', 'Active']
+    const body = displayedUsers.map((u) => [
+      u.userId ?? '',
+      u.name ?? '',
+      u.role ?? '',
+      u.active !== false ? 'TRUE' : 'FALSE',
+    ])
+    downloadXlsxFromAoA('UserManagement', 'Users', [header, ...body])
+    setExcelMsg(formatKoEn(L.excelExportDone))
+    setTimeout(() => setExcelMsg(''), 2500)
+  }
+
   return (
     <section className="card page__section user-mgmt">
-      <h2>User Management</h2>
+      <h2>
+        <BilingualLabel label={L.userManagementTitle} as="span" />
+      </h2>
       <p className="page__hint">
-        Admin만 접근 가능합니다. 비밀번호는 SHA-256으로 저장됩니다(로컬 전용).
+        <BilingualLabel label={L.userManagementHint} as="span" />
       </p>
       {message && (
         <p className="page__notice" role="status">
@@ -139,27 +179,85 @@ export default function UserManagementPage({ users, setUsers, currentUserId }) {
         </p>
       )}
 
-      <div className="page__actions" style={{ marginBottom: '0.75rem' }}>
-        <button type="button" className="btn btn--ghost" onClick={handleAdd}>
-          Add user
-        </button>
-      </div>
+      <PageDataToolbar
+        hideUpload
+        hideSave
+        hideDownload={isMobile}
+        onDownload={handleDownloadUsers}
+        downloadDisabled={displayedUsers.length === 0}
+        message={excelMsg}
+        extra={
+          <button type="button" className="btn btn--ghost btn--toolbar" onClick={handleAdd}>
+            <BilingualLabel label={L.userManagementAdd} as="span" />
+          </button>
+        }
+        searchSlot={
+          <form
+            className="page-search-strip"
+            onSubmit={(e) => {
+              e.preventDefault()
+              setAppliedSearch(searchText.trim().toLowerCase())
+            }}
+          >
+            <div className="page-search-strip__fields">
+              <label className="page-search-strip__field">
+                <span className="page-search-strip__label">
+                  <BilingualLabel label={L.pageSearchUser} as="span" />
+                </span>
+                <input
+                  className="cell-input"
+                  value={searchText}
+                  onChange={(e) => setSearchText(e.target.value)}
+                  aria-label={formatKoEnInline(L.pageSearchUser)}
+                />
+              </label>
+            </div>
+            <div className="page-search-strip__actions">
+              <button type="submit" className="btn btn--primary btn--toolbar">
+                <BilingualLabel label={L.pageSearchButton} as="span" />
+              </button>
+              <button
+                type="button"
+                className="btn btn--ghost btn--toolbar"
+                onClick={() => {
+                  setSearchText('')
+                  setAppliedSearch('')
+                }}
+              >
+                <BilingualLabel label={L.pageSearchReset} as="span" />
+              </button>
+            </div>
+          </form>
+        }
+      />
 
       <div className="table-wrap page__table">
         <table className="ops-table user-mgmt__table">
           <thead>
             <tr>
-              <th>User ID</th>
-              <th>Password</th>
-              <th>Name</th>
-              <th>Role</th>
-              <th>Active</th>
-              <th>Menus</th>
+              <th>
+                <BilingualLabel label={L.userIdCol} as="span" />
+              </th>
+              <th>
+                <BilingualLabel label={L.passwordCol} as="span" />
+              </th>
+              <th>
+                <BilingualLabel label={L.nameCol} as="span" />
+              </th>
+              <th>
+                <BilingualLabel label={L.roleCol} as="span" />
+              </th>
+              <th>
+                <BilingualLabel label={L.activeCol} as="span" />
+              </th>
+              <th>
+                <BilingualLabel label={L.menusCol} as="span" />
+              </th>
               <th />
             </tr>
           </thead>
           <tbody>
-            {users.map((row) => (
+            {displayedUsers.map((row) => (
               <tr key={row.id}>
                 <td>
                   <input
@@ -215,7 +313,9 @@ export default function UserManagementPage({ users, setUsers, currentUserId }) {
                           disabled={row.role === 'Admin'}
                           onChange={() => toggleMenu(row.id, mid)}
                         />
-                        <span>{VIEW_MENU_LABELS[mid]}</span>
+                        <span>
+                          <BilingualLabel label={VIEW_MENU_LABELS[mid]} as="span" />
+                        </span>
                       </label>
                     ))}
                   </div>
@@ -224,17 +324,17 @@ export default function UserManagementPage({ users, setUsers, currentUserId }) {
                   <div className="user-mgmt__row-actions">
                     <button
                       type="button"
-                      className="btn btn--primary btn--sm"
+                      className="btn btn--primary btn--toolbar"
                       onClick={() => handleSaveRow(row)}
                     >
-                      Save
+                      <BilingualLabel label={L.save} as="span" />
                     </button>
                     <button
                       type="button"
-                      className="btn btn--ghost btn--sm"
+                      className="btn btn--ghost btn--toolbar"
                       onClick={() => handleDelete(row.id)}
                     >
-                      Delete
+                      <BilingualLabel label={L.transitRowDelete} as="span" />
                     </button>
                   </div>
                 </td>

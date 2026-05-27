@@ -1,20 +1,17 @@
 import { useCallback, useMemo, useRef, useState } from 'react'
+import useGridNativePaste from '../../hooks/useGridNativePaste'
 import { getEnabledProducts } from '../../config/products'
 import { MIN_MANAGEMENT_WEEKS } from '../../config/inventoryPolicy'
 import { operationsMeta } from '../../data/logisticsSampleData'
-import { L, formatKoEn } from '../../i18n/labels'
+import { L, formatKoEn, formatKoEnInline } from '../../i18n/labels'
 import { saveJson, storageKeys } from '../../utils/appPersistence'
 import { buildItemInventoryStatus } from '../../utils/inventoryCoverage'
-import {
-  matrixToTsv,
-  parseQtyCell,
-  readClipboardText,
-  splitTsvToMatrix,
-  writeClipboardText,
-} from '../../utils/excelGridClipboard'
+import { parseQtyCell } from '../../utils/excelGridClipboard'
+import { downloadXlsxFromAoA, readXlsxFirstSheetMatrix } from '../../utils/excelFile'
+import { useMobileSimpleLayout } from '../../utils/mobileLayout'
 import { newId } from '../../utils/newId'
-import ExcelGridToolbar from '../grid/ExcelGridToolbar.jsx'
-import useGridNativePaste from '../../hooks/useGridNativePaste.js'
+import { inventoryRemoteSyncEnabled } from '../../utils/inventoryRemoteSync'
+import PageDataToolbar from '../grid/PageDataToolbar.jsx'
 import BilingualLabel from '../BilingualLabel'
 import '../logistics/ops.css'
 import './pages.css'
@@ -30,6 +27,78 @@ const MASTER_COLS = [
   'status',
 ]
 
+const EMPTY_SEARCH = { model: '', part: '', desc: '' }
+
+function lc(s) {
+  return String(s ?? '').toLowerCase()
+}
+
+function rowMatchesMasterSearch(row, applied) {
+  if (applied.model && !lc(row.modelName).includes(applied.model)) return false
+  if (applied.part && !lc(row.partNo).includes(applied.part)) return false
+  if (applied.desc && !lc(row.description).includes(applied.desc)) return false
+  return true
+}
+
+function matrixSkipHeaderRow(matrix) {
+  if (!matrix?.length) return []
+  const c0 = String(matrix[0]?.[0] ?? '').toLowerCase()
+  if (c0.includes('model')) return matrix.slice(1)
+  return matrix
+}
+
+/** 화면(필터) 기준 행·열 앵커로 마스터 그리드 붙여넣기 */
+function applyMasterPasteFromDisplay(prev, matrix, dispRow, dispCol, appliedSearch) {
+  const errs = []
+  const bad = new Set()
+  const displayed = prev.filter((r) => rowMatchesMasterSearch(r, appliedSearch))
+  const next = [...prev]
+
+  for (let r = 0; r < matrix.length; r++) {
+    const disp = displayed[dispRow + r]
+    if (!disp) break
+    const rowIdx = next.findIndex((x) => x.id === disp.id)
+    if (rowIdx < 0) continue
+    const row = { ...next[rowIdx] }
+    for (let mc = 0; mc < matrix[r].length; mc++) {
+      const fi = dispCol + mc
+      if (fi >= MASTER_COLS.length) break
+      const field = MASTER_COLS[fi]
+      const cell = String(matrix[r][mc] ?? '').trim()
+      if (cell === '') continue
+      if (
+        field === 'currentStock' ||
+        field === 'weeklyDemand' ||
+        field === 'safetyStockWeeks' ||
+        field === 'leadTime'
+      ) {
+        const p = parseQtyCell(cell)
+        if (!p.ok) {
+          errs.push(`R${r + 1} C${mc + 1}: ${field} — not a number`)
+          bad.add(row.id)
+          continue
+        }
+        if (field === 'safetyStockWeeks' || field === 'leadTime') {
+          row[field] = Math.max(0, Math.round(p.value))
+        } else {
+          row[field] = Math.max(0, p.value)
+        }
+      } else if (field === 'status') {
+        const v = cell.toLowerCase()
+        row.status = v.startsWith('inact') ? 'Inactive' : 'Active'
+      } else {
+        row[field] = cell
+      }
+    }
+    if (!String(row.modelName).trim() || !String(row.partNo).trim()) {
+      errs.push(`Row ${dispRow + r + 1}: Model and Part No are required`)
+      bad.add(row.id)
+    }
+    next[rowIdx] = row
+  }
+  return { next, errs, bad }
+}
+
 function formatCoverageWeeks(weeks) {
   if (weeks === Infinity) return '∞'
   if (!Number.isFinite(weeks)) return '—'
@@ -43,14 +112,24 @@ export default function MasterDataPage({
   inTransit = [],
   opsMeta,
 }) {
+  const isMobile = useMobileSimpleLayout()
   const products = getEnabledProducts()
   const [saveHint, setSaveHint] = useState('')
   const [excelMsg, setExcelMsg] = useState('')
   const [selected, setSelected] = useState(() => new Set())
   const [invalidIds, setInvalidIds] = useState(() => new Set())
+  const [searchModel, setSearchModel] = useState('')
+  const [searchPart, setSearchPart] = useState('')
+  const [searchDesc, setSearchDesc] = useState('')
+  const [appliedSearch, setAppliedSearch] = useState(() => ({ ...EMPTY_SEARCH }))
   const masterTableRef = useRef(null)
 
   const asOfDate = opsMeta?.asOfDate ?? operationsMeta.asOfDate
+
+  const displayedRows = useMemo(
+    () => masterItems.filter((r) => rowMatchesMasterSearch(r, appliedSearch)),
+    [masterItems, appliedSearch],
+  )
 
   const itemStatusById = useMemo(() => {
     const m = new Map()
@@ -69,7 +148,9 @@ export default function MasterDataPage({
   }, [masterItems, deliveryPlans, inTransit, asOfDate])
 
   function flashSaved() {
-    setSaveHint(formatKoEn(L.savedToBrowserStorage))
+    setSaveHint(
+      formatKoEn(inventoryRemoteSyncEnabled() ? L.savedAfterEditWithRemote : L.savedToBrowserStorage),
+    )
     setTimeout(() => setSaveHint(''), 2500)
   }
 
@@ -109,6 +190,21 @@ export default function MasterDataPage({
     })
   }
 
+  function applySearchFromForm() {
+    setAppliedSearch({
+      model: searchModel.trim().toLowerCase(),
+      part: searchPart.trim().toLowerCase(),
+      desc: searchDesc.trim().toLowerCase(),
+    })
+  }
+
+  function resetSearch() {
+    setSearchModel('')
+    setSearchPart('')
+    setSearchDesc('')
+    setAppliedSearch({ ...EMPTY_SEARCH })
+  }
+
   const toggleSelect = useCallback((id) => {
     setSelected((s) => {
       const n = new Set(s)
@@ -120,16 +216,38 @@ export default function MasterDataPage({
 
   const toggleSelectAll = useCallback(() => {
     setSelected((s) => {
-      if (s.size === masterItems.length) return new Set()
-      return new Set(masterItems.map((r) => r.id))
+      if (s.size === displayedRows.length && displayedRows.length > 0) return new Set()
+      return new Set(displayedRows.map((r) => r.id))
     })
-  }, [masterItems])
+  }, [displayedRows])
 
-  const firstSelectedIndex = useMemo(() => {
-    if (!selected.size) return 0
-    const ix = masterItems.findIndex((r) => selected.has(r.id))
-    return ix >= 0 ? ix : 0
-  }, [masterItems, selected])
+  const onMasterPasteMatrix = useCallback(
+    (matrix, cell) => {
+      const dispRow = Number(cell.dataset.excelRow)
+      const dispCol = Number(cell.dataset.excelCol)
+      if (!Number.isFinite(dispRow) || !Number.isFinite(dispCol)) return
+      const m = matrixSkipHeaderRow(matrix)
+      if (!m.length) return
+      setExcelMsg('')
+      setMasterItems((prev) => {
+        const out = applyMasterPasteFromDisplay(prev, m, dispRow, dispCol, appliedSearch)
+        queueMicrotask(() => {
+          setInvalidIds(out.bad)
+          setExcelMsg(
+            out.errs.length ? `!${out.errs.join('\n')}` : formatKoEn(L.excelUploadApplied),
+          )
+        })
+        return out.next
+      })
+    },
+    [appliedSearch],
+  )
+
+  useGridNativePaste({
+    tableRef: masterTableRef,
+    enabled: !isMobile,
+    onPasteMatrix: onMasterPasteMatrix,
+  })
 
   const applyMasterMatrix = useCallback((matrix, startRowIdx, startColIdx = 0) => {
     setExcelMsg('')
@@ -196,41 +314,29 @@ export default function MasterDataPage({
     })
 
     setInvalidIds(bad)
-    setExcelMsg(errs.length ? `!${errs.join('\n')}` : formatKoEn(L.excelPasteDone))
+    setExcelMsg(errs.length ? `!${errs.join('\n')}` : formatKoEn(L.excelUploadApplied))
   }, [])
 
-  const handlePasteFromExcel = useCallback(async () => {
+  async function handleMasterUpload(ev) {
+    const file = ev.target.files?.[0]
+    ev.target.value = ''
+    if (!file) return
     setExcelMsg('')
-    setInvalidIds(new Set())
-    const text = await readClipboardText()
-    if (!String(text).trim()) {
-      setExcelMsg(`!${formatKoEn(L.excelClipboardEmpty)}`)
-      return
+    try {
+      const raw = await readXlsxFirstSheetMatrix(file)
+      const matrix = matrixSkipHeaderRow(raw)
+      if (!matrix.length) {
+        setExcelMsg(`!${formatKoEn(L.excelClipboardEmpty)}`)
+        return
+      }
+      applyMasterMatrix(matrix, 0, 0)
+      setTimeout(() => setExcelMsg(''), 3500)
+    } catch (err) {
+      setExcelMsg(`!${String(err?.message || err)}`)
     }
-    const matrix = splitTsvToMatrix(text)
-    if (!matrix.length) {
-      setExcelMsg(`!${formatKoEn(L.excelClipboardEmpty)}`)
-      return
-    }
-    applyMasterMatrix(matrix, firstSelectedIndex, 0)
-  }, [applyMasterMatrix, firstSelectedIndex])
+  }
 
-  const onMasterNativePaste = useCallback(
-    (matrix, cell) => {
-      const row = Number.parseInt(String(cell.getAttribute('data-excel-row') ?? ''), 10)
-      const col = Number.parseInt(String(cell.getAttribute('data-excel-col') ?? ''), 10)
-      applyMasterMatrix(
-        matrix,
-        Number.isFinite(row) ? row : 0,
-        Number.isFinite(col) ? col : 0,
-      )
-    },
-    [applyMasterMatrix],
-  )
-
-  useGridNativePaste({ tableRef: masterTableRef, onPasteMatrix: onMasterNativePaste })
-
-  const handleCopyToExcel = useCallback(async () => {
+  function handleDownloadXlsx() {
     setExcelMsg('')
     const header = [
       'Model',
@@ -242,9 +348,7 @@ export default function MasterDataPage({
       'Lead Time (d)',
       'Status',
     ]
-    const rowsSrc =
-      selected.size > 0 ? masterItems.filter((r) => selected.has(r.id)) : masterItems
-    const body = rowsSrc.map((row) => [
+    const body = displayedRows.map((row) => [
       row.modelName ?? '',
       row.partNo ?? '',
       row.description ?? '',
@@ -254,42 +358,87 @@ export default function MasterDataPage({
       String(row.leadTime ?? ''),
       row.status ?? '',
     ])
-    await writeClipboardText(matrixToTsv([header, ...body]))
-    setExcelMsg(formatKoEn(L.excelCopyDone))
-  }, [masterItems, selected])
-
-  const handleClearSelected = useCallback(() => {
-    if (!selected.size) return
-    setMasterItems((rows) => rows.filter((r) => !selected.has(r.id)))
-    setSelected(new Set())
-    setInvalidIds(new Set())
-    setExcelMsg('')
-  }, [selected])
+    downloadXlsxFromAoA('WarehouseInventory', 'Warehouse', [header, ...body])
+    setExcelMsg(formatKoEn(L.excelExportDone))
+    setTimeout(() => setExcelMsg(''), 2500)
+  }
 
   return (
     <div className="page page--wide">
       <header className="page__header">
         <h1>
-          <BilingualLabel label={L.warehouseInventoryScreen} compact as="span" />
+          <BilingualLabel label={L.warehouseInventoryScreen} as="span" />
         </h1>
         <p className="page__desc">
-          <BilingualLabel label={L.warehouseInventorySubtitle} compact as="span" />
+          <BilingualLabel label={L.warehouseInventorySubtitle} as="span" />
         </p>
-        <ExcelGridToolbar
-          onPasteFromExcel={handlePasteFromExcel}
-          onCopyToExcel={handleCopyToExcel}
-          onClearSelected={handleClearSelected}
-          selectedCount={selected.size}
+        <PageDataToolbar
+          hideUpload={isMobile}
+          hideDownload={isMobile}
+          onUploadChange={handleMasterUpload}
+          onDownload={handleDownloadXlsx}
+          downloadDisabled={displayedRows.length === 0}
+          onSave={handleSave}
           message={excelMsg}
+          extra={
+            <button type="button" className="btn btn--ghost btn--toolbar" onClick={handleAdd}>
+              <BilingualLabel label={L.warehouseAddItem} as="span" />
+            </button>
+          }
+          searchSlot={
+            <form
+              className="page-search-strip"
+              onSubmit={(e) => {
+                e.preventDefault()
+                applySearchFromForm()
+              }}
+            >
+              <div className="page-search-strip__fields">
+                <label className="page-search-strip__field">
+                  <span className="page-search-strip__label">
+                    <BilingualLabel label={L.pageSearchModel} as="span" />
+                  </span>
+                  <input
+                    className="cell-input"
+                    value={searchModel}
+                    onChange={(e) => setSearchModel(e.target.value)}
+                    aria-label={formatKoEnInline(L.pageSearchModel)}
+                  />
+                </label>
+                <label className="page-search-strip__field">
+                  <span className="page-search-strip__label">
+                    <BilingualLabel label={L.pageSearchPartNo} as="span" />
+                  </span>
+                  <input
+                    className="cell-input"
+                    value={searchPart}
+                    onChange={(e) => setSearchPart(e.target.value)}
+                    aria-label={formatKoEnInline(L.pageSearchPartNo)}
+                  />
+                </label>
+                <label className="page-search-strip__field">
+                  <span className="page-search-strip__label">
+                    <BilingualLabel label={L.pageSearchDescription} as="span" />
+                  </span>
+                  <input
+                    className="cell-input"
+                    value={searchDesc}
+                    onChange={(e) => setSearchDesc(e.target.value)}
+                    aria-label={formatKoEnInline(L.pageSearchDescription)}
+                  />
+                </label>
+              </div>
+              <div className="page-search-strip__actions">
+                <button type="submit" className="btn btn--primary btn--toolbar">
+                  <BilingualLabel label={L.pageSearchButton} as="span" />
+                </button>
+                <button type="button" className="btn btn--ghost btn--toolbar" onClick={resetSearch}>
+                  <BilingualLabel label={L.pageSearchReset} as="span" />
+                </button>
+              </div>
+            </form>
+          }
         />
-        <div className="page__actions">
-          <button type="button" className="btn btn--ghost" onClick={handleAdd}>
-            Add Item
-          </button>
-          <button type="button" className="btn btn--primary" onClick={handleSave}>
-            Save
-          </button>
-        </div>
         {saveHint && (
           <p className="page__hint" role="status">
             {saveHint}
@@ -305,30 +454,51 @@ export default function MasterDataPage({
                 <input
                   type="checkbox"
                   aria-label="Select all"
-                  checked={masterItems.length > 0 && selected.size === masterItems.length}
+                  checked={
+                    displayedRows.length > 0 && selected.size === displayedRows.length
+                  }
                   onChange={toggleSelectAll}
                 />
               </th>
-              <th>Model</th>
-              <th>Part No</th>
-              <th>Description</th>
-              <th>Current Stock</th>
               <th>
-                <BilingualLabel label={L.coverageWeeks} compact as="span" />
+                <BilingualLabel label={L.model} as="span" />
               </th>
-              <th>Weekly Demand</th>
-              <th>Safety (wks)</th>
-              <th>Lead Time (d)</th>
-              <th>Status</th>
+              <th>
+                <BilingualLabel label={L.partNo} as="span" />
+              </th>
+              <th>
+                <BilingualLabel label={L.description} as="span" />
+              </th>
+              <th>
+                <BilingualLabel label={L.currentStock} as="span" />
+              </th>
+              <th>
+                <BilingualLabel label={L.coverageWeeks} as="span" />
+              </th>
+              <th>
+                <BilingualLabel label={L.weeklyDemand} as="span" />
+              </th>
+              <th>
+                <BilingualLabel label={L.safetyStockWeeks} as="span" />
+              </th>
+              <th>
+                <BilingualLabel label={L.leadTimeDays} as="span" />
+              </th>
+              <th>
+                <BilingualLabel label={L.status} as="span" />
+              </th>
               <th />
             </tr>
           </thead>
           <tbody>
-            {masterItems.map((row, rowIdx) => {
+            {displayedRows.map((row, rowIdx) => {
               const st = itemStatusById.get(row.id)
               const cov = st?.coverageWeeks
               return (
-                <tr key={row.id} className={invalidIds.has(row.id) ? 'row--excel-invalid' : undefined}>
+                <tr
+                  key={row.id}
+                  className={invalidIds.has(row.id) ? 'row--excel-invalid' : undefined}
+                >
                   <td className="cell--center">
                     <input
                       type="checkbox"
@@ -341,41 +511,41 @@ export default function MasterDataPage({
                     <input
                       className="cell-input"
                       list="model-options"
+                      value={row.modelName}
                       data-excel-paste
                       data-excel-row={rowIdx}
                       data-excel-col={0}
-                      value={row.modelName}
                       onChange={(e) => updateRow(row.id, { modelName: e.target.value })}
                     />
                   </td>
                   <td>
                     <input
                       className="cell-input"
+                      value={row.partNo}
                       data-excel-paste
                       data-excel-row={rowIdx}
                       data-excel-col={1}
-                      value={row.partNo}
                       onChange={(e) => updateRow(row.id, { partNo: e.target.value })}
                     />
                   </td>
                   <td>
                     <input
                       className="cell-input master-table__desc"
+                      value={row.description}
                       data-excel-paste
                       data-excel-row={rowIdx}
                       data-excel-col={2}
-                      value={row.description}
                       onChange={(e) => updateRow(row.id, { description: e.target.value })}
                     />
                   </td>
                   <td>
                     <input
                       className="cell-input cell-input--num"
+                      type="number"
+                      value={row.currentStock}
                       data-excel-paste
                       data-excel-row={rowIdx}
                       data-excel-col={3}
-                      type="number"
-                      value={row.currentStock}
                       onChange={(e) =>
                         updateRow(row.id, { currentStock: Number(e.target.value) || 0 })
                       }
@@ -387,11 +557,11 @@ export default function MasterDataPage({
                   <td>
                     <input
                       className="cell-input cell-input--num"
+                      type="number"
+                      value={row.weeklyDemand}
                       data-excel-paste
                       data-excel-row={rowIdx}
                       data-excel-col={4}
-                      type="number"
-                      value={row.weeklyDemand}
                       onChange={(e) =>
                         updateRow(row.id, { weeklyDemand: Number(e.target.value) || 0 })
                       }
@@ -400,12 +570,12 @@ export default function MasterDataPage({
                   <td>
                     <input
                       className="cell-input cell-input--num"
-                      data-excel-paste
-                      data-excel-row={rowIdx}
-                      data-excel-col={5}
                       type="number"
                       min={0}
                       value={row.safetyStockWeeks ?? MIN_MANAGEMENT_WEEKS}
+                      data-excel-paste
+                      data-excel-row={rowIdx}
+                      data-excel-col={5}
                       onChange={(e) =>
                         updateRow(row.id, {
                           safetyStockWeeks: Math.max(0, Number(e.target.value) || 0),
@@ -416,12 +586,12 @@ export default function MasterDataPage({
                   <td>
                     <input
                       className="cell-input cell-input--num"
-                      data-excel-paste
-                      data-excel-row={rowIdx}
-                      data-excel-col={6}
                       type="number"
                       min={0}
                       value={row.leadTime ?? 0}
+                      data-excel-paste
+                      data-excel-row={rowIdx}
+                      data-excel-col={6}
                       onChange={(e) =>
                         updateRow(row.id, { leadTime: Math.max(0, Number(e.target.value) || 0) })
                       }
@@ -430,10 +600,10 @@ export default function MasterDataPage({
                   <td>
                     <select
                       className="cell-input"
+                      value={row.status}
                       data-excel-paste
                       data-excel-row={rowIdx}
                       data-excel-col={7}
-                      value={row.status}
                       onChange={(e) => updateRow(row.id, { status: e.target.value })}
                     >
                       <option value="Active">Active</option>
@@ -443,10 +613,10 @@ export default function MasterDataPage({
                   <td>
                     <button
                       type="button"
-                      className="btn btn--ghost btn--sm"
+                      className="btn btn--ghost btn--toolbar"
                       onClick={() => handleDelete(row.id)}
                     >
-                      Delete
+                      <BilingualLabel label={L.transitRowDelete} as="span" />
                     </button>
                   </td>
                 </tr>

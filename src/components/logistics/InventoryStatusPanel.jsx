@@ -15,7 +15,13 @@ function CoverageBadge({ status }) {
   const label = getCoverageStatusLabel(status)
   return (
     <span className={`coverage-badge coverage-badge--${status}`}>
-      <BilingualLabel label={label} compact as="span" />
+      <BilingualLabel
+        compact
+        className="coverage-badge__label"
+        enClassName="coverage-badge__en"
+        label={label}
+        as="span"
+      />
     </span>
   )
 }
@@ -37,8 +43,8 @@ export default function InventoryStatusPanel({
       <section
         className={`ops-section card inv-status-panel${compact ? ' inv-status-panel--compact' : ''}`}
       >
-        <h2 className="ops-section__title">
-          <BilingualLabel label={titleLabel} compact as="span" />
+        <h2 className="ops-section__title ops-section__title--stacked">
+          <BilingualLabel label={titleLabel} as="span" />
         </h2>
         <p className="empty-block">No inventory data for selected model.</p>
       </section>
@@ -47,16 +53,16 @@ export default function InventoryStatusPanel({
 
   const headlineCoverage = summary?.minCoverageWeeks ?? 0
   const headlineStatus = itemRows.reduce((worst, row) => {
-    const order = { danger: 0, caution: 1, stable: 2 }
+    const order = { critical: 0, warning: 1, stable: 2, overstock: 3 }
     return order[row.status] < order[worst] ? row.status : worst
-  }, 'stable')
+  }, 'overstock')
 
   return (
     <section
       className={`ops-section card inv-status-panel${compact ? ' inv-status-panel--compact' : ''}`}
     >
-      <h2 className="ops-section__title">
-        <BilingualLabel label={titleLabel} compact as="span" />
+      <h2 className="ops-section__title ops-section__title--stacked">
+        <BilingualLabel label={titleLabel} as="span" />
       </h2>
 
       {!compact && (
@@ -64,20 +70,20 @@ export default function InventoryStatusPanel({
           <article className={`inv-hero inv-hero--${headlineStatus}`}>
             <div className="inv-hero__main">
               <span className="inv-hero__label">
-                <BilingualLabel label={L.coverageWeeks} compact as="span" />
+                <BilingualLabel label={L.coverageWeeks} as="span" />
                 <span className="inv-hero__hint">
-                  (<BilingualLabel label={L.demandBasedCoverage} compact as="span" />)
+                  (<BilingualLabel label={L.demandBasedCoverage} as="span" />)
                 </span>
               </span>
               <strong className="inv-hero__value">{formatDecimal(headlineCoverage)}</strong>
               <span className="inv-hero__unit">
-                <BilingualLabel label={L.weeks} compact as="span" /> · min across parts
+                <BilingualLabel label={L.weeks} as="span" /> · min across parts
               </span>
             </div>
             <CoverageBadge status={headlineStatus} />
             <p className="inv-hero__policy">
-              <BilingualLabel label={L.safetyStockPerMaster} compact as="span" /> ·{' '}
-              <BilingualLabel label={L.coverageLegend} compact as="span" />
+              <BilingualLabel label={L.safetyStockPerMaster} as="span" /> ·{' '}
+              <BilingualLabel label={L.coverageLegend} as="span" />
             </p>
           </article>
         </>
@@ -85,51 +91,51 @@ export default function InventoryStatusPanel({
 
       {compact && (
         <p className="inv-status-panel__hint">
-          <BilingualLabel label={L.coverageLegend} compact as="span" />
+          <BilingualLabel label={L.coverageLegend} as="span" />
         </p>
       )}
 
       <div className="table-wrap">
-        <table className="ops-table inv-item-table">
+        <table className={`ops-table inv-item-table${compact ? ' dash-board-table' : ''}`}>
           <thead>
             <tr>
               <th>
-                <BilingualLabel label={L.model} compact />
+                <BilingualLabel label={L.model} />
               </th>
               <th>
-                <BilingualLabel label={L.partNo} compact />
+                <BilingualLabel label={L.partNo} />
               </th>
               {!compact && (
                 <th>
-                  <BilingualLabel label={L.description} compact />
+                  <BilingualLabel label={L.description} />
                 </th>
               )}
               <th>
-                <BilingualLabel label={L.currentStock} compact />
+                <BilingualLabel label={L.currentStock} />
               </th>
               {!compact && (
                 <>
                   <th>
-                    <BilingualLabel label={L.weeklyDemandShort} compact />
+                    <BilingualLabel label={L.weeklyDemandShort} />
                   </th>
                   <th>
-                    <BilingualLabel label={L.weeklyDeliveryQty} compact />
+                    <BilingualLabel label={L.weeklyDeliveryQty} />
                   </th>
                 </>
               )}
               <th>
-                <BilingualLabel label={L.coverageWeeks} compact />
+                <BilingualLabel label={L.coverageWeeks} />
               </th>
               {!compact && (
                 <th>
-                  <BilingualLabel label={L.safetyStock} compact />
+                  <BilingualLabel label={L.safetyStock} />
                 </th>
               )}
               <th>
-                <BilingualLabel label={L.gap} compact />
+                <BilingualLabel label={L.gap} />
               </th>
               <th>
-                <BilingualLabel label={L.status} compact />
+                <BilingualLabel label={L.status} />
               </th>
             </tr>
           </thead>

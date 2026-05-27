@@ -3,7 +3,7 @@
  * Supabase/Firebase 등으로 교체 시 이 모듈만 서버 스키마에 맞게 조정하면 됩니다.
  */
 
-import { VIEW_LABELS, formatKoEn } from '../i18n/labels.js'
+import { VIEW_LABELS } from '../i18n/labels.js'
 
 /**
  * 네비 표시 순서 (운영: 대시보드 → 창고 → 운송중 → 출고 계획 → 재고 예측 → 설정).
@@ -19,7 +19,7 @@ export const VIEW_IDS = [
 ]
 
 export const VIEW_MENU_LABELS = Object.fromEntries(
-  VIEW_IDS.map((id) => [id, formatKoEn(VIEW_LABELS[id])]),
+  VIEW_IDS.map((id) => [id, VIEW_LABELS[id]]),
 )
 
 /** @typedef {{ dashboard?: boolean, master?: boolean, delivery?: boolean, transit?: boolean, projection?: boolean, settings?: boolean }} MenuPermissions */

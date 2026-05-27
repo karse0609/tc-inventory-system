@@ -1,6 +1,10 @@
-import { MIN_MANAGEMENT_WEEKS } from '../config/inventoryPolicy'
-import { planWeekMonday } from './deliveryPlanHorizon'
-import { isInTransitRowActive } from './logisticsMetrics'
+import { getCoverageStatus, MIN_MANAGEMENT_WEEKS } from '../config/inventoryPolicy'
+import { calculateDemandBasedCoverageWeeks } from './inventoryCoverage'
+import { addDaysIso, planWeekMonday } from './deliveryPlanHorizon'
+import { getWeekRange, isDateInRange, isInTransitRowActive } from './logisticsMetrics'
+
+const PROJECTION_DEBUG =
+  typeof import.meta !== 'undefined' && import.meta.env?.VITE_DEBUG_INVENTORY_PROJECTION === 'true'
 
 /** @param {string} weekId e.g. 2026-W20 → W20 */
 export function shortWeekLabel(weekId) {
@@ -18,27 +22,32 @@ function deliveryQtyForWeek(planRows, modelName, partNo, mondayIso) {
   return sum
 }
 
-/** ETA W/H (YYYY-MM-DD) → 해당 주 월요일 키, 없으면 '' */
-function arrivalMondayFromTransit(row) {
-  const raw = row.etaWh
-  if (!raw) return ''
-  const s = String(raw).trim()
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(s)) return ''
-  return planWeekMonday(s)
+/**
+ * 운송중 행의 창고 입고 예상일 = ETA Port(YYYY-MM-DD) + 7일.
+ * ETA Port가 없거나 형식이 아니면 반영하지 않음.
+ */
+export function warehouseReceiptDateFromEtaPort(row) {
+  const p = String(row?.etaPort ?? '').trim()
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(p)) return ''
+  return addDaysIso(p, 7)
 }
 
-function arrivalQtyForWeek(transitRows, modelName, partNo, mondayIso) {
+/** 입고 예정일이 해당 주(월요일 periodStart 기준 월~일) 안에 있으면 그 주 inbound */
+function inboundQtyForWeek(transitRows, modelName, partNo, periodStartMonday) {
+  const { start, end } = getWeekRange(periodStartMonday)
   let sum = 0
   for (const t of transitRows) {
     if (!isInTransitRowActive(t)) continue
     if (t.modelName !== modelName || t.partNo !== partNo) continue
-    if (arrivalMondayFromTransit(t) !== mondayIso) continue
+    const receipt = warehouseReceiptDateFromEtaPort(t)
+    if (!receipt) continue
+    if (!isDateInRange(receipt, start, end)) continue
     sum += Number(t.qty) || 0
   }
   return sum
 }
 
-/** 활성 운송중 수량 합계(ETA 주차와 무관, 파이프라인 표시용) */
+/** 활성 운송중 수량 합계(주차 무관, 파이프라인 표시용) */
 function pipelineQtyForSku(transitRows, modelName, partNo) {
   let sum = 0
   for (const t of transitRows) {
@@ -49,16 +58,21 @@ function pipelineQtyForSku(transitRows, modelName, partNo) {
   return sum
 }
 
-function projectionStatusFromPolicy(projected, weeklyOut, safetyWeeks, leadTimeDays) {
-  if (weeklyOut <= 0) return 'na'
-  const cov = projected / weeklyOut
-  if (!Number.isFinite(cov)) return 'na'
-  const safetyW =
-    safetyWeeks > 0 ? safetyWeeks : MIN_MANAGEMENT_WEEKS
-  const leadW = Math.max(0, (Number(leadTimeDays) || 0) / 7)
-  if (cov < safetyW) return 'critical'
-  if (cov < safetyW + leadW) return 'warning'
-  return 'stable'
+/**
+ * 품번별 ETA Port + 7일 창고입고일이 속한 주의 월요일(periodStart) 중 가장 늦은 값.
+ * 활성 운송중이며 ETA Port가 유효한 행만 고려. 없으면 ''.
+ */
+export function lastInboundMondayFromTransit(transitRows, modelName, partNo) {
+  let maxMonday = ''
+  for (const t of transitRows) {
+    if (!isInTransitRowActive(t)) continue
+    if (t.modelName !== modelName || t.partNo !== partNo) continue
+    const receipt = warehouseReceiptDateFromEtaPort(t)
+    if (!receipt) continue
+    const monday = getWeekRange(receipt).start
+    if (monday > maxMonday) maxMonday = monday
+  }
+  return maxMonday
 }
 
 /**
@@ -83,29 +97,53 @@ export function buildInventoryProjectionRows(masterItems, deliveryPlans, inTrans
       item.partNo,
     )
 
+    const lastInboundMonday = lastInboundMondayFromTransit(
+      inTransitRows,
+      item.modelName,
+      item.partNo,
+    )
+
     for (const col of sortedWeeks) {
-      const arrival = arrivalQtyForWeek(inTransitRows, item.modelName, item.partNo, col.periodStart)
-      const delivery = deliveryQtyForWeek(
+      const previousStock = projected
+      const inbound = inboundQtyForWeek(
+        inTransitRows,
+        item.modelName,
+        item.partNo,
+        col.periodStart,
+      )
+      const outbound = deliveryQtyForWeek(
         deliveryPlans,
         item.modelName,
         item.partNo,
         col.periodStart,
       )
-      const weeklyOut = Math.max(delivery, masterWeeklyDemand)
+      const weeklyOut = Math.max(outbound, masterWeeklyDemand)
 
-      projected = projected + arrival - delivery
+      projected = previousStock + inbound - outbound
 
       const coverageWeeks = weeklyOut > 0 ? projected / weeklyOut : null
       const safetyWForQty = safetyWeeks > 0 ? safetyWeeks : MIN_MANAGEMENT_WEEKS
       const safetyStockQty = weeklyOut * safetyWForQty
       const gap = projected - safetyStockQty
 
-      const status = projectionStatusFromPolicy(
-        projected,
-        weeklyOut,
-        safetyWeeks,
-        leadTimeDays,
-      )
+      /** 대시보드 품번별 재고와 동일: 커버리지(주) 구간만 사용 */
+      const covForStatus = calculateDemandBasedCoverageWeeks(projected, weeklyOut)
+      const showStatusBadge =
+        !!lastInboundMonday && String(col.periodStart).localeCompare(lastInboundMonday) <= 0
+      const status = showStatusBadge ? getCoverageStatus(covForStatus) : null
+
+      if (PROJECTION_DEBUG) {
+        console.log('[tc-inv projection] cell', {
+          model: item.modelName,
+          part: item.partNo,
+          week: col.week,
+          periodStart: col.periodStart,
+          previousStock,
+          inbound,
+          outbound,
+          projectedStock: projected,
+        })
+      }
 
       weeks[col.periodStart] = {
         weekId: col.week,
@@ -113,10 +151,17 @@ export function buildInventoryProjectionRows(masterItems, deliveryPlans, inTrans
         coverageWeeks,
         gap,
         safetyStockQty,
-        arrival,
-        delivery,
+        /** ETA Port + 7일이 해당 주에 들어오는 운송중 수량 */
+        inbound,
+        /** @deprecated 호환: inbound과 동일 */
+        arrival: inbound,
+        outbound,
+        delivery: outbound,
+        previousStock,
         weeklyOut,
+        /** critical | warning | stable | overstock | null (뱃지 비표시) */
         status,
+        lastInboundPeriodStart: lastInboundMonday || null,
       }
     }
 
@@ -129,6 +174,7 @@ export function buildInventoryProjectionRows(masterItems, deliveryPlans, inTrans
       inTransitPipeline,
       safetyStockWeeks: safetyWeeks,
       leadTimeDays,
+      lastInboundPeriodStart: lastInboundMonday || null,
       weeks,
     }
   })

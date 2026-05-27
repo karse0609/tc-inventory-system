@@ -5,6 +5,7 @@
 import * as XLSX from 'xlsx'
 import { formatLocalYMD } from './parseExcelWideFormat'
 import { newId } from './newId'
+import { TRANSIT_ROW_STATUS } from './inTransitStatus'
 
 export class ParseShipmentScheduleError extends Error {
   constructor(message, debug = {}) {
@@ -79,6 +80,10 @@ function buildRowFromCells(cells, idx) {
     remark: String(v(idx.remark) ?? '').trim(),
     arrived: false,
     tcTechNo: String(v(idx.tcTech) ?? '').trim(),
+    transitStatus: TRANSIT_ROW_STATUS.IN_TRANSIT,
+    receiptDate: '',
+    receivedBy: '',
+    receivedAtIso: '',
   }
 }
 

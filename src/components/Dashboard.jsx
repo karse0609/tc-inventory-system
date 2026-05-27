@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { ALL_MODELS_VALUE, getEnabledProducts } from '../config/products'
 import { todayShipments as sampleTodayShipments } from '../data/logisticsSampleData'
-import { L, formatKoEn } from '../i18n/labels'
+import { L, formatKoEnInline } from '../i18n/labels'
 import { computeWarehouseQtyAsOf, sumWarehouseStockForModelWithAsOf } from '../utils/inventoryAsOf'
 import {
   buildInventorySummary,
@@ -15,6 +15,7 @@ import {
   sumInTransitStockForContainers,
 } from '../utils/logisticsMetrics'
 import { formatKstDateTime, formatSeattleDateTime, getKoreaCalendarDate } from '../utils/timeZones'
+import { inventoryRemoteSyncEnabled } from '../utils/inventoryRemoteSync'
 import BilingualLabel from './BilingualLabel'
 import DashboardCoreKpis from './logistics/DashboardCoreKpis'
 import InventoryStatusPanel from './logistics/InventoryStatusPanel'
@@ -35,6 +36,8 @@ export default function Dashboard({
   setOpsMeta,
   unitCostKrwBySku,
   arrivalLedger = [],
+  /** 휴대폰·PWA: 조회 위주(기준일 수정·주간 ETA 표 숨김) */
+  readOnlyMobile = false,
 }) {
   const [selectedModelName, setSelectedModelName] = useState(ALL_MODELS_VALUE)
   const [clockTick, setClockTick] = useState(() => new Date())
@@ -172,6 +175,21 @@ export default function Dashboard({
     [containersAsOf, asOfDate],
   )
 
+  /** 연속된 동일 컨테이너 No 구간을 교차 배경으로 구분 (짝수 번째 구간에 은은한 톤) */
+  const weekEtaRowBands = useMemo(() => {
+    if (!weekEtaRows.length) return []
+    let groupIdx = -1
+    let prevKey = '__INIT__'
+    return weekEtaRows.map((row) => {
+      const key = String(row?.containerNo ?? '').trim() || '__MISSING__'
+      if (key !== prevKey) {
+        groupIdx += 1
+        prevKey = key
+      }
+      return groupIdx % 2 === 1
+    })
+  }, [weekEtaRows])
+
   const showLedgerHint =
     (!arrivalLedger || arrivalLedger.length === 0) &&
     referenceDate &&
@@ -180,11 +198,12 @@ export default function Dashboard({
 
   const enabledProducts = getEnabledProducts()
 
-  const modelTag =
-    selectedModelName === ALL_MODELS_VALUE ? formatKoEn(L.dashboardModelAll) : selectedModelName
-
   return (
-    <div className="dashboard dashboard--ops">
+    <div
+      className={
+        readOnlyMobile ? 'dashboard dashboard--ops dashboard--mobile-readonly' : 'dashboard dashboard--ops'
+      }
+    >
       <header className="dashboard__header">
         <div>
           <p className="dashboard__eyebrow">{opsMeta.subtitle}</p>
@@ -192,19 +211,19 @@ export default function Dashboard({
           <div className="dashboard__clock-bar" aria-live="polite">
             <div className="dashboard__as-of-item">
               <span className="dashboard__as-of-label">
-                <BilingualLabel label={L.dashboardSeattleTime} compact as="span" />
+                <BilingualLabel label={L.dashboardSeattleTime} as="span" />
               </span>
               <span className="dashboard__as-of-value">{seattleClock}</span>
             </div>
             <div className="dashboard__as-of-item">
               <span className="dashboard__as-of-label">
-                <BilingualLabel label={L.dashboardKoreaTime} compact as="span" />
+                <BilingualLabel label={L.dashboardKoreaTime} as="span" />
               </span>
               <span className="dashboard__as-of-value">{koreaClock}</span>
             </div>
           </div>
           <div className="dashboard__as-of-inline">
-            <BilingualLabel label={L.opsQueryDateKst} compact as="span" />
+            <BilingualLabel label={L.opsQueryDateKst} as="span" />
             {typeof setOpsMeta === 'function' ? (
               <input
                 type="date"
@@ -213,31 +232,41 @@ export default function Dashboard({
                 onChange={(e) =>
                   setOpsMeta((o) => ({ ...o, asOfDate: e.target.value || o.asOfDate }))
                 }
-                aria-label={formatKoEn(L.opsQueryDateKst)}
+                aria-label={formatKoEnInline(L.opsQueryDateKst)}
               />
             ) : (
               <time dateTime={asOfDate}>{asOfDate}</time>
             )}
-            <span className="tag tag--model">{modelTag}</span>
+            <span className="tag tag--model">
+              {selectedModelName === ALL_MODELS_VALUE ? (
+                <BilingualLabel label={L.dashboardModelAll} as="span" />
+              ) : (
+                selectedModelName
+              )}
+            </span>
           </div>
-          {showLedgerHint ? (
+          {showLedgerHint && !readOnlyMobile ? (
             <p className="dashboard__as-of-hint" role="note">
-              <BilingualLabel label={L.dashboardAsOfLedgerHint} compact as="span" />
+              <BilingualLabel label={L.dashboardAsOfLedgerHint} as="span" />
             </p>
           ) : null}
-          <p className="dashboard__scope-note">
-            <BilingualLabel label={L.multiItemNote} as="span" />
-          </p>
+          {!readOnlyMobile ? (
+            <p className="dashboard__scope-note">
+              <BilingualLabel label={L.multiItemNote} as="span" />
+            </p>
+          ) : null}
         </div>
         <div className="dashboard__header-actions">
           <label className="dashboard__model-select">
-            <BilingualLabel label={L.model} compact as="span" />
+            <BilingualLabel label={L.model} as="span" />
             <select
               value={selectedModelName}
               onChange={(e) => setSelectedModelName(e.target.value)}
-              aria-label="Model"
+              aria-label={formatKoEnInline(L.model)}
             >
-              <option value={ALL_MODELS_VALUE}>{formatKoEn(L.dashboardModelAll)}</option>
+              <option value={ALL_MODELS_VALUE} title={formatKoEnInline(L.dashboardModelAll)}>
+                {L.dashboardModelAll.ko}
+              </option>
               {enabledProducts.map((p) => (
                 <option key={p.modelName} value={p.modelName}>
                   {p.displayName}
@@ -258,6 +287,14 @@ export default function Dashboard({
         coverageWeeks={inventorySummary.minCoverageWeeks}
         unit={opsMeta.unit}
       />
+      <p className="dashboard__kpi-footnote page__hint">
+        <BilingualLabel
+          label={
+            inventoryRemoteSyncEnabled() ? L.dashboardInTransitQtyFootnoteRemote : L.dashboardInTransitQtyFootnote
+          }
+          as="span"
+        />
+      </p>
 
       <InventoryStatusPanel
         variant="compact"
@@ -266,53 +303,57 @@ export default function Dashboard({
         unit={opsMeta.unit}
       />
 
+      {!readOnlyMobile ? (
       <section className="dashboard__week-eta card" aria-labelledby="dash-week-eta-heading">
         <h2 id="dash-week-eta-heading" className="dashboard__week-eta-title">
-          <BilingualLabel label={L.thisWeekEtaSection} compact as="span" />
+          <BilingualLabel label={L.thisWeekEtaSection} as="span" />
         </h2>
         <p className="dashboard__week-eta-hint">
-          <BilingualLabel label={L.dashboardWeekEtaDesc} compact as="span" />
+          <BilingualLabel label={L.dashboardWeekEtaDesc} as="span" />
         </p>
         {weekEtaRows.length === 0 ? (
           <p className="dashboard__week-eta-empty">
-            <BilingualLabel label={L.dashboardWeekEtaEmpty} compact as="span" />
+            <BilingualLabel label={L.dashboardWeekEtaEmpty} as="span" />
           </p>
         ) : (
           <div className="table-wrap dashboard__week-eta-table">
-            <table className="ops-table">
+            <table className="ops-table dash-board-table dashboard__week-eta-grid">
               <thead>
                 <tr>
                   <th>
-                    <BilingualLabel label={L.containerNo} compact as="span" />
+                    <BilingualLabel label={L.containerNo} as="span" />
                   </th>
                   <th>
-                    <BilingualLabel label={L.model} compact as="span" />
+                    <BilingualLabel label={L.model} as="span" />
                   </th>
                   <th>
-                    <BilingualLabel label={L.partNo} compact as="span" />
+                    <BilingualLabel label={L.partNo} as="span" />
                   </th>
                   <th className="cell--num">
-                    <BilingualLabel label={L.qty} compact as="span" />
+                    <BilingualLabel label={L.qty} as="span" />
                   </th>
                   <th>
-                    <BilingualLabel label={L.dashboardWeekEtaWhCol} compact as="span" />
+                    <BilingualLabel label={L.dashboardWeekEtaWhCol} as="span" />
                   </th>
                   <th>
-                    <BilingualLabel label={L.etaPort} compact as="span" />
+                    <BilingualLabel label={L.etaPort} as="span" />
                   </th>
                 </tr>
               </thead>
               <tbody>
-                {weekEtaRows.map((row) => (
-                  <tr key={row.id}>
+                {weekEtaRows.map((row, idx) => (
+                  <tr
+                    key={row.id ?? `${row.containerNo}-${row.partNo}-${idx}`}
+                    className={weekEtaRowBands[idx] ? 'week-eta-row--band' : undefined}
+                  >
                     <td>{row.containerNo || '—'}</td>
                     <td>{row.modelName}</td>
                     <td>
                       <code>{row.partNo}</code>
                     </td>
                     <td className="cell--num">{formatInt(row.qty)}</td>
-                    <td>{row.etaWh || '—'}</td>
-                    <td>{row.etaPort || '—'}</td>
+                    <td className="dash-board-table__numeric">{row.etaWh || '—'}</td>
+                    <td className="dash-board-table__numeric">{row.etaPort || '—'}</td>
                   </tr>
                 ))}
               </tbody>
@@ -320,6 +361,7 @@ export default function Dashboard({
           </div>
         )}
       </section>
+      ) : null}
     </div>
   )
 }

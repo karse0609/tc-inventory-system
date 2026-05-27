@@ -1,25 +1,35 @@
 import { useCallback, useMemo, useRef, useState } from 'react'
 import { operationsMeta as defaultOps } from '../../data/logisticsSampleData'
-import { L, formatKoEn } from '../../i18n/labels'
+import { L, formatKoEn, formatKoEnInline } from '../../i18n/labels'
+import { saveJson, storageKeys } from '../../utils/appPersistence'
 import { skuCostKey } from '../../utils/unitCostKrw'
-import {
-  matrixToTsv,
-  parseQtyCell,
-  readClipboardText,
-  splitTsvToMatrix,
-  writeClipboardText,
-} from '../../utils/excelGridClipboard'
-import ExcelGridToolbar from '../grid/ExcelGridToolbar.jsx'
-import useGridNativePaste from '../../hooks/useGridNativePaste.js'
+import { parseQtyCell } from '../../utils/excelGridClipboard'
+import { downloadXlsxFromAoA, readXlsxFirstSheetMatrix } from '../../utils/excelFile'
+import { useMobileSimpleLayout } from '../../utils/mobileLayout'
+import PageDataToolbar from '../grid/PageDataToolbar.jsx'
 import BilingualLabel from '../BilingualLabel'
 import UserManagementPage from './UserManagementPage.jsx'
 import '../logistics/ops.css'
 import './pages.css'
 
+const EMPTY_COST_SEARCH = { model: '', part: '' }
+
+function lc(s) {
+  return String(s ?? '').toLowerCase()
+}
+
+function rowMatchesCostSearch(row, applied) {
+  if (applied.model && !lc(row.modelName).includes(applied.model)) return false
+  if (applied.part && !lc(row.partNo).includes(applied.part)) return false
+  return true
+}
+
 export default function SettingsPage({
   opsMeta,
   setOpsMeta,
   onResetAllData,
+  onDownloadAppDataBackup,
+  onImportAppDataBackup,
   isAdmin = false,
   users,
   setUsers,
@@ -29,7 +39,18 @@ export default function SettingsPage({
   masterItems = [],
   unitCostKrwBySku = {},
   setUnitCostKrwBySku,
+  remoteSync = {
+    enabled: false,
+    meta: {},
+    busyPull: false,
+    busyPush: false,
+    error: '',
+    lastOk: '',
+    onPull: async () => {},
+    onPush: async () => {},
+  },
 }) {
+  const isMobile = useMobileSimpleLayout()
   function patch(field, value) {
     setOpsMeta((o) => ({ ...o, [field]: value }))
   }
@@ -58,7 +79,16 @@ export default function SettingsPage({
   const [excelMsg, setExcelMsg] = useState('')
   const [selectedCost, setSelectedCost] = useState(() => new Set())
   const [invalidCostKeys, setInvalidCostKeys] = useState(() => new Set())
+  const [searchCostModel, setSearchCostModel] = useState('')
+  const [searchCostPart, setSearchCostPart] = useState('')
+  const [appliedCostSearch, setAppliedCostSearch] = useState(() => ({ ...EMPTY_COST_SEARCH }))
   const unitCostTableRef = useRef(null)
+  const importBackupInputRef = useRef(null)
+
+  const displayedSkuRows = useMemo(
+    () => skuRowsForCost.filter((r) => rowMatchesCostSearch(r, appliedCostSearch)),
+    [skuRowsForCost, appliedCostSearch],
+  )
 
   const toggleCostSelect = useCallback((mapKey) => {
     setSelectedCost((s) => {
@@ -71,16 +101,10 @@ export default function SettingsPage({
 
   const toggleCostSelectAll = useCallback(() => {
     setSelectedCost((s) => {
-      if (s.size === skuRowsForCost.length) return new Set()
-      return new Set(skuRowsForCost.map((r) => r.mapKey))
+      if (s.size === displayedSkuRows.length && displayedSkuRows.length > 0) return new Set()
+      return new Set(displayedSkuRows.map((r) => r.mapKey))
     })
-  }, [skuRowsForCost])
-
-  const firstSelectedCostIndex = useMemo(() => {
-    if (!selectedCost.size) return 0
-    const ix = skuRowsForCost.findIndex((r) => selectedCost.has(r.mapKey))
-    return ix >= 0 ? ix : 0
-  }, [skuRowsForCost, selectedCost])
+  }, [displayedSkuRows])
 
   const applyUnitCostMatrix = useCallback(
     (matrix, startRowIdx) => {
@@ -130,77 +154,81 @@ export default function SettingsPage({
       })
 
       setInvalidCostKeys(bad)
-      setExcelMsg(errs.length ? `!${errs.slice(0, 6).join('\n')}` : formatKoEn(L.excelPasteDone))
+      setExcelMsg(errs.length ? `!${errs.slice(0, 6).join('\n')}` : formatKoEn(L.excelUploadApplied))
     },
     [skuRowsForCost, setUnitCostKrwBySku],
   )
 
-  const handlePasteUnitCost = useCallback(async () => {
-    if (typeof setUnitCostKrwBySku !== 'function') return
-    const text = await readClipboardText()
-    if (!String(text).trim()) {
-      setExcelMsg(`!${formatKoEn(L.excelClipboardEmpty)}`)
-      return
+  async function handleUnitCostUpload(ev) {
+    const file = ev.target.files?.[0]
+    ev.target.value = ''
+    if (!file || typeof setUnitCostKrwBySku !== 'function') return
+    setExcelMsg('')
+    try {
+      const raw = await readXlsxFirstSheetMatrix(file)
+      const matrix =
+        raw.length && String(raw[0]?.[0] ?? '').toLowerCase().includes('model')
+          ? raw.slice(1)
+          : raw
+      if (!matrix.length) {
+        setExcelMsg(`!${formatKoEn(L.excelClipboardEmpty)}`)
+        return
+      }
+      applyUnitCostMatrix(matrix, 0)
+      setTimeout(() => setExcelMsg(''), 3500)
+    } catch (err) {
+      setExcelMsg(`!${String(err?.message || err)}`)
     }
-    const matrix = splitTsvToMatrix(text)
-    if (!matrix.length) {
-      setExcelMsg(`!${formatKoEn(L.excelClipboardEmpty)}`)
-      return
-    }
-    applyUnitCostMatrix(matrix, firstSelectedCostIndex)
-  }, [applyUnitCostMatrix, firstSelectedCostIndex, setUnitCostKrwBySku])
+  }
 
-  const onUnitCostNativePaste = useCallback(
-    (matrix, cell) => {
-      const row = Number.parseInt(String(cell.getAttribute('data-excel-row') ?? ''), 10)
-      applyUnitCostMatrix(matrix, Number.isFinite(row) ? row : 0)
-    },
-    [applyUnitCostMatrix],
-  )
-
-  useGridNativePaste({
-    tableRef: unitCostTableRef,
-    enabled: Boolean(isAdmin && skuRowsForCost.length > 0 && typeof setUnitCostKrwBySku === 'function'),
-    onPasteMatrix: onUnitCostNativePaste,
-  })
-
-  const handleCopyUnitCost = useCallback(async () => {
+  function handleUnitCostDownload() {
     setExcelMsg('')
     const header = ['Model', 'Part No', 'Unit cost (KRW)']
-    const src =
-      selectedCost.size > 0
-        ? skuRowsForCost.filter((r) => selectedCost.has(r.mapKey))
-        : skuRowsForCost
-    const body = src.map((row) => [
+    const body = displayedSkuRows.map((row) => [
       row.modelName,
       row.partNo,
       unitCostKrwBySku[row.mapKey] == null ? '' : String(unitCostKrwBySku[row.mapKey]),
     ])
-    await writeClipboardText(matrixToTsv([header, ...body]))
-    setExcelMsg(formatKoEn(L.excelCopyDone))
-  }, [skuRowsForCost, selectedCost, unitCostKrwBySku])
+    downloadXlsxFromAoA('SettingsUnitCost', 'UnitCost', [header, ...body])
+    setExcelMsg(formatKoEn(L.excelExportDone))
+    setTimeout(() => setExcelMsg(''), 2500)
+  }
 
-  const handleClearUnitCost = useCallback(() => {
-    if (!selectedCost.size || typeof setUnitCostKrwBySku !== 'function') return
-    setUnitCostKrwBySku((prev) => {
-      const next = { ...(prev || {}) }
-      for (const k of selectedCost) delete next[k]
-      return next
-    })
-    setSelectedCost(new Set())
-    setInvalidCostKeys(new Set())
-    setExcelMsg('')
-  }, [selectedCost, setUnitCostKrwBySku])
+  function handleUnitCostSave() {
+    if (typeof setUnitCostKrwBySku !== 'function') return
+    saveJson(storageKeys.unitCostsKrw, unitCostKrwBySku)
+    setExcelMsg(formatKoEn(remoteSync.enabled ? L.savedAfterEditWithRemote : L.savedToBrowserStorage))
+    setTimeout(() => setExcelMsg(''), 2500)
+  }
+
+  function handleImportBackupFile(ev) {
+    const file = ev.target.files?.[0]
+    ev.target.value = ''
+    if (!file || typeof onImportAppDataBackup !== 'function') return
+    const reader = new FileReader()
+    reader.onload = () => {
+      try {
+        const parsed = JSON.parse(String(reader.result ?? ''))
+        if (!window.confirm(formatKoEnInline(L.settingsDataImportConfirm))) return
+        onImportAppDataBackup(parsed)
+        window.alert(formatKoEn(L.settingsDataImportDone))
+      } catch {
+        window.alert(formatKoEn(L.settingsDataImportParseError))
+      }
+    }
+    reader.onerror = () => window.alert(formatKoEn(L.settingsDataImportParseError))
+    reader.readAsText(file, 'UTF-8')
+  }
 
   return (
     <div className="page">
       <header className="page__header page__header--row">
         <div>
           <h1>
-            <BilingualLabel label={L.settingsScreen} compact as="span" />
+            <BilingualLabel label={L.settingsScreen} as="span" />
           </h1>
           <p className="page__desc">
-            <BilingualLabel label={L.settingsSubtitle} compact as="span" />
+            <BilingualLabel label={L.settingsSubtitle} as="span" />
           </p>
           {onNavigateView && (
             <p className="page__actions">
@@ -209,7 +237,7 @@ export default function SettingsPage({
                 className="btn btn--ghost"
                 onClick={() => onNavigateView('master')}
               >
-                {formatKoEn(L.openWarehouseInventory)}
+                <BilingualLabel label={L.openWarehouseInventory} as="span" />
               </button>
             </p>
           )}
@@ -289,23 +317,78 @@ export default function SettingsPage({
       {isAdmin && typeof setUnitCostKrwBySku === 'function' && (
         <section className="card page__section">
           <h2>
-            <BilingualLabel label={L.settingsUnitCostTitle} compact as="span" />
+            <BilingualLabel label={L.settingsUnitCostTitle} as="span" />
           </h2>
           <p className="page__hint">
-            <BilingualLabel label={L.settingsUnitCostHint} compact as="span" />
+            <BilingualLabel label={L.settingsUnitCostHint} as="span" />
           </p>
           {skuRowsForCost.length === 0 ? (
             <p className="page__hint">
-              <BilingualLabel label={L.settingsUnitCostEmpty} compact as="span" />
+              <BilingualLabel label={L.settingsUnitCostEmpty} as="span" />
             </p>
           ) : (
             <>
-              <ExcelGridToolbar
-                onPasteFromExcel={handlePasteUnitCost}
-                onCopyToExcel={handleCopyUnitCost}
-                onClearSelected={handleClearUnitCost}
-                selectedCount={selectedCost.size}
+              <PageDataToolbar
+                hideUpload={isMobile}
+                hideDownload={isMobile}
+                onUploadChange={handleUnitCostUpload}
+                onDownload={handleUnitCostDownload}
+                downloadDisabled={displayedSkuRows.length === 0}
+                onSave={handleUnitCostSave}
                 message={excelMsg}
+                searchSlot={
+                  <form
+                    className="page-search-strip"
+                    onSubmit={(e) => {
+                      e.preventDefault()
+                      setAppliedCostSearch({
+                        model: searchCostModel.trim().toLowerCase(),
+                        part: searchCostPart.trim().toLowerCase(),
+                      })
+                    }}
+                  >
+                    <div className="page-search-strip__fields">
+                      <label className="page-search-strip__field">
+                        <span className="page-search-strip__label">
+                          <BilingualLabel label={L.pageSearchModel} as="span" />
+                        </span>
+                        <input
+                          className="cell-input"
+                          value={searchCostModel}
+                          onChange={(e) => setSearchCostModel(e.target.value)}
+                          aria-label={formatKoEnInline(L.pageSearchModel)}
+                        />
+                      </label>
+                      <label className="page-search-strip__field">
+                        <span className="page-search-strip__label">
+                          <BilingualLabel label={L.pageSearchPartNo} as="span" />
+                        </span>
+                        <input
+                          className="cell-input"
+                          value={searchCostPart}
+                          onChange={(e) => setSearchCostPart(e.target.value)}
+                          aria-label={formatKoEnInline(L.pageSearchPartNo)}
+                        />
+                      </label>
+                    </div>
+                    <div className="page-search-strip__actions">
+                      <button type="submit" className="btn btn--primary btn--toolbar">
+                        <BilingualLabel label={L.pageSearchButton} as="span" />
+                      </button>
+                      <button
+                        type="button"
+                        className="btn btn--ghost btn--toolbar"
+                        onClick={() => {
+                          setSearchCostModel('')
+                          setSearchCostPart('')
+                          setAppliedCostSearch({ ...EMPTY_COST_SEARCH })
+                        }}
+                      >
+                        <BilingualLabel label={L.pageSearchReset} as="span" />
+                      </button>
+                    </div>
+                  </form>
+                }
               />
               <div className="table-wrap">
                 <table ref={unitCostTableRef} className="ops-table settings-unit-cost-table">
@@ -316,21 +399,25 @@ export default function SettingsPage({
                           type="checkbox"
                           aria-label="Select all"
                           checked={
-                            skuRowsForCost.length > 0 &&
-                            selectedCost.size === skuRowsForCost.length
+                            displayedSkuRows.length > 0 &&
+                            selectedCost.size === displayedSkuRows.length
                           }
                           onChange={toggleCostSelectAll}
                         />
                       </th>
-                      <th>Model</th>
-                      <th>Part No</th>
                       <th>
-                        <BilingualLabel label={L.settingsUnitCostColKrw} compact as="span" />
+                        <BilingualLabel label={L.model} as="span" />
+                      </th>
+                      <th>
+                        <BilingualLabel label={L.partNo} as="span" />
+                      </th>
+                      <th>
+                        <BilingualLabel label={L.settingsUnitCostColKrw} as="span" />
                       </th>
                     </tr>
                   </thead>
                   <tbody>
-                    {skuRowsForCost.map((row, rowIdx) => (
+                    {displayedSkuRows.map((row) => (
                       <tr
                         key={row.mapKey}
                         className={
@@ -353,8 +440,6 @@ export default function SettingsPage({
                           <input
                             type="number"
                             className="cell-input cell-input--num"
-                            data-excel-paste
-                            data-excel-row={rowIdx}
                             min={0}
                             step={1}
                             value={
@@ -386,6 +471,112 @@ export default function SettingsPage({
           )}
         </section>
       )}
+
+      <section className="card page__section">
+        <h2>
+          <BilingualLabel label={L.settingsRemoteSyncTitle} as="span" />
+        </h2>
+        <p className="page__hint">
+          <BilingualLabel label={L.settingsRemoteSyncHint} as="span" />
+        </p>
+        <p className="page__hint">
+          <BilingualLabel
+            label={remoteSync.enabled ? L.settingsRemoteActive : L.settingsRemoteDisabled}
+            as="span"
+          />
+        </p>
+        {remoteSync.enabled && remoteSync.meta && (
+          <ul className="page__hint" style={{ margin: '0.25rem 0 0.65rem', paddingLeft: '1.1rem' }}>
+            {remoteSync.meta.lastPullOkAt && (
+              <li>
+                <BilingualLabel label={L.settingsRemoteLastPull} as="span" />:{' '}
+                {String(remoteSync.meta.lastPullOkAt)}
+              </li>
+            )}
+            {remoteSync.meta.lastPushOkAt && (
+              <li>
+                <BilingualLabel label={L.settingsRemoteLastPush} as="span" />:{' '}
+                {String(remoteSync.meta.lastPushOkAt)}
+              </li>
+            )}
+            {remoteSync.meta.lastRemoteUpdatedAt && (
+              <li>
+                <BilingualLabel label={L.settingsRemoteServerTime} as="span" />:{' '}
+                {String(remoteSync.meta.lastRemoteUpdatedAt)}
+              </li>
+            )}
+          </ul>
+        )}
+        {remoteSync.error ? (
+          <p className="page__hint page__hint--error" role="alert">
+            {remoteSync.error}
+          </p>
+        ) : null}
+        <div className="page__actions" style={{ flexWrap: 'wrap', gap: '0.5rem' }}>
+          <button
+            type="button"
+            className="btn btn--ghost"
+            disabled={!remoteSync.enabled || remoteSync.busyPull}
+            onClick={() => void remoteSync.onPull?.()}
+          >
+            {remoteSync.busyPull ? (
+              <BilingualLabel label={L.settingsRemoteBusy} as="span" />
+            ) : (
+              <BilingualLabel label={L.settingsRemotePull} as="span" />
+            )}
+          </button>
+          <button
+            type="button"
+            className="btn btn--primary"
+            disabled={!remoteSync.enabled || remoteSync.busyPush}
+            onClick={() => void remoteSync.onPush?.()}
+          >
+            {remoteSync.busyPush ? (
+              <BilingualLabel label={L.settingsRemoteBusy} as="span" />
+            ) : (
+              <BilingualLabel label={L.settingsRemotePush} as="span" />
+            )}
+          </button>
+        </div>
+      </section>
+
+      <section className="card page__section">
+        <h2>
+          <BilingualLabel label={L.settingsDataBackupTitle} as="span" />
+        </h2>
+        <p className="page__hint">
+          <BilingualLabel
+            label={remoteSync.enabled ? L.settingsDataBackupHintRemote : L.settingsDataBackupHint}
+            as="span"
+          />
+        </p>
+        <div className="page__actions" style={{ flexWrap: 'wrap', gap: '0.5rem' }}>
+          {typeof onDownloadAppDataBackup === 'function' && (
+            <button type="button" className="btn btn--ghost" onClick={onDownloadAppDataBackup}>
+              <BilingualLabel label={L.settingsDataExportButton} as="span" />
+            </button>
+          )}
+          {typeof onImportAppDataBackup === 'function' && (
+            <>
+              <input
+                ref={importBackupInputRef}
+                type="file"
+                accept="application/json,.json"
+                className="page-data-toolbar__file"
+                style={{ display: 'none' }}
+                onChange={handleImportBackupFile}
+              />
+              <button
+                type="button"
+                className="btn btn--primary"
+                onClick={() => importBackupInputRef.current?.click()}
+              >
+                <BilingualLabel label={L.settingsDataImportButton} as="span" />
+              </button>
+            </>
+          )}
+        </div>
+      </section>
 
       <section className="card page__section">
         <h2>Data reset</h2>

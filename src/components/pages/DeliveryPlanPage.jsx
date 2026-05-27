@@ -1,20 +1,17 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import BilingualLabel from '../BilingualLabel'
 import { operationsMeta } from '../../data/logisticsSampleData'
-import { formatKoEn, L } from '../../i18n/labels'
+import { formatKoEn, formatKoEnInline, L } from '../../i18n/labels'
 import { saveJson, storageKeys } from '../../utils/appPersistence'
 import { buildWeekHorizon, planWeekMonday } from '../../utils/deliveryPlanHorizon'
 import { getWeekRange } from '../../utils/logisticsMetrics'
-import {
-  matrixToTsv,
-  parseQtyCell,
-  readClipboardText,
-  splitTsvToMatrix,
-  writeClipboardText,
-} from '../../utils/excelGridClipboard'
+import useGridNativePaste from '../../hooks/useGridNativePaste'
+import { parseQtyCell } from '../../utils/excelGridClipboard'
+import { downloadXlsxFromAoA, readXlsxFirstSheetMatrix } from '../../utils/excelFile'
+import { useMobileSimpleLayout } from '../../utils/mobileLayout'
 import { newId } from '../../utils/newId'
-import useGridNativePaste from '../../hooks/useGridNativePaste.js'
-import ExcelGridToolbar from '../grid/ExcelGridToolbar.jsx'
+import { inventoryRemoteSyncEnabled } from '../../utils/inventoryRemoteSync'
+import PageDataToolbar from '../grid/PageDataToolbar.jsx'
 import '../logistics/ops.css'
 import './pages.css'
 import './DeliveryPlanPage.css'
@@ -22,6 +19,18 @@ import './DeliveryPlanPage.css'
 const DEFAULT_PAST = 2
 const DEFAULT_FUTURE = 22
 const MAX_PAST_WEEKS = 52
+
+const EMPTY_PART_SEARCH = { model: '', part: '' }
+
+function lc(s) {
+  return String(s ?? '').toLowerCase()
+}
+
+function rowMatchesPartSearch(spec, applied) {
+  if (applied.model && !lc(spec.modelName).includes(applied.model)) return false
+  if (applied.part && !lc(spec.partNo).includes(applied.part)) return false
+  return true
+}
 
 /** 향후 주 잠금 UI — true로 바꾸면 정책상 미래 주 편집 비활성화 */
 const FUTURE_WEEKS_LOCKED = false
@@ -109,7 +118,7 @@ function WeekCell({ col, plan, disabled, asOfDate, onQtyChange, onFocusAnchor, r
   const lockedByPolicy = FUTURE_WEEKS_LOCKED && isFutureWeek
   const readOnly = disabled || lockedByRow || lockedByPolicy
   const val = plan?.qty ?? ''
-  const ariaWeek = `${formatKoEn(L.deliveryPlanWeeklyQty)} · ${col.headerShort}`
+  const ariaWeek = `${formatKoEnInline(L.deliveryPlanWeeklyQty)} · ${col.headerShort}`
 
   return (
     <td className="dp-week-cell dp-week-col" title={`${col.week} · ${mon}`}>
@@ -138,6 +147,7 @@ export default function DeliveryPlanPage({
   setDeliveryPlans,
   opsMeta,
 }) {
+  const isMobile = useMobileSimpleLayout()
   const asOfDate = opsMeta?.asOfDate ?? operationsMeta.asOfDate
   const [pastWeeks, setPastWeeks] = useState(DEFAULT_PAST)
   const [futureWeeks, setFutureWeeks] = useState(DEFAULT_FUTURE)
@@ -148,6 +158,9 @@ export default function DeliveryPlanPage({
   const [excelMsg, setExcelMsg] = useState('')
   const [selected, setSelected] = useState(() => new Set())
   const [invalidRowKeys, setInvalidRowKeys] = useState(() => new Set())
+  const [searchModel, setSearchModel] = useState('')
+  const [searchPart, setSearchPart] = useState('')
+  const [appliedPartSearch, setAppliedPartSearch] = useState(() => ({ ...EMPTY_PART_SEARCH }))
   /** 붙여넣기 시작 위치: 행 인덱스 + 열 앵커(모델/부품/주차) */
   const pasteAnchorRef = useRef({ rowIndex: 0, colKind: 'week', weekColIndex: 0 })
   const dpTableRef = useRef(null)
@@ -173,6 +186,11 @@ export default function DeliveryPlanPage({
     [masterItems, deliveryPlans, draftRows],
   )
 
+  const displayedPartRows = useMemo(
+    () => partRows.filter((p) => rowMatchesPartSearch(p, appliedPartSearch)),
+    [partRows, appliedPartSearch],
+  )
+
   useEffect(() => {
     if (!deleteTarget) return undefined
     const onKey = (e) => {
@@ -193,7 +211,9 @@ export default function DeliveryPlanPage({
 
   function handleSave() {
     saveJson(storageKeys.plans, deliveryPlans)
-    setSaveHint('saved')
+    setSaveHint(
+      formatKoEn(inventoryRemoteSyncEnabled() ? L.savedAfterEditWithRemote : L.savedToBrowserStorage),
+    )
     setTimeout(() => setSaveHint(''), 2500)
   }
 
@@ -243,20 +263,10 @@ export default function DeliveryPlanPage({
 
   const toggleSelectAll = useCallback(() => {
     setSelected((s) => {
-      if (s.size === partRows.length) return new Set()
-      return new Set(partRows.map((p) => p.rowKey))
+      if (s.size === displayedPartRows.length && displayedPartRows.length > 0) return new Set()
+      return new Set(displayedPartRows.map((p) => p.rowKey))
     })
-  }, [partRows])
-
-  const pickStartRowIndex = useCallback(() => {
-    const indices = partRows
-      .map((p, i) => (selected.has(p.rowKey) ? i : -1))
-      .filter((i) => i >= 0)
-    if (indices.length) return Math.min(...indices)
-    const { rowIndex } = pasteAnchorRef.current
-    if (!partRows.length) return 0
-    return Math.max(0, Math.min(rowIndex, partRows.length - 1))
-  }, [partRows, selected])
+  }, [displayedPartRows])
 
   const weekPasteReadOnly = useCallback(
     (spec, col, plan) => {
@@ -426,51 +436,65 @@ export default function DeliveryPlanPage({
       setExcelMsg(
         errs.length
           ? `!${errs.slice(0, 8).join('\n')}${errs.length > 8 ? '\n…' : ''}`
-          : formatKoEn(L.excelPasteDone),
+          : formatKoEn(L.excelUploadApplied),
       )
     },
     [deliveryPlans, draftRows, partRows, columns, weekPasteReadOnly],
   )
 
-  const handlePasteFromExcel = useCallback(async () => {
-    const text = await readClipboardText()
-    if (!String(text).trim()) {
-      setExcelMsg(`!${formatKoEn(L.excelClipboardEmpty)}`)
-      return
-    }
-    const matrix = splitTsvToMatrix(text)
-    if (!matrix.length) {
-      setExcelMsg(`!${formatKoEn(L.excelClipboardEmpty)}`)
-      return
-    }
-    runPlanMatrixPaste(matrix, pasteAnchorRef.current, pickStartRowIndex())
-  }, [runPlanMatrixPaste, pickStartRowIndex])
-
-  const onDpNativePaste = useCallback(
+  const onDpPasteMatrix = useCallback(
     (matrix, cell) => {
-      const row = Number.parseInt(String(cell.getAttribute('data-dp-row') ?? ''), 10)
-      const kindRaw = cell.getAttribute('data-dp-kind') || 'week'
-      const weekIdx = Number.parseInt(String(cell.getAttribute('data-dp-week-idx') ?? ''), 10)
-      const kind =
-        kindRaw === 'model' || kindRaw === 'part' || kindRaw === 'week' ? kindRaw : 'week'
-      const anchor = {
-        rowIndex: Number.isFinite(row) ? row : 0,
-        colKind: kind,
-        weekColIndex: Number.isFinite(weekIdx) ? weekIdx : 0,
-      }
-      pasteAnchorRef.current = anchor
-      runPlanMatrixPaste(matrix, anchor, Number.isFinite(row) ? row : 0)
+      const el = cell
+      if (!(el instanceof HTMLElement)) return
+      const rowIndexDisp = Number(el.dataset.dpRow ?? NaN)
+      if (!Number.isFinite(rowIndexDisp)) return
+      const kind = el.dataset.dpKind || 'week'
+      const weekColIndex = Number(el.dataset.dpWeekIdx ?? 0) || 0
+      const spec = displayedPartRows[rowIndexDisp]
+      if (!spec) return
+      const startRowIdx = partRows.findIndex((p) => p.rowKey === spec.rowKey)
+      if (startRowIdx < 0) return
+      runPlanMatrixPaste(matrix, { rowIndex: rowIndexDisp, colKind: kind, weekColIndex }, startRowIdx)
     },
-    [runPlanMatrixPaste],
+    [displayedPartRows, partRows, runPlanMatrixPaste],
   )
 
-  useGridNativePaste({ tableRef: dpTableRef, onPasteMatrix: onDpNativePaste })
+  useGridNativePaste({
+    tableRef: dpTableRef,
+    enabled: !isMobile,
+    onPasteMatrix: onDpPasteMatrix,
+  })
 
-  const handleCopyToExcel = useCallback(async () => {
+  async function handleDpUpload(ev) {
+    const file = ev.target.files?.[0]
+    ev.target.value = ''
+    if (!file) return
+    setExcelMsg('')
+    try {
+      const raw = await readXlsxFirstSheetMatrix(file)
+      const matrix =
+        raw.length && String(raw[0]?.[0] ?? '').toLowerCase().includes('model')
+          ? raw.slice(1)
+          : raw
+      if (!matrix.length) {
+        setExcelMsg(`!${formatKoEn(L.excelClipboardEmpty)}`)
+        return
+      }
+      const start =
+        displayedPartRows.length > 0
+          ? Math.max(0, partRows.findIndex((p) => p.rowKey === displayedPartRows[0].rowKey))
+          : 0
+      runPlanMatrixPaste(matrix, { rowIndex: 0, colKind: 'model', weekColIndex: 0 }, start)
+      setTimeout(() => setExcelMsg(''), 3500)
+    } catch (err) {
+      setExcelMsg(`!${String(err?.message || err)}`)
+    }
+  }
+
+  function handleDpDownload() {
     setExcelMsg('')
     const header = ['Model', 'Part No', ...columns.map((c) => c.headerShort ?? c.week ?? '')]
-    const src = selected.size > 0 ? partRows.filter((p) => selected.has(p.rowKey)) : partRows
-    const body = src.map((spec) => {
+    const body = displayedPartRows.map((spec) => {
       const cells = [spec.modelName ?? '', spec.partNo ?? '']
       for (const col of columns) {
         const wk = weekStartFromCol(col)
@@ -480,26 +504,10 @@ export default function DeliveryPlanPage({
       }
       return cells
     })
-    await writeClipboardText(matrixToTsv([header, ...body]))
-    setExcelMsg(formatKoEn(L.excelCopyDone))
-  }, [partRows, selected, columns, planByKey])
-
-  const handleClearSelected = useCallback(() => {
-    if (!selected.size) return
-    setDeliveryPlans((plans) => {
-      let next = [...plans]
-      for (const rk of selected) {
-        const spec = partRows.find((p) => p.rowKey === rk)
-        if (!spec || spec.kind === 'draft') continue
-        next = next.filter((p) => !(p.modelName === spec.modelName && p.partNo === spec.partNo))
-      }
-      return next
-    })
-    setDraftRows((drafts) => drafts.filter((d) => !selected.has(`d:${d.id}`)))
-    setSelected(new Set())
-    setInvalidRowKeys(new Set())
-    setExcelMsg('')
-  }, [selected, partRows])
+    downloadXlsxFromAoA('DeliveryPlan', 'DeliveryPlan', [header, ...body])
+    setExcelMsg(formatKoEn(L.excelExportDone))
+    setTimeout(() => setExcelMsg(''), 2500)
+  }
 
   const pastOptions = useMemo(
     () => Array.from({ length: MAX_PAST_WEEKS + 1 }, (_, i) => i),
@@ -510,96 +518,151 @@ export default function DeliveryPlanPage({
     <div className="page delivery-plan-page">
       <header className="page__header">
         <h1>
-          <BilingualLabel label={L.deliveryPlanScreenTitle} compact as="span" />
+          <BilingualLabel label={L.deliveryPlanScreenTitle} as="span" />
         </h1>
         <p className="page__desc">
-          <BilingualLabel label={L.deliveryPlanPageDesc} compact as="span" />
+          <BilingualLabel
+            label={inventoryRemoteSyncEnabled() ? L.deliveryPlanPageDescRemote : L.deliveryPlanPageDesc}
+            as="span"
+          />
         </p>
         <p className="page__desc page__desc--secondary">
-          <BilingualLabel label={L.deliveryPlanScreenSubtitle} compact as="span" />
+          <BilingualLabel label={L.deliveryPlanScreenSubtitle} as="span" />
         </p>
-        <ExcelGridToolbar
-          onPasteFromExcel={handlePasteFromExcel}
-          onCopyToExcel={handleCopyToExcel}
-          onClearSelected={handleClearSelected}
-          selectedCount={selected.size}
+        <PageDataToolbar
+          hideUpload={isMobile}
+          hideDownload={isMobile}
+          onUploadChange={handleDpUpload}
+          onDownload={handleDpDownload}
+          downloadDisabled={displayedPartRows.length === 0}
+          onSave={handleSave}
           message={excelMsg}
-        />
-        <div className="delivery-plan-page__toolbar">
-          <label>
-            <BilingualLabel label={L.previousWeeksShown} compact as="span" />
-            <select
-              value={pastWeeks}
-              onChange={(e) => setPastWeeks(Number(e.target.value))}
-              aria-label={formatKoEn(L.previousWeeksShown)}
-            >
-              {pastOptions.map((n) => (
-                <option key={n} value={n}>
-                  {n}
-                </option>
-              ))}
-            </select>
-          </label>
-          <label>
-            <BilingualLabel label={L.futureWeeksShown} compact as="span" />
-            <select
-              value={futureWeeks}
-              onChange={(e) => setFutureWeeks(Number(e.target.value))}
-              aria-label={formatKoEn(L.futureWeeksShown)}
-            >
-              <option value={12}>12</option>
-              <option value={18}>18</option>
-              <option value={22}>22</option>
-              <option value={26}>26</option>
-              <option value={34}>34</option>
-            </select>
-          </label>
-          <div className="delivery-plan-page__nav">
-            <button
-              type="button"
-              className="btn btn--ghost"
-              onClick={() => setWeekOffset((o) => o - 12)}
-            >
-              {formatKoEn(L.previous12Weeks)}
-            </button>
-            <button
-              type="button"
-              className="btn btn--ghost"
-              onClick={() => setWeekOffset((o) => o + 12)}
-            >
-              {formatKoEn(L.next12Weeks)}
-            </button>
-            <button
-              type="button"
-              className="btn btn--ghost"
-              onClick={() => {
-                setWeekOffset(0)
-                setPastWeeks(DEFAULT_PAST)
-                setFutureWeeks(DEFAULT_FUTURE)
+          extra={
+            <div className="delivery-plan-page__toolbar delivery-plan-page__toolbar--inline">
+              <label>
+                <BilingualLabel label={L.previousWeeksShown} as="span" />
+                <select
+                  value={pastWeeks}
+                  onChange={(e) => setPastWeeks(Number(e.target.value))}
+                  aria-label={formatKoEnInline(L.previousWeeksShown)}
+                >
+                  {pastOptions.map((n) => (
+                    <option key={n} value={n}>
+                      {n}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label>
+                <BilingualLabel label={L.futureWeeksShown} as="span" />
+                <select
+                  value={futureWeeks}
+                  onChange={(e) => setFutureWeeks(Number(e.target.value))}
+                  aria-label={formatKoEnInline(L.futureWeeksShown)}
+                >
+                  <option value={12}>12</option>
+                  <option value={18}>18</option>
+                  <option value={22}>22</option>
+                  <option value={26}>26</option>
+                  <option value={34}>34</option>
+                </select>
+              </label>
+              <div className="delivery-plan-page__nav">
+                <button
+                  type="button"
+                  className="btn btn--ghost btn--toolbar"
+                  onClick={() => setWeekOffset((o) => o - 12)}
+                >
+                  <BilingualLabel label={L.previous12Weeks} as="span" />
+                </button>
+                <button
+                  type="button"
+                  className="btn btn--ghost btn--toolbar"
+                  onClick={() => setWeekOffset((o) => o + 12)}
+                >
+                  <BilingualLabel label={L.next12Weeks} as="span" />
+                </button>
+                <button
+                  type="button"
+                  className="btn btn--ghost btn--toolbar"
+                  onClick={() => {
+                    setWeekOffset(0)
+                    setPastWeeks(DEFAULT_PAST)
+                    setFutureWeeks(DEFAULT_FUTURE)
+                  }}
+                >
+                  <BilingualLabel label={L.currentBaseline} as="span" />
+                </button>
+              </div>
+              <span className="page__hint" style={{ margin: 0 }}>
+                {formatKoEnInline(L.opsQueryDateKst)}: <strong>{asOfDate}</strong> ·{' '}
+                {formatKoEnInline(L.columnsCount)} {columns.length} {formatKoEnInline(L.weeks)}
+                {weekOffset !== 0
+                  ? ` · ${formatKoEnInline(L.viewOffsetWeeks)} ${weekOffset > 0 ? '+' : ''}${weekOffset} ${formatKoEnInline(L.weeks)}`
+                  : ''}
+              </span>
+              <button type="button" className="btn btn--ghost btn--toolbar" onClick={addDraftRow}>
+                <BilingualLabel label={L.addSkuRow} as="span" />
+              </button>
+            </div>
+          }
+          searchSlot={
+            <form
+              className="page-search-strip"
+              onSubmit={(e) => {
+                e.preventDefault()
+                setAppliedPartSearch({
+                  model: searchModel.trim().toLowerCase(),
+                  part: searchPart.trim().toLowerCase(),
+                })
               }}
             >
-              {formatKoEn(L.currentBaseline)}
-            </button>
-          </div>
-          <span className="page__hint" style={{ margin: 0 }}>
-            {formatKoEn(L.opsQueryDateKst)}: <strong>{asOfDate}</strong> · {formatKoEn(L.columnsCount)}{' '}
-            {columns.length} {formatKoEn(L.weeks)}
-            {weekOffset !== 0
-              ? ` · ${formatKoEn(L.viewOffsetWeeks)} ${weekOffset > 0 ? '+' : ''}${weekOffset} ${formatKoEn(L.weeks)}`
-              : ''}
-          </span>
-          <div className="page__actions" style={{ marginLeft: 'auto' }}>
-            <button type="button" className="btn btn--ghost" onClick={addDraftRow}>
-              {formatKoEn(L.addSkuRow)}
-            </button>
-            <button type="button" className="btn btn--primary" onClick={handleSave}>
-              {formatKoEn(L.save)}
-            </button>
-          </div>
-        </div>
+              <div className="page-search-strip__fields">
+                <label className="page-search-strip__field">
+                  <span className="page-search-strip__label">
+                    <BilingualLabel label={L.pageSearchModel} as="span" />
+                  </span>
+                  <input
+                    className="cell-input"
+                    value={searchModel}
+                    onChange={(e) => setSearchModel(e.target.value)}
+                    aria-label={formatKoEnInline(L.pageSearchModel)}
+                  />
+                </label>
+                <label className="page-search-strip__field">
+                  <span className="page-search-strip__label">
+                    <BilingualLabel label={L.pageSearchPartNo} as="span" />
+                  </span>
+                  <input
+                    className="cell-input"
+                    value={searchPart}
+                    onChange={(e) => setSearchPart(e.target.value)}
+                    aria-label={formatKoEnInline(L.pageSearchPartNo)}
+                  />
+                </label>
+              </div>
+              <div className="page-search-strip__actions">
+                <button type="submit" className="btn btn--primary btn--toolbar">
+                  <BilingualLabel label={L.pageSearchButton} as="span" />
+                </button>
+                <button
+                  type="button"
+                  className="btn btn--ghost btn--toolbar"
+                  onClick={() => {
+                    setSearchModel('')
+                    setSearchPart('')
+                    setAppliedPartSearch({ ...EMPTY_PART_SEARCH })
+                  }}
+                >
+                  <BilingualLabel label={L.pageSearchReset} as="span" />
+                </button>
+              </div>
+            </form>
+          }
+        />
         {saveHint && (
           <p className="page__hint" role="status">
-            <BilingualLabel label={L.savedToBrowserStorage} compact as="span" />
+            {saveHint}
           </p>
         )}
       </header>
@@ -618,7 +681,7 @@ export default function DeliveryPlanPage({
             onClick={(e) => e.stopPropagation()}
           >
             <h2 id="dp-delete-title" className="dp-modal__title">
-              <BilingualLabel label={L.deletePartPlansTitle} compact as="span" />
+              <BilingualLabel label={L.deletePartPlansTitle} as="span" />
             </h2>
             <div className="dp-modal__body">
               <p>{L.deletePartPlansConfirm.ko}</p>
@@ -626,10 +689,10 @@ export default function DeliveryPlanPage({
             </div>
             <div className="dp-modal__actions">
               <button type="button" className="btn btn--ghost" onClick={cancelDeletePartPlans}>
-                {formatKoEn(L.actionCancel)}
+                <BilingualLabel label={L.actionCancel} as="span" />
               </button>
               <button type="button" className="btn btn--primary dp-btn-delete-confirm" onClick={confirmDeletePartPlans}>
-                {formatKoEn(L.actionDelete)}
+                <BilingualLabel label={L.actionDelete} as="span" />
               </button>
             </div>
           </div>
@@ -644,15 +707,17 @@ export default function DeliveryPlanPage({
                 <input
                   type="checkbox"
                   aria-label="Select all"
-                  checked={partRows.length > 0 && selected.size === partRows.length}
+                  checked={
+                    displayedPartRows.length > 0 && selected.size === displayedPartRows.length
+                  }
                   onChange={toggleSelectAll}
                 />
               </th>
               <th className="dp-th--sticky dp-col-model">
-                <BilingualLabel label={L.model} compact as="span" />
+                <BilingualLabel label={L.model} as="span" />
               </th>
               <th className="dp-th--sticky-end dp-col-part">
-                <BilingualLabel label={L.partNo} compact as="span" />
+                <BilingualLabel label={L.partNo} as="span" />
               </th>
               {columns.map((c) => {
                 const wk = weekStartFromCol(c)
@@ -662,13 +727,13 @@ export default function DeliveryPlanPage({
                   </th>
                 )
               })}
-              <th className="dp-th-actions" scope="col" aria-label={formatKoEn(L.actionDelete)}>
-                <BilingualLabel label={L.actionDelete} compact as="span" />
+              <th className="dp-th-actions" scope="col" aria-label={formatKoEnInline(L.actionDelete)}>
+                <BilingualLabel label={L.actionDelete} as="span" />
               </th>
             </tr>
           </thead>
           <tbody>
-            {partRows.map((spec, rowIndex) => {
+            {displayedPartRows.map((spec, rowIndex) => {
               const { modelName, partNo, rowKey, kind, draftId } = spec
               const cellDisabled =
                 (kind === 'draft' && (!modelName || !partNo)) ||
@@ -708,7 +773,7 @@ export default function DeliveryPlanPage({
                       <input
                         className="dp-input"
                         value={modelName}
-                        placeholder={formatKoEn(L.model)}
+                        placeholder={formatKoEnInline(L.model)}
                         data-excel-paste
                         data-dp-row={rowIndex}
                         data-dp-kind="model"
@@ -742,7 +807,7 @@ export default function DeliveryPlanPage({
                       <input
                         className="dp-input"
                         value={partNo}
-                        placeholder={formatKoEn(L.partNo)}
+                        placeholder={formatKoEnInline(L.partNo)}
                         data-excel-paste
                         data-dp-row={rowIndex}
                         data-dp-kind="part"
@@ -756,7 +821,7 @@ export default function DeliveryPlanPage({
                       <input
                         className="dp-input"
                         value={partNo}
-                        placeholder={formatKoEn(L.partNo)}
+                        placeholder={formatKoEnInline(L.partNo)}
                         data-excel-paste
                         data-dp-row={rowIndex}
                         data-dp-kind="part"
@@ -804,15 +869,15 @@ export default function DeliveryPlanPage({
                       type="button"
                       className="btn btn--ghost dp-btn-delete-row"
                       disabled={deleteDisabled}
-                      title={formatKoEn(L.actionDelete)}
-                      aria-label={formatKoEn(L.actionDelete)}
+                      title={formatKoEnInline(L.actionDelete)}
+                      aria-label={formatKoEnInline(L.actionDelete)}
                       onClick={() => {
                         if (deleteDisabled) return
                         if (showDeleteConfirm) requestDeleteRow(spec)
                         else removeDraft(draftId)
                       }}
                     >
-                      {formatKoEn(L.actionDelete)}
+                      <BilingualLabel label={L.actionDelete} as="span" />
                     </button>
                   </td>
                 </tr>

@@ -1,4 +1,5 @@
 import { newId } from './newId'
+import { normalizeTransitStatus, TRANSIT_ROW_STATUS } from './inTransitStatus'
 
 /**
  * localStorage 등 레거시 In-Transit 행 → 현재 스키마
@@ -22,6 +23,10 @@ export function migrateInTransitRow(row) {
       forwarder: '',
       hbl: '',
       tcTechNo: '',
+      transitStatus: TRANSIT_ROW_STATUS.IN_TRANSIT,
+      receiptDate: '',
+      receivedBy: '',
+      receivedAtIso: '',
     }
   }
 
@@ -37,6 +42,8 @@ export function migrateInTransitRow(row) {
   void forwarder
   void hbl
 
+  const transitStatus = normalizeTransitStatus(row.transitStatus)
+
   return {
     ...rest,
     id: row.id ?? newId('tr-mig'),
@@ -47,6 +54,10 @@ export function migrateInTransitRow(row) {
     forwarder: row.forwarder ?? '',
     hbl: row.hbl ?? '',
     tcTechNo: row.tcTechNo ?? '',
+    transitStatus,
+    receiptDate: String(row.receiptDate ?? '').trim(),
+    receivedBy: String(row.receivedBy ?? '').trim(),
+    receivedAtIso: String(row.receivedAtIso ?? row.receivedAt ?? '').trim(),
   }
 }
 

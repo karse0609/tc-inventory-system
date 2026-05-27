@@ -1,17 +1,21 @@
 import BilingualLabel from '../BilingualLabel'
+import { getCoverageStatus } from '../../config/inventoryPolicy'
 import { L } from '../../i18n/labels'
-import { formatKrwTotal } from '../../utils/unitCostKrw'
+import { formatKrwInteger } from '../../utils/unitCostKrw'
 
 function formatNumber(value) {
   return new Intl.NumberFormat('ko-KR').format(Math.round(value))
 }
 
 function coverageCardClass(coverageWeeks) {
-  if (coverageWeeks === Infinity) return 'dash-kpi__card--cov-good'
-  if (!Number.isFinite(coverageWeeks)) return 'dash-kpi__card--cov-neutral'
-  if (coverageWeeks >= 4) return 'dash-kpi__card--cov-good'
-  if (coverageWeeks >= 3) return 'dash-kpi__card--cov-warn'
-  return 'dash-kpi__card--cov-bad'
+  const status = getCoverageStatus(coverageWeeks)
+  const map = {
+    critical: 'dash-kpi__card--cov-critical',
+    warning: 'dash-kpi__card--cov-warning',
+    stable: 'dash-kpi__card--cov-stable',
+    overstock: 'dash-kpi__card--cov-overstock',
+  }
+  return map[status] || 'dash-kpi__card--cov-neutral'
 }
 
 function coverageDisplay(coverageWeeks) {
@@ -33,25 +37,24 @@ export default function DashboardCoreKpis({
   unit,
 }) {
   const totalKrw = (Number(warehouseValue) || 0) + (Number(inTransitValue) || 0)
-  const krwMeta = 'KRW'
 
   const cards = [
     { label: L.dashboardWarehouseQty, value: formatNumber(warehouseQty), meta: unit },
     {
       label: L.dashboardWarehouseValue,
-      value: formatKrwTotal(warehouseValue),
-      meta: krwMeta,
+      value: formatKrwInteger(warehouseValue),
+      meta: 'KRW',
     },
     { label: L.dashboardInTransitQty, value: formatNumber(inTransitQty), meta: unit },
     {
       label: L.dashboardInTransitValue,
-      value: formatKrwTotal(inTransitValue),
-      meta: krwMeta,
+      value: formatKrwInteger(inTransitValue),
+      meta: 'KRW',
     },
     {
       label: L.totalInventoryValue,
-      value: formatKrwTotal(totalKrw),
-      meta: krwMeta,
+      value: formatKrwInteger(totalKrw),
+      meta: 'KRW',
     },
     {
       label: L.dashboardThisWeekEtaQty,
@@ -61,7 +64,7 @@ export default function DashboardCoreKpis({
     {
       label: L.coverageWeeks,
       value: coverageDisplay(coverageWeeks),
-      meta: <BilingualLabel label={L.weeks} compact as="span" />,
+      meta: 'weeks',
       extraClass: coverageCardClass(coverageWeeks),
     },
   ]
@@ -74,10 +77,12 @@ export default function DashboardCoreKpis({
           className={`dash-kpi__card ${card.extraClass || ''}`}
         >
           <span className="dash-kpi__label">
-            <BilingualLabel label={card.label} compact as="span" />
+            <BilingualLabel label={card.label} as="span" />
           </span>
           <strong className="dash-kpi__value">{card.value}</strong>
-          <span className="dash-kpi__meta">{card.meta}</span>
+          {card.meta != null && card.meta !== '' ? (
+            <span className="dash-kpi__meta">{card.meta}</span>
+          ) : null}
         </article>
       ))}
     </section>

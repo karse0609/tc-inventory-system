@@ -1,4 +1,5 @@
 import BilingualLabel from '../BilingualLabel'
+import { getCoverageStatus } from '../../config/inventoryPolicy'
 import { L } from '../../i18n/labels'
 
 function formatNumber(value) {
@@ -17,6 +18,7 @@ export default function TodayStatus({ metrics, unit, currency = 'USD' }) {
   const cov = metrics.coverageWeeks
   const covFinite = Number.isFinite(cov)
   const covDisplay = covFinite ? cov.toFixed(1) : '∞'
+  const covStatus = getCoverageStatus(cov)
 
   const demandSum = metrics.modelWeeklyDemandTotal ?? 0
 
@@ -65,9 +67,7 @@ export default function TodayStatus({ metrics, unit, currency = 'USD' }) {
       label: L.coverageWeeks,
       value: covDisplay,
       meta: `${L.weeks.en} · min`,
-      highlight: true,
-      warn: covFinite && cov >= 3 && cov < 4,
-      danger: covFinite && cov < 3,
+      covTone: covStatus,
     },
     {
       label: L.inventoryValue,
@@ -79,14 +79,16 @@ export default function TodayStatus({ metrics, unit, currency = 'USD' }) {
 
   return (
     <section className="ops-section card">
-      <h2 className="ops-section__title">
+      <h2 className="ops-section__title ops-section__title--stacked">
         <BilingualLabel label={L.todayStatus} as="span" />
       </h2>
       <div className="today-status today-status--8">
         {cards.map((card) => (
           <article
             key={card.label.en}
-            className={`today-status__card ${card.highlight ? 'today-status__card--primary' : ''} ${card.danger ? 'today-status__card--danger' : ''} ${card.warn && !card.danger ? 'today-status__card--warn' : ''}`}
+            className={`today-status__card ${card.highlight ? 'today-status__card--primary' : ''} ${
+              card.covTone ? `today-status__card--${card.covTone}` : ''
+            }`}
           >
             <span className="today-status__label">
               <BilingualLabel label={card.label} as="span" />

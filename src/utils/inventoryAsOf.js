@@ -2,7 +2,16 @@ import { filterByModel, planRowWeekStart } from './logisticsMetrics'
 import { skuCostKey } from './unitCostKrw'
 
 /**
- * @typedef {{ modelName: string, partNo: string, qty: number, receivedAt: string }} ArrivalLedgerEntry
+ * @typedef {{
+ *   id?: string,
+ *   modelName: string,
+ *   partNo: string,
+ *   qty: number,
+ *   receivedAt: string,
+ *   sourceTransitId?: string,
+ *   cancelledAtIso?: string,
+ *   cancelledBy?: string,
+ * }} ArrivalLedgerEntry
  */
 
 /** 납품 계획 누적 출고: 주 시작일(월) ≤ through 일까지 합계 */
@@ -22,6 +31,7 @@ function sumArrivalsBetweenExclusiveToInclusive(ledger, modelName, partNo, fromE
   if (!Array.isArray(ledger) || !toInclusive) return 0
   let sum = 0
   for (const e of ledger) {
+    if (e.cancelledAtIso) continue
     if (e.modelName !== modelName || e.partNo !== partNo) continue
     const ra = String(e.receivedAt ?? '').trim()
     if (!/^\d{4}-\d{2}-\d{2}$/.test(ra)) continue

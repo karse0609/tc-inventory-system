@@ -1,6 +1,7 @@
 import { MIN_MANAGEMENT_WEEKS } from '../config/inventoryPolicy'
 import { newId } from '../utils/newId'
 import { migrateDeliveryPlansToSimple } from '../utils/deliveryPlanMigrate'
+import { migrateInTransitRows } from '../utils/inTransitMigrate'
 import { inventoryItems, itemDeliveryPlans, inTransitContainers } from './logisticsSampleData'
 
 function avgPlannedForPart(partNo, modelName) {
@@ -40,8 +41,9 @@ export function buildSeedDeliveryPlans() {
 }
 
 export function buildSeedInTransit() {
-  return inTransitContainers.map((row, i) => ({
+  const raw = inTransitContainers.map((row, i) => ({
     id: newId(`seed-tr-${i}`),
     ...row,
   }))
+  return migrateInTransitRows(raw)
 }

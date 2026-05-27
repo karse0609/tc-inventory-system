@@ -43,8 +43,19 @@
 .inv-proj-legend {
   font-size: 0.68rem;
   color: var(--muted);
-  margin-bottom: 0.35rem;
+  margin: 0 0 0.28rem;
   line-height: 1.35;
+}
+
+.inv-proj-legend--risk {
+  font-size: 0.66rem;
+  font-weight: 600;
+  color: var(--muted);
+}
+
+.inv-proj-legend--scope {
+  font-size: 0.64rem;
+  margin-bottom: 0.4rem;
 }
 
 .inv-proj-wrap {
@@ -63,11 +74,11 @@
 
 .inv-proj-table th,
 .inv-proj-table td {
-  padding: 0.12rem 0.18rem;
+  padding: 0.06rem 0.12rem;
   border-bottom: 1px solid var(--border);
   border-right: 1px solid var(--border);
   vertical-align: top;
-  line-height: 1.15;
+  line-height: 1.12;
 }
 
 .inv-proj-table thead th {
@@ -205,47 +216,100 @@
 }
 
 .inv-proj-cell--critical {
-  background: rgba(220, 38, 38, 0.04);
+  background: rgba(239, 68, 68, 0.055);
 }
 
 .inv-proj-cell--warning {
-  background: rgba(234, 179, 8, 0.06);
+  background: rgba(245, 158, 11, 0.055);
 }
 
 .inv-proj-cell--stable {
-  background: rgba(22, 163, 74, 0.05);
+  background: rgba(34, 197, 94, 0.045);
 }
 
-.inv-proj-cell--na {
-  background: rgba(0, 0, 0, 0.02);
+.inv-proj-cell--overstock {
+  background: rgba(59, 130, 246, 0.055);
+}
+
+.inv-proj-cell--neutral {
+  background: rgba(148, 163, 184, 0.04);
 }
 
 .inv-proj-status {
   display: inline-block;
-  margin-top: 0.08rem;
-  padding: 0.04rem 0.28rem;
-  border-radius: 3px;
+  margin-top: 0.04rem;
+  padding: 0 0.18rem;
+  border-radius: 2px;
   font-size: 0.58rem;
-  font-weight: 700;
-  letter-spacing: 0.03em;
+  font-weight: 600;
+  line-height: 1.15;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+}
+
+.inv-proj-status__en {
+  font-size: 0.88em;
+  font-weight: 600;
+  opacity: 0.82;
 }
 
 .inv-proj-status--critical {
-  background: rgba(220, 38, 38, 0.12);
-  color: #991b1b;
+  background: rgba(239, 68, 68, 0.14);
+  color: #b91c1c;
 }
 
 .inv-proj-status--warning {
-  background: rgba(234, 179, 8, 0.2);
-  color: #92400e;
+  background: rgba(245, 158, 11, 0.16);
+  color: #a16207;
 }
 
 .inv-proj-status--stable {
-  background: rgba(22, 163, 74, 0.15);
-  color: #166534;
+  background: rgba(34, 197, 94, 0.12);
+  color: #15803d;
 }
 
-.inv-proj-status--na {
-  background: rgba(100, 116, 139, 0.2);
-  color: #475569;
+.inv-proj-status--overstock {
+  background: rgba(59, 130, 246, 0.12);
+  color: #1d4ed8;
+}
+
+.inv-proj-toolbar--inline {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin: 0;
+}
+
+.inv-proj-toolbar--inline select {
+  font-size: 0.78rem;
+  padding: 0.18rem 0.35rem;
+}
+
+@media (max-width: 700px) {
+  .inv-proj-page {
+    padding: 0.38rem 0.45rem 0.95rem;
+    max-width: 100%;
+  }
+
+  .inv-proj-page .page__header h1 {
+    font-size: 0.98rem;
+    line-height: 1.18;
+  }
+
+  .inv-proj-page .page__desc {
+    font-size: 0.68rem;
+    line-height: 1.24;
+    max-height: 2.7em;
+    overflow: hidden;
+  }
+
+  .inv-proj-toolbar {
+    gap: 0.3rem 0.45rem;
+    margin: 0.22rem 0 0.32rem;
+  }
+
+  .inv-proj-legend {
+    font-size: 0.64rem;
+    margin-bottom: 0.28rem;
+  }
 }
