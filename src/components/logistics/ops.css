@@ -504,6 +504,28 @@
   font-size: 0.78rem;
 }
 
+.inv-th--in-transit {
+  max-width: 4.25rem;
+  text-align: right;
+}
+
+.inv-th--in-transit__main {
+  display: block;
+}
+
+.inv-td--in-transit {
+  max-width: 4.25rem;
+}
+
+.inv-col-unit {
+  display: block;
+  font-size: 0.65rem;
+  font-weight: 400;
+  color: var(--muted);
+  margin-top: 0.08rem;
+  line-height: 1.1;
+}
+
 .inv-item-table th {
   white-space: normal;
   vertical-align: bottom;

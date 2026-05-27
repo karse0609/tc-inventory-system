@@ -37,6 +37,7 @@ export default function InventoryStatusPanel({
 }) {
   const compact = variant === 'compact'
   const titleLabel = compact ? L.inventoryByPart : L.inventoryStatus
+  const unitStr = String(unit ?? '').trim()
 
   if (!itemRows?.length) {
     return (
@@ -106,6 +107,12 @@ export default function InventoryStatusPanel({
               <th>
                 <BilingualLabel label={L.partNo} />
               </th>
+              <th className="inv-th--in-transit">
+                <span className="inv-th--in-transit__main">
+                  <BilingualLabel label={L.inventoryTableInTransit} />
+                </span>
+                {unitStr ? <span className="inv-col-unit">{unitStr}</span> : null}
+              </th>
               {!compact && (
                 <th>
                   <BilingualLabel label={L.description} />
@@ -142,19 +149,31 @@ export default function InventoryStatusPanel({
           </thead>
           <tbody>
             {itemRows.map((row) => (
-              <tr key={row.partNo} className={`row--coverage-${row.status}`}>
+              <tr
+                key={`${row.modelName}\t${row.partNo}`}
+                className={`row--coverage-${row.status}`}
+              >
                 <td>
                   <code>{row.modelName}</code>
                 </td>
                 <td>
                   <code>{row.partNo}</code>
                 </td>
+                <td className="cell--num inv-td--in-transit">{formatNumber(row.inTransitQty)}</td>
                 {!compact && <td className="inv-item-table__desc">{row.description}</td>}
                 <td className="cell--num">{formatNumber(row.currentStock)}</td>
                 {!compact && (
                   <>
-                    <td className="cell--num">{formatNumber(row.weeklyDemand)}</td>
-                    <td className="cell--num">{formatNumber(row.plannedDelivery)}</td>
+                    <td className="cell--num">
+                      {row.weeklyDemand == null || !Number.isFinite(row.weeklyDemand)
+                        ? '—'
+                        : formatNumber(row.weeklyDemand)}
+                    </td>
+                    <td className="cell--num">
+                      {row.plannedDelivery == null || !Number.isFinite(row.plannedDelivery)
+                        ? '—'
+                        : formatNumber(row.plannedDelivery)}
+                    </td>
                   </>
                 )}
                 <td className="cell--num">

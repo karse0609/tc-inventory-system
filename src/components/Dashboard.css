@@ -919,26 +919,31 @@ tbody tr:hover {
 
 .inv-status-panel--compact .inv-item-table th:nth-child(1),
 .inv-status-panel--compact .inv-item-table td:nth-child(1) {
-  width: 12%;
+  width: 11%;
 }
 
 .inv-status-panel--compact .inv-item-table th:nth-child(2),
 .inv-status-panel--compact .inv-item-table td:nth-child(2) {
-  width: 22%;
+  width: 19%;
 }
 
 .inv-status-panel--compact .inv-item-table th:nth-child(3),
-.inv-status-panel--compact .inv-item-table td:nth-child(3),
+.inv-status-panel--compact .inv-item-table td:nth-child(3) {
+  width: 10%;
+}
+
 .inv-status-panel--compact .inv-item-table th:nth-child(4),
 .inv-status-panel--compact .inv-item-table td:nth-child(4),
 .inv-status-panel--compact .inv-item-table th:nth-child(5),
-.inv-status-panel--compact .inv-item-table td:nth-child(5) {
-  width: 13%;
-}
-
+.inv-status-panel--compact .inv-item-table td:nth-child(5),
 .inv-status-panel--compact .inv-item-table th:nth-child(6),
 .inv-status-panel--compact .inv-item-table td:nth-child(6) {
-  width: 26%;
+  width: 12%;
+}
+
+.inv-status-panel--compact .inv-item-table th:nth-child(7),
+.inv-status-panel--compact .inv-item-table td:nth-child(7) {
+  width: 22%;
   text-align: center;
 }
 
@@ -950,7 +955,8 @@ tbody tr:hover {
 .inv-status-panel--compact .inv-item-table thead th:nth-child(3),
 .inv-status-panel--compact .inv-item-table thead th:nth-child(4),
 .inv-status-panel--compact .inv-item-table thead th:nth-child(5),
-.inv-status-panel--compact .inv-item-table thead th:nth-child(6) {
+.inv-status-panel--compact .inv-item-table thead th:nth-child(6),
+.inv-status-panel--compact .inv-item-table thead th:nth-child(7) {
   text-align: center;
 }
 

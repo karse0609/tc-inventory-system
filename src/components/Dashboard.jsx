@@ -68,6 +68,14 @@ export default function Dashboard({
     [containers, asOfDate, referenceDate],
   )
 
+  const allInTransitAsOf = useMemo(
+    () =>
+      (inTransitContainers || []).filter((r) =>
+        isInTransitRowActiveAsOf(r, asOfDate, referenceDate),
+      ),
+    [inTransitContainers, asOfDate, referenceDate],
+  )
+
   const todayShipments = useMemo(
     () => filterByModel(sampleTodayShipments, selectedModelName),
     [selectedModelName],
@@ -94,11 +102,21 @@ export default function Dashboard({
           item,
           itemDeliveryPlans: [],
           inTransitContainers: containersAsOf,
+          inTransitByPartNoContainers: allInTransitAsOf,
           asOfDate,
           warehouseStockQty,
         })
       }),
-    [itemsForModel, containersAsOf, asOfDate, deliveryPlans, weekConfirmations, arrivalLedger, referenceDate],
+    [
+      itemsForModel,
+      containersAsOf,
+      allInTransitAsOf,
+      asOfDate,
+      deliveryPlans,
+      weekConfirmations,
+      arrivalLedger,
+      referenceDate,
+    ],
   )
 
   const inventorySummary = useMemo(() => {

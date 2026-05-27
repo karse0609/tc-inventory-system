@@ -463,6 +463,8 @@ export const L = {
   dashboardDelayContainers: { ko: '지연 컨테이너', en: 'Delay containers' },
   delayOverdue: { ko: '지연', en: 'Overdue' },
   inventoryByPart: { ko: '품번별 재고 현황', en: 'Inventory by Part' },
+  /** 품번별 재고 표 — 참고용 운송중(미입고) 수량 열 */
+  inventoryTableInTransit: { ko: '운송중', en: 'In-Transit' },
   weeklyDeliveryQty: { ko: '주간 납품', en: 'Weekly delivery' },
 }
 

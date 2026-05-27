@@ -71,13 +71,27 @@ export function sumInTransitByPart(containers, modelName, partNo) {
 }
 
 /**
+ * 품번(Part No)만 일치하는 미입고 운송중 행 수량 합산 — 모델명 무관(참고용 표시).
+ * 입고 완료·arrived 행 제외 (`isInTransitRowActive`).
+ */
+export function sumInTransitQtyByPartNo(containers, partNo) {
+  const p = String(partNo ?? '').trim()
+  if (!p) return 0
+  return (containers || [])
+    .filter((c) => isInTransitRowActive(c) && String(c.partNo ?? '').trim() === p)
+    .reduce((sum, c) => sum + (Number(c.qty) || 0), 0)
+}
+
+/**
  * Item 단위 재고 현황 (modelName + partNo)
  * 커버리지·Gap은 Master의 Weekly Demand만 사용 (출고계획 미사용).
+ * @param {object[]} [inTransitByPartNoContainers] 품번 기준 운송중 참고 합산(모델 무관). 생략 시 `inTransitContainers` 사용.
  */
 export function buildItemInventoryStatus({
   item,
   itemDeliveryPlans: _itemDeliveryPlans,
   inTransitContainers,
+  inTransitByPartNoContainers,
   asOfDate: _asOfDate,
   /** 기준일 시점 창고 재고(없으면 item.currentStock) */
   warehouseStockQty,
@@ -90,7 +104,8 @@ export function buildItemInventoryStatus({
   const plannedDelivery = null
   const confirmedDelivery = null
 
-  const inTransitQty = sumInTransitByPart(inTransitContainers, item.modelName, item.partNo)
+  const transitForPartRef = inTransitByPartNoContainers ?? inTransitContainers
+  const inTransitQty = sumInTransitQtyByPartNo(transitForPartRef, item.partNo)
 
   const warehouseStock =
     warehouseStockQty != null && !Number.isNaN(Number(warehouseStockQty))
@@ -139,11 +154,22 @@ export function buildItemInventoryStatus({
 }
 
 export function buildInventorySummary(itemRows, options = {}) {
-  const { portfolioCoverageWeeks = null } = options
+  const { portfolioCoverageWeeks = null, totalActiveInTransitQty = null } = options
   const warehouseValue = itemRows.reduce((s, r) => s + r.warehouseValue, 0)
   const inTransitValue = itemRows.reduce((s, r) => s + r.inTransitValue, 0)
   const totalStock = itemRows.reduce((s, r) => s + r.currentStock, 0)
-  const totalInTransit = itemRows.reduce((s, r) => s + r.inTransitQty, 0)
+
+  let totalInTransit = totalActiveInTransitQty
+  if (totalInTransit == null || !Number.isFinite(totalInTransit)) {
+    const seenPart = new Set()
+    totalInTransit = 0
+    for (const r of itemRows) {
+      const k = String(r.partNo ?? '').trim()
+      if (!k || seenPart.has(k)) continue
+      seenPart.add(k)
+      totalInTransit += Number(r.inTransitQty) || 0
+    }
+  }
 
   const finiteVals = itemRows
     .map((r) => r.coverageWeeks)
