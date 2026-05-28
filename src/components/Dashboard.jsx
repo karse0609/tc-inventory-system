@@ -26,6 +26,7 @@ import {
 } from '../utils/modelName'
 import BilingualLabel from './BilingualLabel'
 import DashboardCoreKpis from './logistics/DashboardCoreKpis'
+import DashboardRoleGuidance from './logistics/DashboardRoleGuidance'
 import InventoryStatusPanel from './logistics/InventoryStatusPanel'
 import './Dashboard.css'
 import './logistics/ops.css'
@@ -47,6 +48,8 @@ export default function Dashboard({
   arrivalLedger = [],
   /** 휴대폰·PWA: 조회 위주(기준일 수정·주간 ETA 표 숨김) */
   readOnlyMobile = false,
+  /** Admin: 시스템·저장소 안내 / 일반 사용자: 사용 안내 */
+  isAdminViewer = false,
 }) {
   const [selectedModelName, setSelectedModelName] = useState(ALL_MODELS_VALUE)
   const [clockTick, setClockTick] = useState(() => new Date())
@@ -314,16 +317,10 @@ export default function Dashboard({
               )}
             </span>
           </div>
-          {showLedgerHint && !readOnlyMobile ? (
-            <p className="dashboard__as-of-hint" role="note">
-              <BilingualLabel label={L.dashboardAsOfLedgerHint} as="span" />
-            </p>
-          ) : null}
-          {!readOnlyMobile ? (
-            <p className="dashboard__scope-note">
-              <BilingualLabel label={L.multiItemNote} as="span" />
-            </p>
-          ) : null}
+          <DashboardRoleGuidance
+            isAdmin={isAdminViewer}
+            showLedgerHint={showLedgerHint && !readOnlyMobile}
+          />
         </div>
         <div className="dashboard__header-actions">
           <label className="dashboard__model-select">
@@ -358,14 +355,18 @@ export default function Dashboard({
         }
         unit={opsMeta.unit}
       />
-      <p className="dashboard__kpi-footnote page__hint">
-        <BilingualLabel
-          label={
-            inventoryRemoteSyncEnabled() ? L.dashboardInTransitQtyFootnoteRemote : L.dashboardInTransitQtyFootnote
-          }
-          as="span"
-        />
-      </p>
+      {isAdminViewer ? (
+        <p className="dashboard__kpi-footnote page__hint">
+          <BilingualLabel
+            label={
+              inventoryRemoteSyncEnabled()
+                ? L.dashboardInTransitQtyFootnoteRemote
+                : L.dashboardInTransitQtyFootnote
+            }
+            as="span"
+          />
+        </p>
+      ) : null}
 
       <InventoryStatusPanel
         variant="compact"

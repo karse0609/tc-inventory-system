@@ -845,14 +845,14 @@ function App() {
 
   return (
     <div className="app">
-      {!inventoryRemoteSyncEnabled() ? (
+      {isAdminUser(authUser) && !inventoryRemoteSyncEnabled() ? (
         <div className="remote-sync-banner remote-sync-banner--off" role="status">
           <span className="remote-sync-banner__text">
             <BilingualLabel label={L.remoteSyncBannerOff} as="span" />
           </span>
         </div>
       ) : null}
-      {inventoryRemoteSyncEnabled() && remoteUi.error ? (
+      {isAdminUser(authUser) && inventoryRemoteSyncEnabled() && remoteUi.error ? (
         <div className="remote-sync-banner remote-sync-banner--error" role="alert">
           <span className="remote-sync-banner__text">{remoteUi.error}</span>
           <button type="button" className="btn btn--ghost btn--sm" onClick={() => void pullRemoteInventory()}>
@@ -860,7 +860,7 @@ function App() {
           </button>
         </div>
       ) : null}
-      {inventoryRemoteSyncEnabled() && !remoteUi.error && remoteHydrated ? (
+      {isAdminUser(authUser) && inventoryRemoteSyncEnabled() && !remoteUi.error && remoteHydrated ? (
         <div className="remote-sync-banner remote-sync-banner--on" role="status">
           <span className="remote-sync-banner__text">
             <BilingualLabel label={L.remoteSyncBannerOn} as="span" />
@@ -906,6 +906,7 @@ function App() {
           unitCostKrwBySku={unitCostKrwBySku}
           arrivalLedger={arrivalLedger}
           readOnlyMobile={isMobileWarehouseNav}
+          isAdminViewer={isAdminUser(authUser)}
         />
       )}
       {view === 'master' && (

@@ -545,6 +545,57 @@ tbody tr:hover {
   line-height: 1.35;
 }
 
+.dashboard__user-guide {
+  margin: 0.65rem 0 0;
+  padding: 0.65rem 0.85rem;
+  max-width: 44rem;
+  border-radius: 8px;
+  border: 1px solid rgba(148, 163, 184, 0.35);
+  background: rgba(241, 245, 249, 0.65);
+  font-size: 0.78rem;
+  line-height: 1.45;
+  color: var(--muted);
+}
+
+.dashboard__user-guide-heading {
+  margin: 0 0 0.35rem;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--text-h);
+}
+
+.dashboard__user-guide-subheading {
+  margin: 0.55rem 0 0.3rem;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--text-h);
+}
+
+.dashboard__user-guide-lead {
+  margin: 0;
+}
+
+.dashboard__user-guide-terms {
+  margin: 0;
+  padding-left: 1.1rem;
+  display: grid;
+  gap: 0.2rem;
+}
+
+.dashboard__user-guide .bilingual__en {
+  display: block;
+  margin-top: 0.12rem;
+  font-size: 0.72rem;
+  opacity: 0.92;
+}
+
+@media (max-width: 640px) {
+  .dashboard__user-guide {
+    max-width: none;
+    font-size: 0.76rem;
+  }
+}
+
 .dashboard__kpi-footnote {
   margin: 0.5rem 0 0.35rem;
   max-width: 56rem;

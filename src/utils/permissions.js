@@ -28,6 +28,7 @@ export const VIEW_MENU_LABELS = Object.fromEntries(
 export function defaultMenuPermissionsForRole(role) {
   const all = Object.fromEntries(VIEW_IDS.map((id) => [id, true]))
   const none = Object.fromEntries(VIEW_IDS.map((id) => [id, false]))
+  if (isAdminRole(role)) return { ...all }
   switch (role) {
     case 'Admin':
       return { ...all }
@@ -54,15 +55,21 @@ export function defaultMenuPermissionsForRole(role) {
  * @param {{ role?: string, active?: boolean, menuPermissions?: MenuPermissions } | null} user
  * @param {string} viewId
  */
+/** @param {string | undefined} role */
+export function isAdminRole(role) {
+  const r = String(role ?? '').trim().toLowerCase()
+  return r === 'admin' || r === 'administrator'
+}
+
 export function canAccessView(user, viewId) {
   if (!user || user.active === false) return false
-  if (user.role === 'Admin') return true
+  if (isAdminRole(user.role)) return true
   return !!user.menuPermissions?.[viewId]
 }
 
-/** @param {{ role?: string } | null} user */
+/** @param {{ role?: string, active?: boolean } | null} user */
 export function isAdminUser(user) {
-  return user?.role === 'Admin' && user?.active !== false
+  return !!user && user.active !== false && isAdminRole(user.role)
 }
 
 /** @param {object} user */

@@ -173,6 +173,31 @@ export const L = {
     en: 'Per selected model · warehouse + in-transit + delivery plan (Multi-SKU)',
   },
 
+  dashboardUserGuideTitle: { ko: '사용 안내', en: 'User Guide' },
+  dashboardUserGuideBody: {
+    ko:
+      '이 화면은 모델별 재고 현황을 확인하는 대시보드입니다. 상단 모델 필터를 선택하면 해당 모델의 창고 재고, 운송중 재고, 출고 계획, 재고 예측을 확인할 수 있습니다.',
+    en:
+      'This dashboard shows inventory status by model. Select a model filter to check warehouse stock, in-transit stock, delivery plan, and inventory projection.',
+  },
+  dashboardUserTermsTitle: { ko: '용어 설명', en: 'Terms' },
+  dashboardUserTermWarehouse: {
+    ko: '창고 재고: 현재 창고에 보관 중인 수량',
+    en: 'Warehouse Stock: Quantity currently stored in the warehouse',
+  },
+  dashboardUserTermInTransit: {
+    ko: '운송중 재고: 선적 후 아직 창고에 입고되지 않은 수량',
+    en: 'In-Transit Stock: Quantity shipped but not yet received at the warehouse',
+  },
+  dashboardUserTermDeliveryPlan: {
+    ko: '출고 계획: 향후 출고 예정 수량',
+    en: 'Delivery Plan: Planned outbound quantity',
+  },
+  dashboardUserTermCoverage: {
+    ko: '커버리지: 현재 재고로 운영 가능한 예상 기간',
+    en: 'Coverage: Estimated available operating period based on inventory',
+  },
+
   restoreSample: { ko: '샘플 복원', en: 'Restore Sample' },
 
   containers: { ko: '컨테이너', en: 'containers' },
