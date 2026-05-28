@@ -248,6 +248,10 @@ export const L = {
     ko: 'ETA·컨테이너·품목별 수량. 입고 체크 후 저장하면 창고 재고에 반영되며 행은 입고완료로 보관됩니다. 운송중 탭에는 미입고 건만, 입고 이력 탭에서 과거 확정 내역을 조회합니다.',
     en: 'ETA, container, qty per SKU. Save after receipt updates warehouse stock; rows are kept as received history. Use tabs to switch between in-transit and receipt history.',
   },
+  inTransitUnsavedNavigateConfirm: {
+    ko: '저장하지 않은 변경사항이 있습니다. 저장하지 않고 이동하시겠습니까?',
+    en: 'You have unsaved changes. Leave without saving?',
+  },
   inTransitDeleteConfirm: {
     ko: '정말 삭제하시겠습니까? 삭제 후 복구할 수 없습니다.',
     en: 'Are you sure you want to delete? This cannot be undone.',

@@ -5,6 +5,8 @@ import { downloadXlsxFromAoA } from '../../utils/excelFile'
 import { parseBoolCell, parseDateForInput, parseQtyCell } from '../../utils/excelGridClipboard'
 import { resolveReceiptDateForLedger } from '../../utils/inventoryAsOf'
 import { isTransitRowReceived, TRANSIT_ROW_STATUS, transitRowIdKey } from '../../utils/inTransitStatus'
+import { cloneInTransitRows, inTransitRowsEqual } from '../../utils/inTransitDraft'
+import { sortInTransitRowsByEtdTc } from '../../utils/inTransitSort'
 import { normalizeModel } from '../../utils/modelName'
 import { newId } from '../../utils/newId'
 import { formatKstDateTime, getKoreaCalendarDate } from '../../utils/timeZones'
@@ -42,6 +44,7 @@ function buildTransitPastePatch(field, raw) {
   const s = String(raw ?? '').trim()
   switch (field) {
     case 'containerNo':
+      return { containerNo: s }
     case 'modelName':
       return { modelName: normalizeModel(s) }
     case 'partNo':
@@ -165,8 +168,9 @@ function emptyRow() {
 }
 
 export default function InTransitPage({
-  inTransit,
-  setInTransit,
+  inTransit: savedInTransit,
+  onPersistInTransit,
+  registerUnsavedGuard,
   setMasterItems,
   masterItems = [],
   appendArrivalLedger,
@@ -193,6 +197,33 @@ export default function InTransitPage({
   const transitTableRef = useRef(null)
   const isMobileLayout = useTransitMobileLayout()
 
+  const [draft, setDraft] = useState(() => cloneInTransitRows(savedInTransit))
+
+  const isDirty = useMemo(
+    () => !inTransitRowsEqual(draft, savedInTransit),
+    [draft, savedInTransit],
+  )
+
+  useEffect(() => {
+    if (!isDirty) setDraft(cloneInTransitRows(savedInTransit))
+  }, [savedInTransit, isDirty])
+
+  useEffect(() => {
+    if (!registerUnsavedGuard) return undefined
+    registerUnsavedGuard(() => isDirty)
+    return () => registerUnsavedGuard(null)
+  }, [isDirty, registerUnsavedGuard])
+
+  useEffect(() => {
+    if (!isDirty) return undefined
+    const onBeforeUnload = (e) => {
+      e.preventDefault()
+      e.returnValue = ''
+    }
+    window.addEventListener('beforeunload', onBeforeUnload)
+    return () => window.removeEventListener('beforeunload', onBeforeUnload)
+  }, [isDirty])
+
   useLayoutEffect(() => {
     if (!isMobileLayout) return
     queueMicrotask(() => {
@@ -201,16 +232,16 @@ export default function InTransitPage({
   }, [isMobileLayout])
 
   const activeRows = useMemo(
-    () => inTransit.filter((r) => !isTransitRowReceived(r)),
-    [inTransit],
+    () => draft.filter((r) => !isTransitRowReceived(r)),
+    [draft],
   )
 
   const historyRows = useMemo(
     () =>
-      [...inTransit.filter((r) => isTransitRowReceived(r))].sort((a, b) =>
+      [...draft.filter((r) => isTransitRowReceived(r))].sort((a, b) =>
         String(b.receivedAtIso || '').localeCompare(String(a.receivedAtIso || '')),
       ),
-    [inTransit],
+    [draft],
   )
 
   const displayedActive = useMemo(
@@ -312,6 +343,20 @@ export default function InTransitPage({
     if (!window.confirm(formatKoEnInline(L.receiptCancelConfirm))) return
     try {
       applyReceiptCancellation(cancelRows, currentUserLabel)
+      setDraft((prev) => {
+        const cancelIds = new Set(cancelRows.map((r) => transitRowIdKey(r.id)))
+        return prev.map((row) => {
+          if (!cancelIds.has(transitRowIdKey(row.id))) return row
+          return {
+            ...row,
+            transitStatus: TRANSIT_ROW_STATUS.IN_TRANSIT,
+            arrived: false,
+            receiptDate: null,
+            receivedBy: '',
+            receivedAtIso: null,
+          }
+        })
+      })
     } catch (e) {
       console.error(e)
       window.alert(
@@ -331,10 +376,10 @@ export default function InTransitPage({
     }
   }
 
-  const commitArrivedRows = useCallback(
-    (arrivedRows) => {
+  const applyArrivedToRows = useCallback(
+    (sourceRows, arrivedRows) => {
       const rows = (arrivedRows || []).filter((r) => r && r.arrived && !isTransitRowReceived(r))
-      if (!rows.length) return
+      if (!rows.length) return sourceRows
 
       if (typeof appendArrivalLedger === 'function') {
         const koreaDay = getKoreaCalendarDate()
@@ -370,34 +415,43 @@ export default function InTransitPage({
       const koreaDay = getKoreaCalendarDate()
       const nowIso = new Date().toISOString()
       const by = String(currentUserLabel || '').trim() || '—'
+      const commitIds = new Set(rows.map((x) => transitRowIdKey(x.id)))
 
-      setInTransit((prev) =>
-        prev.map((r) => {
-          if (!rows.some((x) => transitRowIdKey(x.id) === transitRowIdKey(r.id))) return r
-          if (!r.arrived || isTransitRowReceived(r)) return r
-          return {
-            ...r,
-            transitStatus: TRANSIT_ROW_STATUS.RECEIVED,
-            receiptDate: resolveReceiptDateForLedger(r, koreaDay),
-            receivedBy: by,
-            receivedAtIso: nowIso,
-          }
-        }),
-      )
+      return sourceRows.map((r) => {
+        if (!commitIds.has(transitRowIdKey(r.id))) return r
+        if (!r.arrived || isTransitRowReceived(r)) return r
+        return {
+          ...r,
+          transitStatus: TRANSIT_ROW_STATUS.RECEIVED,
+          receiptDate: resolveReceiptDateForLedger(r, koreaDay),
+          receivedBy: by,
+          receivedAtIso: nowIso,
+        }
+      })
+    },
+    [appendArrivalLedger, setMasterItems, currentUserLabel],
+  )
 
+  const persistDraft = useCallback(
+    (rows) => {
+      const sorted = sortInTransitRowsByEtdTc(rows)
+      if (typeof onPersistInTransit === 'function') onPersistInTransit(sorted)
+      setDraft(sorted)
       setSaveHint(
         formatKoEn(inventoryRemoteSyncEnabled() ? L.savedAfterEditWithRemote : L.savedToBrowserStorage),
       )
       setTimeout(() => setSaveHint(''), 2500)
-      if (typeof onRequestRemoteSync === 'function') {
-        onRequestRemoteSync()
-      }
+      if (typeof onRequestRemoteSync === 'function') onRequestRemoteSync()
+      return sorted
     },
-    [appendArrivalLedger, setMasterItems, setInTransit, currentUserLabel, onRequestRemoteSync],
+    [onPersistInTransit, onRequestRemoteSync],
   )
 
   function handleSave() {
-    commitArrivedRows(inTransit.filter((r) => r.arrived && !isTransitRowReceived(r)))
+    let next = [...draft]
+    const arrived = next.filter((r) => r.arrived && !isTransitRowReceived(r))
+    if (arrived.length) next = applyArrivedToRows(next, arrived)
+    persistDraft(next)
   }
 
   function handleMobileInboundCommit() {
@@ -407,7 +461,8 @@ export default function InTransitPage({
       return
     }
     if (!window.confirm(formatKoEnInline(labelWithCount(L.mobileInboundConfirm, rows.length)))) return
-    commitArrivedRows(rows)
+    const next = applyArrivedToRows(draft, rows)
+    persistDraft(next)
   }
 
   function applySearchFromForm() {
@@ -431,13 +486,13 @@ export default function InTransitPage({
     const key = transitRowIdKey(id)
     const next = { ...patch }
     if ('modelName' in next) next.modelName = normalizeModel(next.modelName)
-    setInTransit((rows) => rows.map((r) => (transitRowIdKey(r.id) === key ? { ...r, ...next } : r)))
+    setDraft((rows) => rows.map((r) => (transitRowIdKey(r.id) === key ? { ...r, ...next } : r)))
   }
 
   function handleAdd() {
     const n = Math.max(1, Math.min(500, Math.floor(Number(addRowCount)) || 1))
     setAddRowCount(n)
-    setInTransit((rows) => {
+    setDraft((rows) => {
       const extra = Array.from({ length: n }, () => emptyRow())
       return [...rows, ...extra]
     })
@@ -446,7 +501,7 @@ export default function InTransitPage({
   function requestDeleteRow(id) {
     if (!window.confirm(formatKoEnInline(L.inTransitDeleteConfirm))) return
     const key = transitRowIdKey(id)
-    setInTransit((rows) => rows.filter((r) => transitRowIdKey(r.id) !== key))
+    setDraft((rows) => rows.filter((r) => transitRowIdKey(r.id) !== key))
     setReceiptCancelPickIds((s) => {
       const n = new Set(s)
       n.delete(key)
@@ -474,9 +529,9 @@ export default function InTransitPage({
     try {
       const buffer = await file.arrayBuffer()
       const { rows, sheetName } = parseShipmentScheduleExcel(buffer)
-      setInTransit((prev) => [...prev, ...rows])
+      setDraft((prev) => [...prev, ...rows])
       setSaveHint(
-        `“${sheetName}” 시트에서 ${rows.length}행 로드됨(Loaded ${rows.length} row(s))`,
+        `“${sheetName}” 시트에서 ${rows.length}행 로드됨(저장 전 임시 반영 · Loaded ${rows.length} row(s), not saved yet)`,
       )
       setTimeout(() => setSaveHint(''), 4000)
       setExcelMsg(formatKoEn(L.excelUploadApplied))
@@ -572,14 +627,22 @@ export default function InTransitPage({
       }
       if (!m.length) return
 
-      setInTransit((prev) => {
-        const activeRows = prev.filter((r) => !isTransitRowReceived(r))
-        const displayed = activeRows.filter((r) => rowMatchesApplied(r, appliedSearch))
+      setDraft((prev) => {
+        const received = prev.filter((r) => isTransitRowReceived(r))
+        let active = prev.filter((r) => !isTransitRowReceived(r))
+        const displayed = active.filter((r) => rowMatchesApplied(r, appliedSearch))
         const updates = new Map()
+        const newRows = []
 
         for (let r = 0; r < m.length; r++) {
-          const target = displayed[dispRow + r]
-          if (!target) break
+          const rowIndex = dispRow + r
+          let target = displayed[rowIndex]
+          if (!target) {
+            target = emptyRow()
+            newRows.push(target)
+            active = [...active, target]
+            displayed.push(target)
+          }
           const key = transitRowIdKey(target.id)
           let acc = updates.get(key) || {}
           for (let c = 0; c < m[r].length; c++) {
@@ -592,14 +655,16 @@ export default function InTransitPage({
           updates.set(key, acc)
         }
 
-        return prev.map((row) => {
+        const mergedActive = active.map((row) => {
           const k = transitRowIdKey(row.id)
           const p = updates.get(k)
           return p ? { ...row, ...p } : row
         })
+
+        return [...mergedActive, ...received]
       })
     },
-    [appliedSearch, setInTransit],
+    [appliedSearch],
   )
 
   useGridNativePaste({

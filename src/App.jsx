@@ -34,7 +34,7 @@ import {
   prefersMobileSimpleLayout,
   useMobileSimpleLayout,
 } from './utils/mobileLayout'
-import { VIEW_LABELS, L } from './i18n/labels'
+import { VIEW_LABELS, L, formatKoEnInline } from './i18n/labels'
 import { APP_DATA_EXPORT_VERSION, buildAppDataSnapshot, parseAppDataImport, persistInventoryPatchToLocalStorage } from './utils/appDataBackup'
 import {
   buildInventoryRemoteUrl,
@@ -265,6 +265,11 @@ function App() {
   useEffect(() => {
     saveJson(storageKeys.plans, toPlansStorageValue(planStore.cells, planStore.weekConfirmations))
   }, [planStore])
+  const persistInTransit = useCallback((rows) => {
+    setInTransit(rows)
+  }, [])
+
+  /** 운송중: 화면 draft는 저장 버튼 전까지 반영하지 않음. 입고·원격 동기화 등 App 직접 갱신만 자동 저장 */
   useEffect(() => {
     saveJson(storageKeys.transit, inTransit)
   }, [inTransit])
@@ -661,14 +666,26 @@ function App() {
     [authUser, isMobileWarehouseNav],
   )
 
+  const transitUnsavedRef = useRef(() => false)
+
+  const registerTransitUnsavedGuard = useCallback((checker) => {
+    transitUnsavedRef.current = typeof checker === 'function' ? checker : () => false
+  }, [])
+
+  const confirmLeaveTransitView = useCallback(() => {
+    if (view !== 'transit' || !transitUnsavedRef.current()) return true
+    return window.confirm(formatKoEnInline(L.inTransitUnsavedNavigateConfirm))
+  }, [view])
+
   const goView = useCallback(
     (next) => {
       if (!authUser || !canAccessView(authUser, next)) return
       if (isMobileWarehouseNav && !MOBILE_WAREHOUSE_NAV_VIEW_IDS.includes(next)) return
+      if (view === 'transit' && next !== 'transit' && !confirmLeaveTransitView()) return
       setView(next)
       window.history.replaceState(null, '', `#/${next}`)
     },
-    [authUser, isMobileWarehouseNav],
+    [authUser, isMobileWarehouseNav, view, confirmLeaveTransitView],
   )
 
   useEffect(() => {
@@ -702,14 +719,22 @@ function App() {
       ) {
         const first = defaultHomeView(authUser)
         window.history.replaceState(null, '', `#/${first}`)
+        if (view === 'transit' && first !== 'transit' && !confirmLeaveTransitView()) {
+          window.history.replaceState(null, '', '#/transit')
+          return
+        }
         setView(first)
+        return
+      }
+      if (view === 'transit' && raw !== 'transit' && !confirmLeaveTransitView()) {
+        window.history.replaceState(null, '', '#/transit')
         return
       }
       setView(raw)
     }
     window.addEventListener('hashchange', onHash)
     return () => window.removeEventListener('hashchange', onHash)
-  }, [authUser, isMobileWarehouseNav])
+  }, [authUser, isMobileWarehouseNav, view, confirmLeaveTransitView])
 
   useEffect(() => {
     if (!authUser) return
@@ -889,7 +914,8 @@ function App() {
       {view === 'transit' && (
         <InTransitPage
           inTransit={inTransit}
-          setInTransit={setInTransit}
+          onPersistInTransit={persistInTransit}
+          registerUnsavedGuard={registerTransitUnsavedGuard}
           setMasterItems={setMasterItems}
           masterItems={masterItems}
           appendArrivalLedger={appendArrivalLedger}
