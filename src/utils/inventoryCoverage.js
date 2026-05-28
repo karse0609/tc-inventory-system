@@ -3,6 +3,7 @@ import {
   MIN_MANAGEMENT_WEEKS,
 } from '../config/inventoryPolicy'
 import { isInTransitRowActive } from './logisticsMetrics'
+import { modelsMatch } from './modelName'
 
 /**
  * 레거시: 단순 비율 (다른 화면 호환)
@@ -64,7 +65,7 @@ export function sumInTransitByPart(containers, modelName, partNo) {
     .filter(
       (c) =>
         c.partNo === partNo &&
-        c.modelName === modelName &&
+        modelsMatch(c.modelName, modelName) &&
         isInTransitRowActive(c),
     )
     .reduce((sum, c) => sum + (Number(c.qty) || 0), 0)

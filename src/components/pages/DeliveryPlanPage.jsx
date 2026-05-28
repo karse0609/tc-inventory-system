@@ -8,6 +8,7 @@ import useGridNativePaste from '../../hooks/useGridNativePaste'
 import { parseQtyCell } from '../../utils/excelGridClipboard'
 import { downloadXlsxFromAoA, readXlsxFirstSheetMatrix } from '../../utils/excelFile'
 import { useMobileSimpleLayout } from '../../utils/mobileLayout'
+import { normalizeModel } from '../../utils/modelName'
 import { newId } from '../../utils/newId'
 import { inventoryRemoteSyncEnabled } from '../../utils/inventoryRemoteSync'
 import {
@@ -415,21 +416,22 @@ export default function DeliveryPlanPage({
       function setModelPart(spec, newModel, newPart) {
         const oldM = spec.modelName
         const oldP = spec.partNo
+        const normModel = normalizeModel(newModel)
         if (spec.kind === 'draft') {
           drafts = drafts.map((d) =>
-            d.id === spec.draftId ? { ...d, modelName: newModel, partNo: newPart } : d,
+            d.id === spec.draftId ? { ...d, modelName: normModel, partNo: newPart } : d,
           )
-          spec.modelName = newModel
+          spec.modelName = normModel
           spec.partNo = newPart
           return
         }
         if (spec.kind === 'plan') {
           plans = plans.map((pl) =>
             pl.modelName === oldM && pl.partNo === oldP
-              ? { ...pl, modelName: newModel, partNo: newPart }
+              ? { ...pl, modelName: normModel, partNo: newPart }
               : pl,
           )
-          spec.modelName = newModel
+          spec.modelName = normModel
           spec.partNo = newPart
         }
       }

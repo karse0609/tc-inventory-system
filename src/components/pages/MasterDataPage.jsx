@@ -9,6 +9,7 @@ import { buildItemInventoryStatus } from '../../utils/inventoryCoverage'
 import { parseQtyCell } from '../../utils/excelGridClipboard'
 import { downloadXlsxFromAoA, readXlsxFirstSheetMatrix } from '../../utils/excelFile'
 import { useMobileSimpleLayout } from '../../utils/mobileLayout'
+import { normalizeModel } from '../../utils/modelName'
 import { newId } from '../../utils/newId'
 import { inventoryRemoteSyncEnabled } from '../../utils/inventoryRemoteSync'
 import PageDataToolbar from '../grid/PageDataToolbar.jsx'
@@ -159,7 +160,9 @@ export default function MasterDataPage({
   }
 
   function updateRow(id, patch) {
-    setMasterItems((rows) => rows.map((r) => (r.id === id ? { ...r, ...patch } : r)))
+    const next = { ...patch }
+    if ('modelName' in next) next.modelName = normalizeModel(next.modelName)
+    setMasterItems((rows) => rows.map((r) => (r.id === id ? { ...r, ...next } : r)))
   }
 
   function handleAdd() {
@@ -299,6 +302,8 @@ export default function MasterDataPage({
           } else if (field === 'status') {
             const v = cell.toLowerCase()
             row.status = v.startsWith('inact') ? 'Inactive' : 'Active'
+          } else if (field === 'modelName') {
+            row.modelName = normalizeModel(cell)
           } else {
             row[field] = cell
           }

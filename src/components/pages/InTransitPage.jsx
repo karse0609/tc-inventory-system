@@ -5,6 +5,7 @@ import { downloadXlsxFromAoA } from '../../utils/excelFile'
 import { parseBoolCell, parseDateForInput, parseQtyCell } from '../../utils/excelGridClipboard'
 import { resolveReceiptDateForLedger } from '../../utils/inventoryAsOf'
 import { isTransitRowReceived, TRANSIT_ROW_STATUS, transitRowIdKey } from '../../utils/inTransitStatus'
+import { normalizeModel } from '../../utils/modelName'
 import { newId } from '../../utils/newId'
 import { formatKstDateTime, getKoreaCalendarDate } from '../../utils/timeZones'
 import {
@@ -42,6 +43,7 @@ function buildTransitPastePatch(field, raw) {
   switch (field) {
     case 'containerNo':
     case 'modelName':
+      return { modelName: normalizeModel(s) }
     case 'partNo':
     case 'deliveryLocation':
     case 'remark':
@@ -427,7 +429,9 @@ export default function InTransitPage({
 
   function updateRow(id, patch) {
     const key = transitRowIdKey(id)
-    setInTransit((rows) => rows.map((r) => (transitRowIdKey(r.id) === key ? { ...r, ...patch } : r)))
+    const next = { ...patch }
+    if ('modelName' in next) next.modelName = normalizeModel(next.modelName)
+    setInTransit((rows) => rows.map((r) => (transitRowIdKey(r.id) === key ? { ...r, ...next } : r)))
   }
 
   function handleAdd() {

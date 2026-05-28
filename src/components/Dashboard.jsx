@@ -18,6 +18,12 @@ import {
 import { formatKstDateTime, formatSeattleDateTime, getKoreaCalendarDate } from '../utils/timeZones'
 import { inventoryRemoteSyncEnabled } from '../utils/inventoryRemoteSync'
 import { collectOperationalModelNames } from '../utils/dashboardModelOptions'
+import {
+  auditNonOperationalModels,
+  isOperationalModelName,
+  modelsMatch,
+  normalizeModel,
+} from '../utils/modelName'
 import BilingualLabel from './BilingualLabel'
 import DashboardCoreKpis from './logistics/DashboardCoreKpis'
 import InventoryStatusPanel from './logistics/InventoryStatusPanel'
@@ -235,14 +241,27 @@ export default function Dashboard({
     [masterItems, inTransitContainers, deliveryPlans],
   )
 
+  useEffect(() => {
+    if (!import.meta.env.DEV) return
+    const flagged = auditNonOperationalModels({
+      masterItems,
+      inTransitContainers,
+      deliveryPlans,
+    })
+    if (flagged.length) {
+      console.info('[TC Inventory] Non-operational model values in loaded data:', flagged)
+    }
+  }, [masterItems, inTransitContainers, deliveryPlans])
+
   const dashboardModelSelectOptions = useMemo(() => {
     const names = [...dashboardModelNames]
+    if (selectedModelName === ALL_MODELS_VALUE || !selectedModelName) return names
+    const norm = normalizeModel(selectedModelName)
     if (
-      selectedModelName !== ALL_MODELS_VALUE &&
-      selectedModelName &&
-      !names.includes(selectedModelName)
+      isOperationalModelName(norm) &&
+      !names.some((n) => modelsMatch(n, selectedModelName))
     ) {
-      names.push(selectedModelName)
+      names.push(norm)
       names.sort((a, b) => a.localeCompare(b, 'en', { sensitivity: 'base' }))
     }
     return names

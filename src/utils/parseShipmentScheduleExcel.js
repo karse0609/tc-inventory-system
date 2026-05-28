@@ -6,6 +6,7 @@ import * as XLSX from 'xlsx'
 import { formatLocalYMD } from './parseExcelWideFormat'
 import { newId } from './newId'
 import { TRANSIT_ROW_STATUS } from './inTransitStatus'
+import { normalizeModel } from './modelName'
 
 export class ParseShipmentScheduleError extends Error {
   constructor(message, debug = {}) {
@@ -69,7 +70,7 @@ function buildRowFromCells(cells, idx) {
   return {
     id: newId('tr'),
     containerNo: String(v(idx.container) ?? '').trim(),
-    modelName: String(v(idx.model) ?? '').trim(),
+    modelName: normalizeModel(v(idx.model)),
     partNo: String(v(idx.part) ?? '').trim(),
     qty: toNumber(v(idx.qty)),
     etdTcTech: cellDate(v(idx.etdTc)),

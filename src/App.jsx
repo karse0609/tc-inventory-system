@@ -10,6 +10,7 @@ import {
   weeklyPlans as sampleWeeklyPlans,
 } from './data/sampleInventoryData'
 import { markArrivalLedgerEntriesCancelled } from './utils/arrivalLedger'
+import { normalizeModel } from './utils/modelName'
 import { loadJson, saveJson, storageKeys } from './utils/appPersistence'
 import { TRANSIT_ROW_STATUS, transitRowIdKey, isTransitRowReceived } from './utils/inTransitStatus'
 import { newId } from './utils/newId'
@@ -82,19 +83,25 @@ function App() {
 
   const [masterItems, setMasterItems] = useState(() => {
     const loaded = loadJson(storageKeys.master)
-    return Array.isArray(loaded) && loaded.length ? loaded : buildSeedMasterItems()
+    const rows = Array.isArray(loaded) && loaded.length ? loaded : buildSeedMasterItems()
+    return rows.map((m) => ({ ...m, modelName: normalizeModel(m.modelName) || m.modelName }))
   })
   const [planStore, setPlanStore] = useState(() => {
     const raw = loadJson(storageKeys.plans)
     const { cells, weekConfirmations } = parsePlansStorageValue(raw)
+    const mapPlanModels = (list) =>
+      migrateDeliveryPlansToSimple(list).map((p) => ({
+        ...p,
+        modelName: normalizeModel(p.modelName) || p.modelName,
+      }))
     if (cells.length) {
       return {
-        cells: migrateDeliveryPlansToSimple(cells),
+        cells: mapPlanModels(cells),
         weekConfirmations: weekConfirmations && typeof weekConfirmations === 'object' ? weekConfirmations : {},
       }
     }
     return {
-      cells: migrateDeliveryPlansToSimple(buildSeedDeliveryPlans()),
+      cells: mapPlanModels(buildSeedDeliveryPlans()),
       weekConfirmations: {},
     }
   })
@@ -115,7 +122,10 @@ function App() {
   const [inTransit, setInTransit] = useState(() => {
     const loaded = loadJson(storageKeys.transit)
     if (Array.isArray(loaded) && loaded.length) {
-      return migrateInTransitRows(loaded)
+      return migrateInTransitRows(loaded).map((r) => ({
+        ...r,
+        modelName: normalizeModel(r.modelName) || r.modelName,
+      }))
     }
     return buildSeedInTransit()
   })

@@ -1,6 +1,7 @@
 /** 물류 운영 KPI · 주차/지연 판단 */
 
 import { ALL_MODELS_VALUE } from '../config/products'
+import { modelsMatch } from './modelName'
 import { isTransitRowReceived } from './inTransitStatus'
 import { formatWeekHeaderShort, isoWeekLabelFromMonday } from './weekIsoLabels'
 
@@ -42,7 +43,7 @@ export function isToday(dateStr, asOfDate) {
 
 export function filterByModel(records, modelName) {
   if (!modelName || modelName === ALL_MODELS_VALUE) return records
-  return records.filter((row) => row.modelName === modelName)
+  return records.filter((row) => modelsMatch(row.modelName, modelName))
 }
 
 /** 도착 예정일: 창고 ETA 우선, 없으면 Port ETA */
