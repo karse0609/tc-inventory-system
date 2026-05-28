@@ -259,17 +259,25 @@ function App() {
     }
   }, [loggedInUserId, authUser])
 
+  const persistMasterItems = useCallback((rows) => {
+    setMasterItems(rows)
+  }, [])
+
+  const persistPlanStore = useCallback(({ cells, weekConfirmations }) => {
+    setPlanStore({ cells, weekConfirmations })
+  }, [])
+
+  const persistInTransit = useCallback((rows) => {
+    setInTransit(rows)
+  }, [])
+
+  /** 창고·출고·운송중: 화면 draft는 저장 버튼 전까지 App 상태에 반영하지 않음. 직접 갱신만 localStorage 저장 */
   useEffect(() => {
     saveJson(storageKeys.master, masterItems)
   }, [masterItems])
   useEffect(() => {
     saveJson(storageKeys.plans, toPlansStorageValue(planStore.cells, planStore.weekConfirmations))
   }, [planStore])
-  const persistInTransit = useCallback((rows) => {
-    setInTransit(rows)
-  }, [])
-
-  /** 운송중: 화면 draft는 저장 버튼 전까지 반영하지 않음. 입고·원격 동기화 등 App 직접 갱신만 자동 저장 */
   useEffect(() => {
     saveJson(storageKeys.transit, inTransit)
   }, [inTransit])
@@ -666,26 +674,36 @@ function App() {
     [authUser, isMobileWarehouseNav],
   )
 
-  const transitUnsavedRef = useRef(() => false)
+  const DRAFT_GUARD_VIEWS = useMemo(() => new Set(['master', 'delivery', 'transit']), [])
+  const unsavedCheckersRef = useRef({})
 
-  const registerTransitUnsavedGuard = useCallback((checker) => {
-    transitUnsavedRef.current = typeof checker === 'function' ? checker : () => false
+  const registerUnsavedGuard = useCallback((screenId, checker) => {
+    if (!screenId) return
+    if (checker == null) delete unsavedCheckersRef.current[screenId]
+    else unsavedCheckersRef.current[screenId] = checker
   }, [])
 
-  const confirmLeaveTransitView = useCallback(() => {
-    if (view !== 'transit' || !transitUnsavedRef.current()) return true
-    return window.confirm(formatKoEnInline(L.inTransitUnsavedNavigateConfirm))
-  }, [view])
+  const confirmLeaveView = useCallback(
+    (fromView, toView) => {
+      if (!fromView || fromView === toView || !DRAFT_GUARD_VIEWS.has(fromView)) return true
+      const checker = unsavedCheckersRef.current[fromView]
+      if (typeof checker === 'function' && checker()) {
+        return window.confirm(formatKoEnInline(L.unsavedNavigateConfirm))
+      }
+      return true
+    },
+    [DRAFT_GUARD_VIEWS],
+  )
 
   const goView = useCallback(
     (next) => {
       if (!authUser || !canAccessView(authUser, next)) return
       if (isMobileWarehouseNav && !MOBILE_WAREHOUSE_NAV_VIEW_IDS.includes(next)) return
-      if (view === 'transit' && next !== 'transit' && !confirmLeaveTransitView()) return
+      if (!confirmLeaveView(view, next)) return
       setView(next)
       window.history.replaceState(null, '', `#/${next}`)
     },
-    [authUser, isMobileWarehouseNav, view, confirmLeaveTransitView],
+    [authUser, isMobileWarehouseNav, view, confirmLeaveView],
   )
 
   useEffect(() => {
@@ -719,22 +737,22 @@ function App() {
       ) {
         const first = defaultHomeView(authUser)
         window.history.replaceState(null, '', `#/${first}`)
-        if (view === 'transit' && first !== 'transit' && !confirmLeaveTransitView()) {
-          window.history.replaceState(null, '', '#/transit')
+        if (!confirmLeaveView(view, first)) {
+          window.history.replaceState(null, '', `#/${view}`)
           return
         }
         setView(first)
         return
       }
-      if (view === 'transit' && raw !== 'transit' && !confirmLeaveTransitView()) {
-        window.history.replaceState(null, '', '#/transit')
+      if (!confirmLeaveView(view, raw)) {
+        window.history.replaceState(null, '', `#/${view}`)
         return
       }
       setView(raw)
     }
     window.addEventListener('hashchange', onHash)
     return () => window.removeEventListener('hashchange', onHash)
-  }, [authUser, isMobileWarehouseNav, view, confirmLeaveTransitView])
+  }, [authUser, isMobileWarehouseNav, view, confirmLeaveView])
 
   useEffect(() => {
     if (!authUser) return
@@ -893,7 +911,8 @@ function App() {
       {view === 'master' && (
         <MasterDataPage
           masterItems={masterItems}
-          setMasterItems={setMasterItems}
+          onPersistMasterItems={persistMasterItems}
+          registerUnsavedGuard={registerUnsavedGuard}
           deliveryPlans={deliveryPlans}
           inTransit={inTransit}
           opsMeta={opsMeta}
@@ -902,11 +921,11 @@ function App() {
       {view === 'delivery' && (
         <DeliveryPlanPage
           masterItems={masterItems}
-          setMasterItems={setMasterItems}
+          onPersistMasterItems={persistMasterItems}
           deliveryPlans={deliveryPlans}
-          setDeliveryPlans={setDeliveryPlans}
           weekConfirmations={weekConfirmations}
-          setWeekConfirmations={setWeekConfirmations}
+          onPersistPlanStore={persistPlanStore}
+          registerUnsavedGuard={registerUnsavedGuard}
           opsMeta={opsMeta}
           onRequestRemoteSync={scheduleRemoteSyncAfterMutation}
         />
@@ -915,7 +934,7 @@ function App() {
         <InTransitPage
           inTransit={inTransit}
           onPersistInTransit={persistInTransit}
-          registerUnsavedGuard={registerTransitUnsavedGuard}
+          registerUnsavedGuard={registerUnsavedGuard}
           setMasterItems={setMasterItems}
           masterItems={masterItems}
           appendArrivalLedger={appendArrivalLedger}

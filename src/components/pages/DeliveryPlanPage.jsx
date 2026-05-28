@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import useUnsavedDraft from '../../hooks/useUnsavedDraft'
 import BilingualLabel from '../BilingualLabel'
 import { operationsMeta } from '../../data/logisticsSampleData'
 import { formatKoEn, formatKoEnInline, L } from '../../i18n/labels'
@@ -8,6 +9,7 @@ import useGridNativePaste from '../../hooks/useGridNativePaste'
 import { parseQtyCell } from '../../utils/excelGridClipboard'
 import { downloadXlsxFromAoA, readXlsxFirstSheetMatrix } from '../../utils/excelFile'
 import { useMobileSimpleLayout } from '../../utils/mobileLayout'
+import { cloneJson } from '../../utils/draftState'
 import { normalizeModel } from '../../utils/modelName'
 import { newId } from '../../utils/newId'
 import { inventoryRemoteSyncEnabled } from '../../utils/inventoryRemoteSync'
@@ -32,6 +34,22 @@ const DEFAULT_FUTURE = 22
 const MAX_PAST_WEEKS = 52
 
 const EMPTY_PART_SEARCH = { model: '', part: '' }
+
+function buildSavedPlanDraft(cells, weekConfirmations) {
+  return {
+    cells: cells ?? [],
+    weekConfirmations: weekConfirmations ?? {},
+    draftRows: [],
+  }
+}
+
+function clonePlanDraft(snapshot) {
+  return {
+    cells: cloneJson(snapshot?.cells ?? []),
+    weekConfirmations: cloneJson(snapshot?.weekConfirmations ?? {}),
+    draftRows: cloneJson(snapshot?.draftRows ?? []),
+  }
+}
 
 function lc(s) {
   return String(s ?? '').toLowerCase()
@@ -171,11 +189,11 @@ function WeekCell({
 
 export default function DeliveryPlanPage({
   masterItems,
-  setMasterItems,
-  deliveryPlans,
-  setDeliveryPlans,
-  weekConfirmations,
-  setWeekConfirmations,
+  onPersistMasterItems,
+  deliveryPlans: savedDeliveryPlans,
+  weekConfirmations: savedWeekConfirmations,
+  onPersistPlanStore,
+  registerUnsavedGuard,
   opsMeta,
   onRequestRemoteSync,
 }) {
@@ -184,7 +202,54 @@ export default function DeliveryPlanPage({
   const [pastWeeks, setPastWeeks] = useState(DEFAULT_PAST)
   const [futureWeeks, setFutureWeeks] = useState(DEFAULT_FUTURE)
   const [weekOffset, setWeekOffset] = useState(0)
-  const [draftRows, setDraftRows] = useState([])
+
+  const savedPlanDraft = useMemo(
+    () => buildSavedPlanDraft(savedDeliveryPlans, savedWeekConfirmations),
+    [savedDeliveryPlans, savedWeekConfirmations],
+  )
+
+  const { draft, setDraft } = useUnsavedDraft({
+    saved: savedPlanDraft,
+    clone: clonePlanDraft,
+    registerUnsavedGuard,
+    guardId: 'delivery',
+  })
+
+  const deliveryPlans = draft.cells
+  const weekConfirmations = draft.weekConfirmations
+  const draftRows = draft.draftRows
+
+  const setDeliveryPlans = useCallback(
+    (updater) => {
+      setDraft((d) => ({
+        ...d,
+        cells: typeof updater === 'function' ? updater(d.cells) : updater,
+      }))
+    },
+    [setDraft],
+  )
+
+  const setWeekConfirmations = useCallback(
+    (updater) => {
+      setDraft((d) => ({
+        ...d,
+        weekConfirmations:
+          typeof updater === 'function' ? updater(d.weekConfirmations) : { ...updater },
+      }))
+    },
+    [setDraft],
+  )
+
+  const setDraftRows = useCallback(
+    (updater) => {
+      setDraft((d) => ({
+        ...d,
+        draftRows: typeof updater === 'function' ? updater(d.draftRows) : updater,
+      }))
+    },
+    [setDraft],
+  )
+
   const [saveHint, setSaveHint] = useState('')
   const [deleteTarget, setDeleteTarget] = useState(null)
   const [excelMsg, setExcelMsg] = useState('')
@@ -197,7 +262,7 @@ export default function DeliveryPlanPage({
   const pasteAnchorRef = useRef({ rowIndex: 0, colKind: 'week', weekColIndex: 0 })
   /** 직전 출고저장(재고 반영 기준) 스냅샷 — 자동 저장 중간값으로 prev가 깨져 중복 차감되지 않도록 ref 유지 */
   const lastWarehouseBaselineRef = useRef(
-    serializeWarehouseBaselinePlansSnapshot(deliveryPlans, weekConfirmations),
+    serializeWarehouseBaselinePlansSnapshot(savedDeliveryPlans, savedWeekConfirmations),
   )
   const dpTableRef = useRef(null)
 
@@ -279,12 +344,16 @@ export default function DeliveryPlanPage({
       nextWeekConfirmations: weekConfirmations,
       masterItems,
     })
-    setMasterItems((prev) => applyStockDeltasToMasterItems(prev, deltas))
-    setDeliveryPlans(normalized)
+    const nextMaster = applyStockDeltasToMasterItems(masterItems, deltas)
+    if (typeof onPersistMasterItems === 'function') onPersistMasterItems(nextMaster)
+    if (typeof onPersistPlanStore === 'function') {
+      onPersistPlanStore({ cells: normalized, weekConfirmations })
+    }
     lastWarehouseBaselineRef.current = serializeWarehouseBaselinePlansSnapshot(
       normalized,
       weekConfirmations,
     )
+    setDraft({ cells: normalized, weekConfirmations, draftRows: [] })
     setSaveHint(
       formatKoEn(inventoryRemoteSyncEnabled() ? L.savedAfterEditWithRemote : L.savedToBrowserStorage),
     )
@@ -317,19 +386,15 @@ export default function DeliveryPlanPage({
     if (!deleteTarget) return
     const { modelName, partNo, kind, draftId } = deleteTarget
     const nextPlans = deliveryPlans.filter((p) => !(p.modelName === modelName && p.partNo === partNo))
-    const deltas = computeStockDeltasBySku(deliveryPlans, nextPlans, weekConfirmations)
-    if (deltas.size) {
-      setMasterItems((prev) => applyStockDeltasToMasterItems(prev, deltas))
-    }
-    const normalizedNext = normalizeDeliveryPlansForPersist(nextPlans, weekConfirmations)
-    setDeliveryPlans(normalizedNext)
-    lastWarehouseBaselineRef.current = serializeWarehouseBaselinePlansSnapshot(
-      normalizedNext,
-      weekConfirmations,
-    )
-    if (kind === 'draft' && draftId) removeDraft(draftId)
+    setDraft((d) => ({
+      ...d,
+      cells: nextPlans,
+      draftRows:
+        kind === 'draft' && draftId
+          ? d.draftRows.filter((row) => row.id !== draftId)
+          : d.draftRows,
+    }))
     setDeleteTarget(null)
-    if (typeof onRequestRemoteSync === 'function') onRequestRemoteSync()
   }
 
   function cancelDeletePartPlans() {

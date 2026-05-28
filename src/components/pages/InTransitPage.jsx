@@ -5,7 +5,8 @@ import { downloadXlsxFromAoA } from '../../utils/excelFile'
 import { parseBoolCell, parseDateForInput, parseQtyCell } from '../../utils/excelGridClipboard'
 import { resolveReceiptDateForLedger } from '../../utils/inventoryAsOf'
 import { isTransitRowReceived, TRANSIT_ROW_STATUS, transitRowIdKey } from '../../utils/inTransitStatus'
-import { cloneInTransitRows, inTransitRowsEqual } from '../../utils/inTransitDraft'
+import useUnsavedDraft from '../../hooks/useUnsavedDraft'
+import { cloneInTransitRows } from '../../utils/inTransitDraft'
 import { sortInTransitRowsByEtdTc } from '../../utils/inTransitSort'
 import { normalizeModel } from '../../utils/modelName'
 import { newId } from '../../utils/newId'
@@ -197,32 +198,12 @@ export default function InTransitPage({
   const transitTableRef = useRef(null)
   const isMobileLayout = useTransitMobileLayout()
 
-  const [draft, setDraft] = useState(() => cloneInTransitRows(savedInTransit))
-
-  const isDirty = useMemo(
-    () => !inTransitRowsEqual(draft, savedInTransit),
-    [draft, savedInTransit],
-  )
-
-  useEffect(() => {
-    if (!isDirty) setDraft(cloneInTransitRows(savedInTransit))
-  }, [savedInTransit, isDirty])
-
-  useEffect(() => {
-    if (!registerUnsavedGuard) return undefined
-    registerUnsavedGuard(() => isDirty)
-    return () => registerUnsavedGuard(null)
-  }, [isDirty, registerUnsavedGuard])
-
-  useEffect(() => {
-    if (!isDirty) return undefined
-    const onBeforeUnload = (e) => {
-      e.preventDefault()
-      e.returnValue = ''
-    }
-    window.addEventListener('beforeunload', onBeforeUnload)
-    return () => window.removeEventListener('beforeunload', onBeforeUnload)
-  }, [isDirty])
+  const { draft, setDraft } = useUnsavedDraft({
+    saved: savedInTransit,
+    clone: cloneInTransitRows,
+    registerUnsavedGuard,
+    guardId: 'transit',
+  })
 
   useLayoutEffect(() => {
     if (!isMobileLayout) return

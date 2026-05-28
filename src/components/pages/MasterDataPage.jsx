@@ -3,9 +3,10 @@ import useGridNativePaste from '../../hooks/useGridNativePaste'
 import { getEnabledProducts } from '../../config/products'
 import { MIN_MANAGEMENT_WEEKS } from '../../config/inventoryPolicy'
 import { operationsMeta } from '../../data/logisticsSampleData'
+import useUnsavedDraft from '../../hooks/useUnsavedDraft'
 import { L, formatKoEn, formatKoEnInline } from '../../i18n/labels'
-import { saveJson, storageKeys } from '../../utils/appPersistence'
 import { buildItemInventoryStatus } from '../../utils/inventoryCoverage'
+import { cloneJson } from '../../utils/draftState'
 import { parseQtyCell } from '../../utils/excelGridClipboard'
 import { downloadXlsxFromAoA, readXlsxFirstSheetMatrix } from '../../utils/excelFile'
 import { useMobileSimpleLayout } from '../../utils/mobileLayout'
@@ -87,6 +88,8 @@ function applyMasterPasteFromDisplay(prev, matrix, dispRow, dispCol, appliedSear
       } else if (field === 'status') {
         const v = cell.toLowerCase()
         row.status = v.startsWith('inact') ? 'Inactive' : 'Active'
+      } else if (field === 'modelName') {
+        row.modelName = normalizeModel(cell)
       } else {
         row[field] = cell
       }
@@ -106,14 +109,23 @@ function formatCoverageWeeks(weeks) {
 }
 
 export default function MasterDataPage({
-  masterItems,
-  setMasterItems,
+  masterItems: savedMasterItems,
+  onPersistMasterItems,
+  registerUnsavedGuard,
   deliveryPlans = [],
   inTransit = [],
   opsMeta,
 }) {
   const isMobile = useMobileSimpleLayout()
   const products = getEnabledProducts()
+
+  const { draft: masterItems, setDraft: setMasterItems } = useUnsavedDraft({
+    saved: savedMasterItems,
+    clone: cloneJson,
+    registerUnsavedGuard,
+    guardId: 'master',
+  })
+
   const [saveHint, setSaveHint] = useState('')
   const [excelMsg, setExcelMsg] = useState('')
   const [selected, setSelected] = useState(() => new Set())
@@ -155,7 +167,7 @@ export default function MasterDataPage({
   }
 
   function handleSave() {
-    saveJson(storageKeys.master, masterItems)
+    if (typeof onPersistMasterItems === 'function') onPersistMasterItems(masterItems)
     flashSaved()
   }
 
