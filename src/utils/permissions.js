@@ -22,7 +22,21 @@ export const VIEW_MENU_LABELS = Object.fromEntries(
   VIEW_IDS.map((id) => [id, VIEW_LABELS[id]]),
 )
 
+/** 미국 창고·파트너 테스트: 대시보드 + 운송중(입고/이력)만, 설정·원가 UI 없음 */
+export const PARTNER_TEST_ROLE = 'PartnerTest'
+
 /** @typedef {{ dashboard?: boolean, master?: boolean, delivery?: boolean, transit?: boolean, projection?: boolean, settings?: boolean }} MenuPermissions */
+
+export function defaultMenuPermissionsForPartnerTest() {
+  return {
+    dashboard: true,
+    master: false,
+    delivery: false,
+    transit: true,
+    projection: false,
+    settings: false,
+  }
+}
 
 /** @param {string} role */
 export function defaultMenuPermissionsForRole(role) {
@@ -32,6 +46,8 @@ export function defaultMenuPermissionsForRole(role) {
   switch (role) {
     case 'Admin':
       return { ...all }
+    case PARTNER_TEST_ROLE:
+      return defaultMenuPermissionsForPartnerTest()
     case 'Manager':
       return {
         ...none,
@@ -51,10 +67,6 @@ export function defaultMenuPermissionsForRole(role) {
   }
 }
 
-/**
- * @param {{ role?: string, active?: boolean, menuPermissions?: MenuPermissions } | null} user
- * @param {string} viewId
- */
 /** @param {string | undefined} role */
 export function isAdminRole(role) {
   const r = String(role ?? '').trim().toLowerCase()
@@ -70,6 +82,24 @@ export function canAccessView(user, viewId) {
 /** @param {{ role?: string, active?: boolean } | null} user */
 export function isAdminUser(user) {
   return !!user && user.active !== false && isAdminRole(user.role)
+}
+
+/**
+ * 미국 창고·파트너 테스트 계정 — 금액/원가 KPI 숨김, 원격 동기화 PUT 비활성 등
+ * (관리자가 아닌 경우에만 적용)
+ */
+export function isPartnerTestViewer(user) {
+  if (!user || user.active === false) return false
+  if (isAdminRole(user.role)) return false
+  const role = String(user.role ?? '').trim().toLowerCase()
+  if (role === PARTNER_TEST_ROLE.toLowerCase()) return true
+  const uid = String(user.userId ?? '').trim().toLowerCase()
+  return uid === 'test'
+}
+
+/** 원가·재고 금액 등 재무 KPI/표시 */
+export function canViewFinancialKpis(user) {
+  return !!user && user.active !== false && !isPartnerTestViewer(user)
 }
 
 /** @param {object} user */

@@ -45,6 +45,10 @@ export const L = {
   passwordCol: { ko: '비밀번호', en: 'Password' },
   nameCol: { ko: '이름', en: 'Name' },
   roleCol: { ko: '역할', en: 'Role' },
+  rolePartnerTest: {
+    ko: '파트너 테스트 (미국 창고)',
+    en: 'Partner test (US warehouse)',
+  },
   activeCol: { ko: '활성', en: 'Active' },
   menusCol: { ko: '메뉴', en: 'Menus' },
   pageSearchButton: { ko: '검색', en: 'Search' },
@@ -175,6 +179,7 @@ export const L = {
 
   dashboardUserGuideTitle: { ko: '사용 안내', en: 'User Guide' },
   dashboardSystemNotesTitle: { ko: '시스템 참고', en: 'System notes' },
+  dashboardHelpBarTitle: { ko: '도움말 (Help)', en: 'Help' },
   dashboardGuideExpand: { ko: '펼치기', en: 'Expand' },
   dashboardGuideCollapse: { ko: '접기', en: 'Collapse' },
   dashboardUserGuideBody: {

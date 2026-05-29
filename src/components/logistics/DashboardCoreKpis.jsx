@@ -26,8 +26,14 @@ function coverageDisplay(coverageWeeks) {
   return coverageWeeks.toFixed(1)
 }
 
+function aggregateRiskClass(level) {
+  if (level === 'critical') return 'dash-kpi__card--aggregate-risk dash-kpi__card--aggregate-risk-critical'
+  if (level === 'warning') return 'dash-kpi__card--aggregate-risk dash-kpi__card--aggregate-risk-warning'
+  return ''
+}
+
 /**
- * 실시간 해외재고 대시보드 — 핵심 KPI (수량·KRW 금액·ETA·커버리지)
+ * 실시간 해외재고 대시보드 — 핵심 KPI (운영 우선순서)
  * 재고 금액은 Settings의 대당 원가(KRW)만 사용합니다.
  */
 export default function DashboardCoreKpis({
@@ -39,39 +45,53 @@ export default function DashboardCoreKpis({
   thisWeekEtaContainerCount,
   coverageWeeks,
   unit,
+  aggregateRisk = 'ok',
+  showTotalInventoryValue = true,
 }) {
   const totalKrw = (Number(warehouseValue) || 0) + (Number(inTransitValue) || 0)
+  const riskExtra = aggregateRiskClass(aggregateRisk)
 
   const cards = [
-    { label: L.dashboardWarehouseQty, value: formatNumber(warehouseQty), meta: unit },
+    ...(showTotalInventoryValue
+      ? [
+          {
+            key: 'total-value',
+            label: L.totalInventoryValue,
+            value: formatKrwInteger(totalKrw),
+            meta: 'KRW',
+            extraClass: riskExtra,
+          },
+        ]
+      : []),
     {
-      label: L.dashboardWarehouseValue,
-      value: formatKrwInteger(warehouseValue),
-      meta: 'KRW',
+      key: 'wh-qty',
+      label: L.dashboardWarehouseQty,
+      value: formatNumber(warehouseQty),
+      meta: unit,
+      extraClass: riskExtra,
     },
-    { label: L.dashboardInTransitQty, value: formatNumber(inTransitQty), meta: unit },
     {
-      label: L.dashboardInTransitValue,
-      value: formatKrwInteger(inTransitValue),
-      meta: 'KRW',
+      key: 'tr-qty',
+      label: L.dashboardInTransitQty,
+      value: formatNumber(inTransitQty),
+      meta: unit,
+      extraClass: riskExtra,
     },
     {
-      label: L.totalInventoryValue,
-      value: formatKrwInteger(totalKrw),
-      meta: 'KRW',
+      key: 'coverage',
+      label: L.coverageWeeks,
+      value: coverageDisplay(coverageWeeks),
+      meta: 'weeks',
+      extraClass: coverageCardClass(coverageWeeks),
     },
     {
+      key: 'eta',
       label: L.dashboardThisWeekEtaQty,
       kind: 'portEtaDue',
       value: formatNumber(thisWeekEtaQty),
       value2: formatNumber(thisWeekEtaContainerCount ?? 0),
       meta: unit,
-    },
-    {
-      label: L.coverageWeeks,
-      value: coverageDisplay(coverageWeeks),
-      meta: 'weeks',
-      extraClass: coverageCardClass(coverageWeeks),
+      extraClass: riskExtra,
     },
   ]
 
@@ -79,8 +99,8 @@ export default function DashboardCoreKpis({
     <section className="dash-kpi" aria-label="Key performance indicators">
       {cards.map((card) => (
         <article
-          key={card.label.en}
-          className={`dash-kpi__card ${card.extraClass || ''}`}
+          key={card.key}
+          className={`dash-kpi__card ${card.extraClass || ''}`.trim()}
         >
           <span className="dash-kpi__label">
             <BilingualLabel label={card.label} as="span" />

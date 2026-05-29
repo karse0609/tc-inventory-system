@@ -28,7 +28,13 @@ import {
   saveUsersToStorage,
   setSessionUserId as writeBrowserSessionUserId,
 } from './utils/auth'
-import { VIEW_IDS, canAccessView, isAdminUser } from './utils/permissions'
+import {
+  VIEW_IDS,
+  canAccessView,
+  isAdminUser,
+  canViewFinancialKpis,
+  isPartnerTestViewer,
+} from './utils/permissions'
 import {
   MOBILE_WAREHOUSE_NAV_VIEW_IDS,
   prefersMobileSimpleLayout,
@@ -540,6 +546,7 @@ function App() {
   const pushRemoteInventoryNow = useCallback(async (opts = {}) => {
     const silent = opts.silent === true
     if (!inventoryRemoteSyncEnabled() || !authUser) return { ok: false }
+    if (isPartnerTestViewer(authUser)) return { ok: false }
     if (!silent) setRemoteUi((u) => ({ ...u, busyPush: true }))
     let payload
     try {
@@ -572,6 +579,7 @@ function App() {
   /** 입고/취소 등 로컬 상태 반영 직후 원격에 밀어 넣고 다시 당겨 옴 (모바일·PC 공통) */
   const scheduleRemoteSyncAfterMutation = useCallback(() => {
     if (!inventoryRemoteSyncEnabled() || !authUser) return
+    if (isPartnerTestViewer(authUser)) return
     window.setTimeout(async () => {
       await pushRemoteInventoryNow({ silent: false })
       await pullRemoteInventory()
@@ -616,6 +624,7 @@ function App() {
 
   useEffect(() => {
     if (!authUser || !inventoryRemoteSyncEnabled()) return undefined
+    if (isPartnerTestViewer(authUser)) return undefined
     if (!remoteHydrated) return undefined
     if (applyingRemoteRef.current) return undefined
     const t = window.setTimeout(() => {
@@ -907,6 +916,7 @@ function App() {
           arrivalLedger={arrivalLedger}
           readOnlyMobile={isMobileWarehouseNav}
           isAdminViewer={isAdminUser(authUser)}
+          hideFinancialMetrics={!canViewFinancialKpis(authUser)}
         />
       )}
       {view === 'master' && (

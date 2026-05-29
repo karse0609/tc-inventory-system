@@ -3,7 +3,11 @@
  * 백엔드 연동 시 이 파일의 저장소 호출부를 API로 교체하면 됩니다.
  */
 
-import { defaultMenuPermissionsForRole, sanitizeUserForClient } from './permissions'
+import {
+  defaultMenuPermissionsForRole,
+  defaultMenuPermissionsForPartnerTest,
+  sanitizeUserForClient,
+} from './permissions'
 
 export const AUTH_STORAGE_KEYS = {
   users: 'tc-inv-users',
@@ -46,9 +50,12 @@ export function saveUsersToStorage(users) {
   localStorage.setItem(AUTH_STORAGE_KEYS.users, JSON.stringify(usersForPersistence(users)))
 }
 
+export const BUILTIN_ADMIN_USER_ID = 'user-builtin-admin'
+export const BUILTIN_PARTNER_TEST_USER_ID = 'user-builtin-partner-test'
+
 export function createDefaultAdminUser() {
   return {
-    id: 'user-builtin-admin',
+    id: BUILTIN_ADMIN_USER_ID,
     userId: 'admin',
     passwordHash: ADMIN_DEFAULT_PASSWORD_HASH,
     name: 'Administrator',
@@ -58,10 +65,31 @@ export function createDefaultAdminUser() {
   }
 }
 
+/** 미국 창고·파트너 테스트 — PW 1234 (해시는 admin 기본과 동일) */
+export function createDefaultPartnerTestUser() {
+  return {
+    id: BUILTIN_PARTNER_TEST_USER_ID,
+    userId: 'test',
+    passwordHash: ADMIN_DEFAULT_PASSWORD_HASH,
+    name: 'US Warehouse · Partner (Test)',
+    role: 'PartnerTest',
+    active: true,
+    menuPermissions: defaultMenuPermissionsForPartnerTest(),
+  }
+}
+
 export function ensureUsersInStorage() {
   let users = loadUsersFromStorage()
   if (!users?.length) {
-    users = [createDefaultAdminUser()]
+    users = [createDefaultAdminUser(), createDefaultPartnerTestUser()]
+    saveUsersToStorage(users)
+    return users
+  }
+  const hasTestLogin = users.some(
+    (u) => String(u.userId ?? '').trim().toLowerCase() === 'test',
+  )
+  if (!hasTestLogin) {
+    users = [...users, createDefaultPartnerTestUser()]
     saveUsersToStorage(users)
   }
   return users

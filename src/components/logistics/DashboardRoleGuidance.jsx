@@ -12,7 +12,7 @@ export default function DashboardRoleGuidance({
 }) {
   const [open, setOpen] = useState(false)
   const panelId = useId()
-  const titleLabel = isAdmin ? L.dashboardSystemNotesTitle : L.dashboardUserGuideTitle
+  const barTitle = L.dashboardHelpBarTitle
   const toggleLabel = open ? L.dashboardGuideCollapse : L.dashboardGuideExpand
 
   const terms = [
@@ -23,10 +23,10 @@ export default function DashboardRoleGuidance({
   ]
 
   return (
-    <section className="dashboard__guide-shell" aria-label={formatTitle(titleLabel)}>
+    <section className="dashboard__guide-shell" aria-label={formatTitle(barTitle)}>
       <div className="dashboard__guide-bar">
         <h2 className="dashboard__guide-bar-title">
-          <BilingualLabel label={titleLabel} as="span" />
+          <BilingualLabel label={barTitle} as="span" />
         </h2>
         <button
           type="button"
@@ -42,6 +42,9 @@ export default function DashboardRoleGuidance({
         <div id={panelId} className="dashboard__guide-panel">
           {isAdmin ? (
             <>
+              <p className="dashboard__guide-panel-heading">
+                <BilingualLabel label={L.dashboardSystemNotesTitle} as="span" />
+              </p>
               <p className="dashboard__scope-note dashboard__scope-note--in-panel">
                 <BilingualLabel label={L.multiItemNote} as="span" />
               </p>
@@ -63,6 +66,9 @@ export default function DashboardRoleGuidance({
             </>
           ) : (
             <aside className="dashboard__user-guide" role="note">
+              <h3 className="dashboard__user-guide-panel-heading">
+                <BilingualLabel label={L.dashboardUserGuideTitle} as="span" />
+              </h3>
               <p className="dashboard__user-guide-lead">
                 <BilingualLabel label={L.dashboardUserGuideBody} as="span" />
               </p>

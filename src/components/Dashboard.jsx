@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { ALL_MODELS_VALUE } from '../config/products'
+import { getCoverageStatus } from '../config/inventoryPolicy'
 import { todayShipments as sampleTodayShipments } from '../data/logisticsSampleData'
 import { L, formatKoEnInline } from '../i18n/labels'
 import { computeWarehouseQtyAsOf, sumWarehouseStockForModelWithAsOf } from '../utils/inventoryAsOf'
@@ -50,6 +51,8 @@ export default function Dashboard({
   readOnlyMobile = false,
   /** Admin: 시스템·저장소 안내 / 일반 사용자: 사용 안내 */
   isAdminViewer = false,
+  /** 파트너 등: 재고 금액(KPI) 숨김 */
+  hideFinancialMetrics = false,
 }) {
   const [selectedModelName, setSelectedModelName] = useState(ALL_MODELS_VALUE)
   const [clockTick, setClockTick] = useState(() => new Date())
@@ -270,6 +273,30 @@ export default function Dashboard({
     return names
   }, [dashboardModelNames, selectedModelName])
 
+  const kpiAggregateRisk = useMemo(() => {
+    const covDisplay =
+      inventorySummary.portfolioCoverageWeeks ?? inventorySummary.minCoverageWeeks
+    const covStatus =
+      covDisplay != null && Number.isFinite(covDisplay) ? getCoverageStatus(covDisplay) : 'unknown'
+
+    let itemWorst = 'ok'
+    for (const r of itemInventoryRows) {
+      const gap = r.gap
+      const gapShort = gap != null && Number.isFinite(gap) && gap < 0
+      if (r.status === 'critical' || gapShort) {
+        itemWorst = 'critical'
+        break
+      }
+      if (r.status === 'warning') {
+        itemWorst = itemWorst === 'critical' ? 'critical' : 'warning'
+      }
+    }
+
+    if (itemWorst === 'critical' || covStatus === 'critical') return 'critical'
+    if (itemWorst === 'warning' || covStatus === 'warning') return 'warning'
+    return 'ok'
+  }, [inventorySummary, itemInventoryRows])
+
   return (
     <div
       className={
@@ -277,7 +304,7 @@ export default function Dashboard({
       }
     >
       <header className="dashboard__header">
-        <div>
+        <div className="dashboard__header-main">
           <p className="dashboard__eyebrow">{opsMeta.subtitle}</p>
           <h1>{opsMeta.title}</h1>
           <div className="dashboard__clock-bar" aria-live="polite">
@@ -294,48 +321,64 @@ export default function Dashboard({
               <span className="dashboard__as-of-value">{koreaClock}</span>
             </div>
           </div>
-          <div className="dashboard__as-of-inline">
-            <BilingualLabel label={L.opsQueryDateKst} as="span" />
-            {typeof setOpsMeta === 'function' ? (
-              <input
-                type="date"
-                className="dashboard__as-of-input cell-input"
-                value={asOfDate || ''}
-                onChange={(e) =>
-                  setOpsMeta((o) => ({ ...o, asOfDate: e.target.value || o.asOfDate }))
-                }
-                aria-label={formatKoEnInline(L.opsQueryDateKst)}
-              />
-            ) : (
-              <time dateTime={asOfDate}>{asOfDate}</time>
-            )}
-            <span className="tag tag--model">
-              {selectedModelName === ALL_MODELS_VALUE ? (
-                <BilingualLabel label={L.dashboardModelAll} as="span" />
-              ) : (
-                selectedModelName
-              )}
-            </span>
-          </div>
-        </div>
-        <div className="dashboard__header-actions">
-          <label className="dashboard__model-select">
-            <BilingualLabel label={L.model} as="span" />
-            <select
-              value={selectedModelName}
-              onChange={(e) => setSelectedModelName(e.target.value)}
-              aria-label={formatKoEnInline(L.model)}
-            >
-              <option value={ALL_MODELS_VALUE} title={formatKoEnInline(L.dashboardModelAll)}>
-                {L.dashboardModelAll.ko}
-              </option>
-              {dashboardModelSelectOptions.map((name) => (
-                <option key={name} value={name}>
-                  {name}
-                </option>
-              ))}
-            </select>
-          </label>
+          {!readOnlyMobile ? (
+            <div className="dashboard__query-row">
+              <label className="dashboard__query-field">
+                <span className="dashboard__query-field-label">
+                  <BilingualLabel label={L.opsQueryDateKst} as="span" />
+                </span>
+                {typeof setOpsMeta === 'function' ? (
+                  <input
+                    type="date"
+                    className="dashboard__as-of-input cell-input"
+                    value={asOfDate || ''}
+                    onChange={(e) =>
+                      setOpsMeta((o) => ({ ...o, asOfDate: e.target.value || o.asOfDate }))
+                    }
+                    aria-label={formatKoEnInline(L.opsQueryDateKst)}
+                  />
+                ) : (
+                  <time className="dashboard__as-of-readonly" dateTime={asOfDate}>
+                    {asOfDate}
+                  </time>
+                )}
+              </label>
+              <label className="dashboard__query-field">
+                <span className="dashboard__query-field-label">
+                  <BilingualLabel label={L.model} as="span" />
+                </span>
+                <select
+                  className="dashboard__model-select-input cell-input"
+                  value={selectedModelName}
+                  onChange={(e) => setSelectedModelName(e.target.value)}
+                  aria-label={formatKoEnInline(L.model)}
+                >
+                  <option value={ALL_MODELS_VALUE} title={formatKoEnInline(L.dashboardModelAll)}>
+                    {L.dashboardModelAll.ko}
+                  </option>
+                  {dashboardModelSelectOptions.map((name) => (
+                    <option key={name} value={name}>
+                      {name}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            </div>
+          ) : (
+            <div className="dashboard__query-row dashboard__query-row--readonly">
+              <span className="dashboard__query-readonly">
+                <BilingualLabel label={L.opsQueryDateKst} as="span" />: {asOfDate}
+              </span>
+              <span className="dashboard__query-readonly">
+                <BilingualLabel label={L.model} as="span" />:{' '}
+                {selectedModelName === ALL_MODELS_VALUE ? (
+                  <BilingualLabel label={L.dashboardModelAll} as="span" />
+                ) : (
+                  selectedModelName
+                )}
+              </span>
+            </div>
+          )}
         </div>
       </header>
 
@@ -350,6 +393,8 @@ export default function Dashboard({
           inventorySummary.portfolioCoverageWeeks ?? inventorySummary.minCoverageWeeks
         }
         unit={opsMeta.unit}
+        aggregateRisk={kpiAggregateRisk}
+        showTotalInventoryValue={!hideFinancialMetrics}
       />
 
       <DashboardRoleGuidance

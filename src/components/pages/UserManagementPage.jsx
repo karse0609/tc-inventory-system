@@ -5,6 +5,8 @@ import {
   VIEW_IDS,
   VIEW_MENU_LABELS,
   defaultMenuPermissionsForRole,
+  defaultMenuPermissionsForPartnerTest,
+  PARTNER_TEST_ROLE,
 } from '../../utils/permissions'
 import { hashPassword } from '../../utils/auth'
 import { newId } from '../../utils/newId'
@@ -14,7 +16,7 @@ import { L, formatKoEn, formatKoEnInline } from '../../i18n/labels'
 import '../logistics/ops.css'
 import './pages.css'
 
-const ROLES = ['Admin', 'Manager', 'Viewer']
+const ROLES = ['Admin', 'Manager', PARTNER_TEST_ROLE, 'Viewer']
 
 function countActiveAdmins(users) {
   return users.filter((u) => u.role === 'Admin' && u.active !== false).length
@@ -126,7 +128,11 @@ export default function UserManagementPage({ users, setUsers, currentUserId }) {
     }
 
     const menuPermissions =
-      row.role === 'Admin' ? defaultMenuPermissionsForRole('Admin') : { ...row.menuPermissions }
+      row.role === 'Admin'
+        ? defaultMenuPermissionsForRole('Admin')
+        : row.role === PARTNER_TEST_ROLE
+          ? defaultMenuPermissionsForPartnerTest()
+          : { ...row.menuPermissions }
 
     const nextRow = {
       ...row,
@@ -291,7 +297,7 @@ export default function UserManagementPage({ users, setUsers, currentUserId }) {
                   >
                     {ROLES.map((r) => (
                       <option key={r} value={r}>
-                        {r}
+                        {r === PARTNER_TEST_ROLE ? formatKoEn(L.rolePartnerTest) : r}
                       </option>
                     ))}
                   </select>
