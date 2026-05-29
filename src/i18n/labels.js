@@ -174,6 +174,9 @@ export const L = {
   },
 
   dashboardUserGuideTitle: { ko: '사용 안내', en: 'User Guide' },
+  dashboardSystemNotesTitle: { ko: '시스템 참고', en: 'System notes' },
+  dashboardGuideExpand: { ko: '펼치기', en: 'Expand' },
+  dashboardGuideCollapse: { ko: '접기', en: 'Collapse' },
   dashboardUserGuideBody: {
     ko:
       '이 화면은 모델별 재고 현황을 확인하는 대시보드입니다. 상단 모델 필터를 선택하면 해당 모델의 창고 재고, 운송중 재고, 출고 계획, 재고 예측을 확인할 수 있습니다.',

@@ -317,10 +317,6 @@ export default function Dashboard({
               )}
             </span>
           </div>
-          <DashboardRoleGuidance
-            isAdmin={isAdminViewer}
-            showLedgerHint={showLedgerHint && !readOnlyMobile}
-          />
         </div>
         <div className="dashboard__header-actions">
           <label className="dashboard__model-select">
@@ -355,18 +351,12 @@ export default function Dashboard({
         }
         unit={opsMeta.unit}
       />
-      {isAdminViewer ? (
-        <p className="dashboard__kpi-footnote page__hint">
-          <BilingualLabel
-            label={
-              inventoryRemoteSyncEnabled()
-                ? L.dashboardInTransitQtyFootnoteRemote
-                : L.dashboardInTransitQtyFootnote
-            }
-            as="span"
-          />
-        </p>
-      ) : null}
+
+      <DashboardRoleGuidance
+        isAdmin={isAdminViewer}
+        showLedgerHint={showLedgerHint && !readOnlyMobile}
+        inventoryRemoteSyncEnabled={inventoryRemoteSyncEnabled()}
+      />
 
       <InventoryStatusPanel
         variant="compact"
