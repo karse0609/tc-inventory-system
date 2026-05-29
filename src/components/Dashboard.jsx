@@ -51,8 +51,6 @@ export default function Dashboard({
   readOnlyMobile = false,
   /** Admin: 시스템·저장소 안내 / 일반 사용자: 사용 안내 */
   isAdminViewer = false,
-  /** 파트너 등: 재고 금액(KPI) 숨김 */
-  hideFinancialMetrics = false,
 }) {
   const [selectedModelName, setSelectedModelName] = useState(ALL_MODELS_VALUE)
   const [clockTick, setClockTick] = useState(() => new Date())
@@ -394,7 +392,6 @@ export default function Dashboard({
         }
         unit={opsMeta.unit}
         aggregateRisk={kpiAggregateRisk}
-        showTotalInventoryValue={!hideFinancialMetrics}
       />
 
       <DashboardRoleGuidance

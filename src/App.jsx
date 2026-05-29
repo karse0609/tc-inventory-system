@@ -28,13 +28,7 @@ import {
   saveUsersToStorage,
   setSessionUserId as writeBrowserSessionUserId,
 } from './utils/auth'
-import {
-  VIEW_IDS,
-  canAccessView,
-  isAdminUser,
-  canViewFinancialKpis,
-  isPartnerTestViewer,
-} from './utils/permissions'
+import { VIEW_IDS, canAccessView, isAdminUser, isPartnerTestViewer } from './utils/permissions'
 import {
   MOBILE_WAREHOUSE_NAV_VIEW_IDS,
   prefersMobileSimpleLayout,
@@ -916,7 +910,6 @@ function App() {
           arrivalLedger={arrivalLedger}
           readOnlyMobile={isMobileWarehouseNav}
           isAdminViewer={isAdminUser(authUser)}
-          hideFinancialMetrics={!canViewFinancialKpis(authUser)}
         />
       )}
       {view === 'master' && (

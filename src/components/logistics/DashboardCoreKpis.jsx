@@ -33,8 +33,8 @@ function aggregateRiskClass(level) {
 }
 
 /**
- * 실시간 해외재고 대시보드 — 핵심 KPI (운영 우선순서)
- * 재고 금액은 Settings의 대당 원가(KRW)만 사용합니다.
+ * 실시간 해외재고 대시보드 — 핵심 KPI
+ * 재고 금액(KRW)은 Settings의 대당 원가 맵만 사용합니다.
  */
 export default function DashboardCoreKpis({
   warehouseQty,
@@ -46,23 +46,32 @@ export default function DashboardCoreKpis({
   coverageWeeks,
   unit,
   aggregateRisk = 'ok',
-  showTotalInventoryValue = true,
 }) {
   const totalKrw = (Number(warehouseValue) || 0) + (Number(inTransitValue) || 0)
   const riskExtra = aggregateRiskClass(aggregateRisk)
 
   const cards = [
-    ...(showTotalInventoryValue
-      ? [
-          {
-            key: 'total-value',
-            label: L.totalInventoryValue,
-            value: formatKrwInteger(totalKrw),
-            meta: 'KRW',
-            extraClass: riskExtra,
-          },
-        ]
-      : []),
+    {
+      key: 'total-value',
+      label: L.totalInventoryValue,
+      value: formatKrwInteger(totalKrw),
+      meta: 'KRW',
+      extraClass: riskExtra,
+    },
+    {
+      key: 'wh-value',
+      label: L.dashboardWarehouseValue,
+      value: formatKrwInteger(warehouseValue),
+      meta: 'KRW',
+      extraClass: riskExtra,
+    },
+    {
+      key: 'tr-value',
+      label: L.dashboardInTransitValue,
+      value: formatKrwInteger(inTransitValue),
+      meta: 'KRW',
+      extraClass: riskExtra,
+    },
     {
       key: 'wh-qty',
       label: L.dashboardWarehouseQty,

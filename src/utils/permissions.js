@@ -85,8 +85,7 @@ export function isAdminUser(user) {
 }
 
 /**
- * 미국 창고·파트너 테스트 계정 — 금액/원가 KPI 숨김, 원격 동기화 PUT 비활성 등
- * (관리자가 아닌 경우에만 적용)
+ * 미국 창고·파트너 테스트 계정 — 원격 동기화 PUT 비활성(관리자 외 동일 데이터 조회용)
  */
 export function isPartnerTestViewer(user) {
   if (!user || user.active === false) return false
@@ -95,11 +94,6 @@ export function isPartnerTestViewer(user) {
   if (role === PARTNER_TEST_ROLE.toLowerCase()) return true
   const uid = String(user.userId ?? '').trim().toLowerCase()
   return uid === 'test'
-}
-
-/** 원가·재고 금액 등 재무 KPI/표시 */
-export function canViewFinancialKpis(user) {
-  return !!user && user.active !== false && !isPartnerTestViewer(user)
 }
 
 /** @param {object} user */
