@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
 import { ALL_MODELS_VALUE } from '../config/products'
-import { getCoverageStatus } from '../config/inventoryPolicy'
 import { todayShipments as sampleTodayShipments } from '../data/logisticsSampleData'
 import { L, formatKoEnInline } from '../i18n/labels'
 import { computeWarehouseQtyAsOf, sumWarehouseStockForModelWithAsOf } from '../utils/inventoryAsOf'
@@ -271,30 +270,6 @@ export default function Dashboard({
     return names
   }, [dashboardModelNames, selectedModelName])
 
-  const kpiAggregateRisk = useMemo(() => {
-    const covDisplay =
-      inventorySummary.portfolioCoverageWeeks ?? inventorySummary.minCoverageWeeks
-    const covStatus =
-      covDisplay != null && Number.isFinite(covDisplay) ? getCoverageStatus(covDisplay) : 'unknown'
-
-    let itemWorst = 'ok'
-    for (const r of itemInventoryRows) {
-      const gap = r.gap
-      const gapShort = gap != null && Number.isFinite(gap) && gap < 0
-      if (r.status === 'critical' || gapShort) {
-        itemWorst = 'critical'
-        break
-      }
-      if (r.status === 'warning') {
-        itemWorst = itemWorst === 'critical' ? 'critical' : 'warning'
-      }
-    }
-
-    if (itemWorst === 'critical' || covStatus === 'critical') return 'critical'
-    if (itemWorst === 'warning' || covStatus === 'warning') return 'warning'
-    return 'ok'
-  }, [inventorySummary, itemInventoryRows])
-
   return (
     <div
       className={
@@ -391,7 +366,6 @@ export default function Dashboard({
           inventorySummary.portfolioCoverageWeeks ?? inventorySummary.minCoverageWeeks
         }
         unit={opsMeta.unit}
-        aggregateRisk={kpiAggregateRisk}
       />
 
       <DashboardRoleGuidance

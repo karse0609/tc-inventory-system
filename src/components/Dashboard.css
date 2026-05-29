@@ -737,8 +737,8 @@ tbody tr:hover {
 .dash-kpi__card {
   padding: 0.65rem 0.7rem;
   border-radius: 8px;
-  border: 1px solid var(--border);
-  background: var(--surface, #fff);
+  border: 1px solid rgba(148, 163, 184, 0.32);
+  background: rgba(248, 250, 252, 0.92);
   display: flex;
   flex-direction: column;
   gap: 0.15rem;
@@ -830,25 +830,15 @@ tbody tr:hover {
   background: rgba(220, 38, 38, 0.05);
 }
 
+/* 과잉재고(6주+) — 파란·회색 톤 (위험 빨강과 구분) */
 .dash-kpi__card--cov-overstock {
-  border-color: rgba(120, 53, 15, 0.38);
-  background: rgba(120, 53, 15, 0.06);
+  border-color: rgba(59, 130, 246, 0.38);
+  background: rgba(239, 246, 255, 0.85);
 }
 
 .dash-kpi__card--cov-neutral {
-  /* default surface */
-}
-
-.dash-kpi__card--aggregate-risk-warning {
-  border-color: rgba(234, 88, 12, 0.55) !important;
-  box-shadow: 0 0 0 1px rgba(234, 88, 12, 0.12);
-  background: rgba(254, 243, 199, 0.35);
-}
-
-.dash-kpi__card--aggregate-risk-critical {
-  border-color: rgba(220, 38, 38, 0.55) !important;
-  box-shadow: 0 0 0 1px rgba(220, 38, 38, 0.12);
-  background: rgba(254, 226, 226, 0.35);
+  border-color: rgba(148, 163, 184, 0.32);
+  background: rgba(248, 250, 252, 0.92);
 }
 
 .dash-kpi__card--alert {
