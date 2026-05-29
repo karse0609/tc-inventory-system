@@ -6,6 +6,7 @@
 import {
   defaultMenuPermissionsForRole,
   defaultMenuPermissionsForPartnerTest,
+  PARTNER_TEST_ROLE,
   sanitizeUserForClient,
 } from './permissions'
 
@@ -92,6 +93,25 @@ export function ensureUsersInStorage() {
     users = [...users, createDefaultPartnerTestUser()]
     saveUsersToStorage(users)
   }
+
+  const partnerMenu = defaultMenuPermissionsForPartnerTest()
+  let partnerMenuUpdated = false
+  users = users.map((u) => {
+    const uid = String(u.userId ?? '').trim().toLowerCase()
+    const role = String(u.role ?? '').trim().toLowerCase()
+    const isSeededPartner =
+      u.id === BUILTIN_PARTNER_TEST_USER_ID ||
+      (uid === 'test' && role === PARTNER_TEST_ROLE.toLowerCase())
+    if (!isSeededPartner) return u
+    const nextPerms = { ...partnerMenu }
+    if (JSON.stringify(u.menuPermissions) === JSON.stringify(nextPerms)) return u
+    partnerMenuUpdated = true
+    return { ...u, menuPermissions: nextPerms }
+  })
+  if (partnerMenuUpdated) {
+    saveUsersToStorage(users)
+  }
+
   return users
 }
 

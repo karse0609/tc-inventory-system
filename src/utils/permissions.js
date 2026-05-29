@@ -22,7 +22,7 @@ export const VIEW_MENU_LABELS = Object.fromEntries(
   VIEW_IDS.map((id) => [id, VIEW_LABELS[id]]),
 )
 
-/** 미국 창고·파트너 테스트: 대시보드 + 운송중(입고/이력)만, 설정·원가 UI 없음 */
+/** 미국 창고·파트너(test): 재고 예측·설정 메뉴만 숨김(나머지는 admin과 동일 노출) */
 export const PARTNER_TEST_ROLE = 'PartnerTest'
 
 /** @typedef {{ dashboard?: boolean, master?: boolean, delivery?: boolean, transit?: boolean, projection?: boolean, settings?: boolean }} MenuPermissions */
@@ -30,8 +30,8 @@ export const PARTNER_TEST_ROLE = 'PartnerTest'
 export function defaultMenuPermissionsForPartnerTest() {
   return {
     dashboard: true,
-    master: false,
-    delivery: false,
+    master: true,
+    delivery: true,
     transit: true,
     projection: false,
     settings: false,
