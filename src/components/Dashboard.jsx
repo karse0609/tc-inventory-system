@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { ALL_MODELS_VALUE } from '../config/products'
 import { todayShipments as sampleTodayShipments } from '../data/logisticsSampleData'
 import { L, formatKoEnInline } from '../i18n/labels'
-import { computeWarehouseQtyAsOf, sumWarehouseStockForModelWithAsOf } from '../utils/inventoryAsOf'
+import { skuCostKey } from '../utils/unitCostKrw'
 import {
   buildInventorySummary,
   buildItemInventoryStatus,
@@ -100,14 +100,8 @@ export default function Dashboard({
   const itemInventoryRows = useMemo(
     () =>
       itemsForModel.map((item) => {
-        const warehouseStockQty = computeWarehouseQtyAsOf({
-          item,
-          deliveryPlans,
-          weekConfirmations,
-          arrivalLedger,
-          asOfDate,
-          referenceDate,
-        })
+        /** 품번별 표의 현재재고 = 창고 재고(Master) Current Stock 그대로 (조회기준일 역산·출고계획 합산 없음) */
+        const warehouseStockQty = Math.max(0, Number(item.currentStock) || 0)
         return buildItemInventoryStatus({
           item,
           itemDeliveryPlans: [],
@@ -122,34 +116,18 @@ export default function Dashboard({
       containersAsOf,
       allInTransitAsOf,
       asOfDate,
-      deliveryPlans,
-      weekConfirmations,
-      arrivalLedger,
-      referenceDate,
     ],
   )
 
   const inventorySummary = useMemo(() => {
     const portfolioCoverageWeeks = computePortfolioWeeklyDemandCoverageWeeks({
       masterItems: itemsForModel,
-      getWarehouseStockQty: (it) =>
-        computeWarehouseQtyAsOf({
-          item: it,
-          deliveryPlans,
-          weekConfirmations,
-          arrivalLedger,
-          asOfDate,
-          referenceDate,
-        }),
+      getWarehouseStockQty: (it) => Math.max(0, Number(it.currentStock) || 0),
     })
     return buildInventorySummary(itemInventoryRows, { portfolioCoverageWeeks })
   }, [
     itemInventoryRows,
     itemsForModel,
-    deliveryPlans,
-    weekConfirmations,
-    arrivalLedger,
-    referenceDate,
   ])
 
   const masterItemsForModel = useMemo(
@@ -179,29 +157,19 @@ export default function Dashboard({
     ],
   )
 
-  const warehouse = useMemo(
-    () =>
-      sumWarehouseStockForModelWithAsOf(
-        masterItems,
-        selectedModelName,
-        unitCostKrwBySku,
-        deliveryPlans,
-        weekConfirmations,
-        arrivalLedger,
-        asOfDate,
-        referenceDate,
-      ),
-    [
-      masterItems,
-      selectedModelName,
-      unitCostKrwBySku,
-      deliveryPlans,
-      weekConfirmations,
-      arrivalLedger,
-      asOfDate,
-      referenceDate,
-    ],
-  )
+  const warehouse = useMemo(() => {
+    const rows = filterByModel(masterItems, selectedModelName).filter((r) => r.status !== 'Inactive')
+    const map = unitCostKrwBySku && typeof unitCostKrwBySku === 'object' ? unitCostKrwBySku : {}
+    let qty = 0
+    let value = 0
+    for (const r of rows) {
+      const q = Math.max(0, Number(r.currentStock) || 0)
+      const cost = Math.max(0, Number(map[skuCostKey(r.modelName, r.partNo)]) || 0)
+      qty += q
+      value += q * cost
+    }
+    return { qty, value }
+  }, [masterItems, selectedModelName, unitCostKrwBySku])
 
   const inTransitTotals = useMemo(
     () => sumInTransitStockForContainers(containersAsOf, unitCostKrwBySku),
