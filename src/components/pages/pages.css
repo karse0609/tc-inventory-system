@@ -510,6 +510,24 @@ td.cell--excel-invalid {
   letter-spacing: -0.02em;
 }
 
+.app-nav__partner-import-input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.app-nav__partner-import {
+  flex-shrink: 0;
+  font-size: 0.78rem;
+  padding: 0.28rem 0.55rem;
+}
+
 .app-nav__user {
   margin-left: auto;
   display: flex;

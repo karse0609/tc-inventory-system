@@ -34,7 +34,7 @@ import {
   prefersMobileSimpleLayout,
   useMobileSimpleLayout,
 } from './utils/mobileLayout'
-import { VIEW_LABELS, L, formatKoEnInline } from './i18n/labels'
+import { VIEW_LABELS, L, formatKoEn, formatKoEnInline } from './i18n/labels'
 import { APP_DATA_EXPORT_VERSION, buildAppDataSnapshot, parseAppDataImport, persistInventoryPatchToLocalStorage } from './utils/appDataBackup'
 import {
   buildInventoryRemoteUrl,
@@ -394,15 +394,21 @@ function App() {
 
   const importAppDataBackup = useCallback((parsed, syncSource = 'manual', importOpts = {}) => {
     const persistLocal = importOpts.persistLocal !== false
+    const partnerTestImport = importOpts.partnerTestImport === true
     const topKeys = parsed && typeof parsed === 'object' ? Object.keys(parsed) : []
-    console.log('[tc-inv sync] importAppDataBackup:begin', { syncSource, topKeys })
+    console.log('[tc-inv sync] importAppDataBackup:begin', { syncSource, topKeys, partnerTestImport })
     const result = parseAppDataImport(parsed)
     if ('error' in result && result.error) {
       console.warn('[tc-inv sync] importAppDataBackup:parse-error', { syncSource, error: result.error })
       window.alert(result.error)
       return
     }
-    const { patch } = result
+    let { patch } = result
+    if (partnerTestImport) {
+      patch = { ...patch }
+      delete patch.unitCostKrwBySku
+      delete patch.users
+    }
     const appliedKeys = Object.keys(patch).filter((k) => patch[k] != null)
     const mergeSummary = {}
     if (Array.isArray(patch.masterItems)) mergeSummary.masterItems = patch.masterItems.length
@@ -446,6 +452,30 @@ function App() {
     }
     console.log('[tc-inv sync] importAppDataBackup:done', { syncSource, appliedKeys })
   }, [])
+
+  const partnerTestImportInputRef = useRef(null)
+
+  const handlePartnerTestJsonFile = useCallback(
+    (ev) => {
+      const file = ev.target.files?.[0]
+      ev.target.value = ''
+      if (!file) return
+      const reader = new FileReader()
+      reader.onload = () => {
+        try {
+          const parsed = JSON.parse(String(reader.result ?? ''))
+          if (!window.confirm(formatKoEnInline(L.settingsDataImportConfirm))) return
+          importAppDataBackup(parsed, 'partner-test-json', { persistLocal: true, partnerTestImport: true })
+          window.alert(formatKoEn(L.settingsDataImportDone))
+        } catch {
+          window.alert(formatKoEn(L.settingsDataImportParseError))
+        }
+      }
+      reader.onerror = () => window.alert(formatKoEn(L.settingsDataImportParseError))
+      reader.readAsText(file, 'UTF-8')
+    },
+    [importAppDataBackup],
+  )
 
   const applyingRemoteRef = useRef(false)
   const remoteBootstrapGenRef = useRef(0)
@@ -959,6 +989,26 @@ function App() {
               TC TECH
               <span className="app-nav__brand-sub">· 실시간 해외재고</span>
             </span>
+            {isPartnerTestViewer(authUser) ? (
+              <>
+                <input
+                  ref={partnerTestImportInputRef}
+                  type="file"
+                  accept="application/json,.json"
+                  className="app-nav__partner-import-input"
+                  aria-hidden="true"
+                  tabIndex={-1}
+                  onChange={handlePartnerTestJsonFile}
+                />
+                <button
+                  type="button"
+                  className="btn btn--ghost app-nav__partner-import"
+                  onClick={() => partnerTestImportInputRef.current?.click()}
+                >
+                  <BilingualLabel label={L.settingsDataImportButton} as="span" />
+                </button>
+              </>
+            ) : null}
             {visibleNav.map((v) => (
               <button
                 key={v.id}
