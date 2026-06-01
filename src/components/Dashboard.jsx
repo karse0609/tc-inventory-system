@@ -46,8 +46,6 @@ export default function Dashboard({
   setOpsMeta,
   unitCostKrwBySku,
   arrivalLedger = [],
-  /** Admin이 아닌 파트너(test) 등: 재고 금액(KRW) KPI 카드만 숨김 — 수량·커버리지·ETA는 동일 표시 */
-  hideFinancialKpis = false,
   /** Admin: 시스템·저장소 안내 / 일반 사용자: 사용 안내 */
   isAdminViewer = false,
 }) {
@@ -314,7 +312,6 @@ export default function Dashboard({
           inventorySummary.portfolioCoverageWeeks ?? inventorySummary.minCoverageWeeks
         }
         unit={opsMeta.unit}
-        hideFinancialKpis={hideFinancialKpis}
       />
 
       <DashboardRoleGuidance

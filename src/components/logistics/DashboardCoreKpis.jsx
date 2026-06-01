@@ -41,11 +41,8 @@ export default function DashboardCoreKpis({
   thisWeekEtaContainerCount,
   coverageWeeks,
   unit,
-  hideFinancialKpis = false,
 }) {
   const totalKrw = (Number(warehouseValue) || 0) + (Number(inTransitValue) || 0)
-
-  const moneyKeys = new Set(['total-value', 'wh-value', 'tr-value'])
 
   const cards = [
     {
@@ -93,7 +90,7 @@ export default function DashboardCoreKpis({
       value2: formatNumber(thisWeekEtaContainerCount ?? 0),
       meta: unit,
     },
-  ].filter((card) => !(hideFinancialKpis && moneyKeys.has(card.key)))
+  ]
 
   return (
     <section className="dash-kpi" aria-label="Key performance indicators">

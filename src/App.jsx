@@ -1042,7 +1042,6 @@ function App() {
               setOpsMeta={setOpsMeta}
               unitCostKrwBySku={unitCostKrwBySku}
               arrivalLedger={arrivalLedger}
-              hideFinancialKpis={isPartnerTestViewer(authUser)}
               isAdminViewer={isAdminUser(authUser)}
             />
           )}
@@ -1100,7 +1099,9 @@ function App() {
               opsMeta={opsMeta}
               setOpsMeta={setOpsMeta}
               onResetAllData={resetAllData}
-              onDownloadAppDataBackup={downloadAppDataBackup}
+              onDownloadAppDataBackup={
+                isPartnerTestViewer(authUser) ? undefined : downloadAppDataBackup
+              }
               onImportAppDataBackup={importAppDataBackup}
               isAdmin={isAdminUser(authUser)}
               users={users}
