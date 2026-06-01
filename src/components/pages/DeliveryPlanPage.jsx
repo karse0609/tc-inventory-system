@@ -196,6 +196,7 @@ export default function DeliveryPlanPage({
   registerUnsavedGuard,
   opsMeta,
   onRequestRemoteSync,
+  inventoryReadOnly = false,
 }) {
   const isMobile = useMobileSimpleLayout()
   const asOfDate = opsMeta?.asOfDate ?? operationsMeta.asOfDate
@@ -303,6 +304,7 @@ export default function DeliveryPlanPage({
 
   const onWeekHeaderConfirmChange = useCallback(
     (weekMonday, checked) => {
+      if (inventoryReadOnly) return
       setWeekConfirmations((prev) => {
         const next = { ...prev }
         if (checked) next[weekMonday] = true
@@ -310,19 +312,21 @@ export default function DeliveryPlanPage({
         return next
       })
     },
-    [setWeekConfirmations],
+    [setWeekConfirmations, inventoryReadOnly],
   )
 
   const onQtyChange = useCallback(
     (modelName, partNo) => (col, raw) => {
+      if (inventoryReadOnly) return
       if (!modelName || !partNo) return
       const wk = weekStartFromCol(col)
       setDeliveryPlans((plans) => mergeCellUpdate(plans, modelName, partNo, wk, raw))
     },
-    [setDeliveryPlans],
+    [setDeliveryPlans, inventoryReadOnly],
   )
 
   function handleSave() {
+    if (inventoryReadOnly) return
     const prev = parseWarehouseBaselinePlansSnapshot(lastWarehouseBaselineRef.current)
     const nextRaw = deliveryPlans
     const deltas = computeStockDeltasBySku(prev.cells, nextRaw, weekConfirmations)
@@ -362,18 +366,22 @@ export default function DeliveryPlanPage({
   }
 
   function addDraftRow() {
+    if (inventoryReadOnly) return
     setDraftRows((r) => [...r, { id: newId('draft'), modelName: '', partNo: '' }])
   }
 
   function updateDraft(draftId, patch) {
+    if (inventoryReadOnly) return
     setDraftRows((rows) => rows.map((d) => (d.id === draftId ? { ...d, ...patch } : d)))
   }
 
   function removeDraft(draftId) {
+    if (inventoryReadOnly) return
     setDraftRows((rows) => rows.filter((d) => d.id !== draftId))
   }
 
   function requestDeleteRow(spec) {
+    if (inventoryReadOnly) return
     const { modelName, partNo, kind, draftId } = spec
     if (kind === 'draft' && (!String(modelName || '').trim() || !String(partNo || '').trim())) {
       removeDraft(draftId)
@@ -383,6 +391,7 @@ export default function DeliveryPlanPage({
   }
 
   function confirmDeletePartPlans() {
+    if (inventoryReadOnly) return
     if (!deleteTarget) return
     const { modelName, partNo, kind, draftId } = deleteTarget
     const nextPlans = deliveryPlans.filter((p) => !(p.modelName === modelName && p.partNo === partNo))
@@ -419,6 +428,7 @@ export default function DeliveryPlanPage({
 
   const weekPasteReadOnly = useCallback(
     (spec, col, plan) => {
+      if (inventoryReadOnly) return true
       const cellDisabled =
         (spec.kind === 'draft' && (!spec.modelName || !spec.partNo)) ||
         (spec.kind === 'plan' && (!spec.modelName || !spec.partNo))
@@ -430,11 +440,12 @@ export default function DeliveryPlanPage({
       const lockedByPolicy = FUTURE_WEEKS_LOCKED && isFutureWeek
       return lockedByRow || lockedByPolicy
     },
-    [asOfDate],
+    [asOfDate, inventoryReadOnly],
   )
 
   const runPlanMatrixPaste = useCallback(
     (matrix, anchor, startRowIdx) => {
+      if (inventoryReadOnly) return
       if (!matrix?.length || !anchor) return
       setExcelMsg('')
       setInvalidRowKeys(new Set())
@@ -589,11 +600,12 @@ export default function DeliveryPlanPage({
           : formatKoEn(L.excelUploadApplied),
       )
     },
-    [deliveryPlans, draftRows, partRows, columns, weekPasteReadOnly],
+    [deliveryPlans, draftRows, partRows, columns, weekPasteReadOnly, inventoryReadOnly],
   )
 
   const onDpPasteMatrix = useCallback(
     (matrix, cell) => {
+      if (inventoryReadOnly) return
       const el = cell
       if (!(el instanceof HTMLElement)) return
       const rowIndexDisp = Number(el.dataset.dpRow ?? NaN)
@@ -606,16 +618,17 @@ export default function DeliveryPlanPage({
       if (startRowIdx < 0) return
       runPlanMatrixPaste(matrix, { rowIndex: rowIndexDisp, colKind: kind, weekColIndex }, startRowIdx)
     },
-    [displayedPartRows, partRows, runPlanMatrixPaste],
+    [displayedPartRows, partRows, runPlanMatrixPaste, inventoryReadOnly],
   )
 
   useGridNativePaste({
     tableRef: dpTableRef,
-    enabled: !isMobile,
+    enabled: !isMobile && !inventoryReadOnly,
     onPasteMatrix: onDpPasteMatrix,
   })
 
   async function handleDpUpload(ev) {
+    if (inventoryReadOnly) return
     const file = ev.target.files?.[0]
     ev.target.value = ''
     if (!file) return
@@ -679,13 +692,19 @@ export default function DeliveryPlanPage({
         <p className="page__desc page__desc--secondary">
           <BilingualLabel label={L.deliveryPlanScreenSubtitle} as="span" />
         </p>
+        {inventoryReadOnly ? (
+          <p className="page__hint page__hint--info" role="status">
+            <BilingualLabel label={L.partnerReadOnlyInventory} as="span" />
+          </p>
+        ) : null}
         <PageDataToolbar
-          hideUpload={isMobile}
+          hideUpload={isMobile || inventoryReadOnly}
           hideDownload={isMobile}
           onUploadChange={handleDpUpload}
           onDownload={handleDpDownload}
           downloadDisabled={displayedPartRows.length === 0}
           onSave={handleSave}
+          saveDisabled={inventoryReadOnly}
           message={excelMsg}
           extra={
             <div className="delivery-plan-page__toolbar delivery-plan-page__toolbar--inline">
@@ -751,7 +770,12 @@ export default function DeliveryPlanPage({
                   ? ` · ${formatKoEnInline(L.viewOffsetWeeks)} ${weekOffset > 0 ? '+' : ''}${weekOffset} ${formatKoEnInline(L.weeks)}`
                   : ''}
               </span>
-              <button type="button" className="btn btn--ghost btn--toolbar" onClick={addDraftRow}>
+              <button
+                type="button"
+                className="btn btn--ghost btn--toolbar"
+                disabled={inventoryReadOnly}
+                onClick={addDraftRow}
+              >
                 <BilingualLabel label={L.addSkuRow} as="span" />
               </button>
             </div>
@@ -857,6 +881,7 @@ export default function DeliveryPlanPage({
                 <input
                   type="checkbox"
                   aria-label="Select all"
+                  disabled={inventoryReadOnly}
                   checked={
                     displayedPartRows.length > 0 && selected.size === displayedPartRows.length
                   }
@@ -887,7 +912,7 @@ export default function DeliveryPlanPage({
                         <input
                           type="checkbox"
                           checked={weekConfirmed}
-                          disabled={headerLocked}
+                          disabled={headerLocked || inventoryReadOnly}
                           onChange={(e) => onWeekHeaderConfirmChange(wk, e.target.checked)}
                           aria-label={formatKoEnInline(L.deliveryPlanWeekShipConfirm)}
                         />
@@ -910,6 +935,7 @@ export default function DeliveryPlanPage({
               const cellDisabled =
                 (kind === 'draft' && (!modelName || !partNo)) ||
                 (kind === 'plan' && (!modelName || !partNo))
+              const cellDisabledOrReadOnly = cellDisabled || inventoryReadOnly
               const masterFrozen = kind === 'master'
               const canQuickRemoveDraft =
                 kind === 'draft' && (!String(modelName || '').trim() || !String(partNo || '').trim())
@@ -919,6 +945,7 @@ export default function DeliveryPlanPage({
                 (kind === 'draft' && !canQuickRemoveDraft)
               const deleteDisabled =
                 kind === 'draft' && canQuickRemoveDraft ? false : !modelName || !partNo
+              const deleteDisabledOrReadOnly = deleteDisabled || inventoryReadOnly
 
               return (
                 <tr
@@ -929,6 +956,7 @@ export default function DeliveryPlanPage({
                     <input
                       type="checkbox"
                       checked={selected.has(rowKey)}
+                      disabled={inventoryReadOnly}
                       onChange={() => toggleSelect(rowKey)}
                       aria-label="Select row"
                     />
@@ -945,6 +973,7 @@ export default function DeliveryPlanPage({
                       <input
                         className="dp-input"
                         value={modelName}
+                        readOnly={inventoryReadOnly}
                         placeholder={formatKoEnInline(L.model)}
                         data-excel-paste
                         data-dp-row={rowIndex}
@@ -979,6 +1008,7 @@ export default function DeliveryPlanPage({
                       <input
                         className="dp-input"
                         value={partNo}
+                        readOnly={inventoryReadOnly}
                         placeholder={formatKoEnInline(L.partNo)}
                         data-excel-paste
                         data-dp-row={rowIndex}
@@ -993,6 +1023,7 @@ export default function DeliveryPlanPage({
                       <input
                         className="dp-input"
                         value={partNo}
+                        readOnly={inventoryReadOnly}
                         placeholder={formatKoEnInline(L.partNo)}
                         data-excel-paste
                         data-dp-row={rowIndex}
@@ -1023,7 +1054,7 @@ export default function DeliveryPlanPage({
                         col={col}
                         plan={plan}
                         asOfDate={asOfDate}
-                        disabled={cellDisabled}
+                        disabled={cellDisabledOrReadOnly}
                         rowIndex={rowIndex}
                         weekIdx={weekIdx}
                         weekConfirmed={weekConfirmed}
@@ -1042,11 +1073,11 @@ export default function DeliveryPlanPage({
                     <button
                       type="button"
                       className="btn btn--ghost dp-btn-delete-row"
-                      disabled={deleteDisabled}
+                      disabled={deleteDisabledOrReadOnly}
                       title={formatKoEnInline(L.actionDelete)}
                       aria-label={formatKoEnInline(L.actionDelete)}
                       onClick={() => {
-                        if (deleteDisabled) return
+                        if (deleteDisabledOrReadOnly) return
                         if (showDeleteConfirm) requestDeleteRow(spec)
                         else removeDraft(draftId)
                       }}

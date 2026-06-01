@@ -507,11 +507,6 @@ export default function SettingsPage({
             )}
           </ul>
         )}
-        {remoteSync.error ? (
-          <p className="page__hint page__hint--error" role="alert">
-            {remoteSync.error}
-          </p>
-        ) : null}
         <div className="page__actions" style={{ flexWrap: 'wrap', gap: '0.5rem' }}>
           <button
             type="button"

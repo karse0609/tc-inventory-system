@@ -171,6 +171,7 @@ export default function InTransitPage({
   onApplyReceiptCancellation: applyReceiptCancellationProp,
   currentUserLabel = '',
   onRequestRemoteSync,
+  readOnly = false,
 }) {
   const applyReceiptCancellation =
     typeof applyReceiptCancellationProp === 'function' ? applyReceiptCancellationProp : null
@@ -266,6 +267,7 @@ export default function InTransitPage({
   }, [viewMode])
 
   function handleReceiptCancel() {
+    if (readOnly) return
     const pickUnion = Array.from(
       new Set([
         ...Array.from(receiptCancelPickIds),
@@ -422,6 +424,7 @@ export default function InTransitPage({
   )
 
   function handleSave() {
+    if (readOnly) return
     let next = [...draft]
     const arrived = next.filter((r) => r.arrived && !isTransitRowReceived(r))
     if (arrived.length) next = applyArrivedToRows(next, arrived)
@@ -429,6 +432,7 @@ export default function InTransitPage({
   }
 
   function handleMobileInboundCommit() {
+    if (readOnly) return
     const rows = displayedActive.filter((r) => r.arrived && !isTransitRowReceived(r))
     if (!rows.length) {
       window.alert(formatKoEnInline(L.mobileInboundNoneChecked))
@@ -457,6 +461,7 @@ export default function InTransitPage({
   }
 
   function updateRow(id, patch) {
+    if (readOnly) return
     const key = transitRowIdKey(id)
     const next = { ...patch }
     if ('modelName' in next) next.modelName = normalizeModel(next.modelName)
@@ -464,6 +469,7 @@ export default function InTransitPage({
   }
 
   function handleAdd() {
+    if (readOnly) return
     const n = Math.max(1, Math.min(500, Math.floor(Number(addRowCount)) || 1))
     setAddRowCount(n)
     setDraft((rows) => {
@@ -473,6 +479,7 @@ export default function InTransitPage({
   }
 
   function requestDeleteRow(id) {
+    if (readOnly) return
     if (!window.confirm(formatKoEnInline(L.inTransitDeleteConfirm))) return
     const key = transitRowIdKey(id)
     setDraft((rows) => rows.filter((r) => transitRowIdKey(r.id) !== key))
@@ -485,6 +492,7 @@ export default function InTransitPage({
   }
 
   const toggleReceiptCancelPick = useCallback((id) => {
+    if (readOnly) return
     const key = transitRowIdKey(id)
     setReceiptCancelPickIds((s) => {
       const n = new Set(s)
@@ -493,9 +501,10 @@ export default function InTransitPage({
       receiptCancelPickIdsRef.current = n
       return n
     })
-  }, [])
+  }, [readOnly])
 
   async function handleShipmentFile(ev) {
+    if (readOnly) return
     const file = ev.target.files?.[0]
     ev.target.value = ''
     if (!file) return
@@ -592,6 +601,7 @@ export default function InTransitPage({
 
   const onTransitPasteMatrix = useCallback(
     (matrix, cell) => {
+      if (readOnly) return
       const dispRow = Number(cell.dataset.excelRow)
       const dispCol = Number(cell.dataset.excelCol)
       if (!Number.isFinite(dispRow) || !Number.isFinite(dispCol)) return
@@ -638,12 +648,12 @@ export default function InTransitPage({
         return [...mergedActive, ...received]
       })
     },
-    [appliedSearch],
+    [appliedSearch, readOnly],
   )
 
   useGridNativePaste({
     tableRef: transitTableRef,
-    enabled: !isMobileLayout && !isHistory,
+    enabled: !isMobileLayout && !isHistory && !readOnly,
     onPasteMatrix: onTransitPasteMatrix,
   })
 
@@ -759,9 +769,14 @@ export default function InTransitPage({
                 반영할 수 있습니다.
               </span>
             </p>
+            {readOnly ? (
+              <p className="page__hint page__hint--info" role="status">
+                <BilingualLabel label={L.partnerReadOnlyInventory} as="span" />
+              </p>
+            ) : null}
             {transitTabBar}
             <PageDataToolbar
-              hideUpload={isHistory}
+              hideUpload={isHistory || readOnly}
               onUploadChange={handleShipmentFile}
               onDownload={handleDownloadXlsx}
               downloadDisabled={
@@ -769,13 +784,14 @@ export default function InTransitPage({
               }
               onSave={handleSave}
               hideSave={isHistory}
+              saveDisabled={readOnly && !isHistory}
               message={uploadError ? `!${uploadError}` : excelMsg}
               extra={
                 isHistory ? (
                   <button
                     type="button"
                     className="btn btn--ghost btn--toolbar"
-                    disabled={receiptCancelPickIds.size === 0}
+                    disabled={readOnly || receiptCancelPickIds.size === 0}
                     onClick={(e) => {
                       e.preventDefault()
                       e.stopPropagation()
@@ -801,6 +817,7 @@ export default function InTransitPage({
                         min={1}
                         max={500}
                         step={1}
+                        disabled={readOnly}
                         value={addRowCount}
                         onChange={(e) =>
                           setAddRowCount(
@@ -810,7 +827,12 @@ export default function InTransitPage({
                         aria-label={formatKoEnInline(L.transitRowsToAdd)}
                       />
                     </label>
-                    <button type="button" className="btn btn--ghost btn--toolbar" onClick={handleAdd}>
+                    <button
+                      type="button"
+                      className="btn btn--ghost btn--toolbar"
+                      disabled={readOnly}
+                      onClick={handleAdd}
+                    >
                       <BilingualLabel label={L.transitAddRowsButton} as="span" />
                     </button>
                   </div>
@@ -897,6 +919,7 @@ export default function InTransitPage({
                   <td>
                     <input
                       className="cell-input"
+                      readOnly={readOnly}
                       data-excel-paste
                       data-excel-row={rowIdx}
                       data-excel-col={0}
@@ -907,6 +930,7 @@ export default function InTransitPage({
                   <td>
                     <input
                       className="cell-input"
+                      readOnly={readOnly}
                       data-excel-paste
                       data-excel-row={rowIdx}
                       data-excel-col={1}
@@ -917,6 +941,7 @@ export default function InTransitPage({
                   <td>
                     <input
                       className="cell-input"
+                      readOnly={readOnly}
                       data-excel-paste
                       data-excel-row={rowIdx}
                       data-excel-col={2}
@@ -927,6 +952,7 @@ export default function InTransitPage({
                   <td>
                     <input
                       className="cell-input cell-input--num"
+                      readOnly={readOnly}
                       data-excel-paste
                       data-excel-row={rowIdx}
                       data-excel-col={3}
@@ -938,6 +964,7 @@ export default function InTransitPage({
                   <td>
                     <input
                       className="cell-input cell-input--date"
+                      readOnly={readOnly}
                       data-excel-paste
                       data-excel-row={rowIdx}
                       data-excel-col={4}
@@ -949,6 +976,7 @@ export default function InTransitPage({
                   <td>
                     <input
                       className="cell-input cell-input--date"
+                      readOnly={readOnly}
                       data-excel-paste
                       data-excel-row={rowIdx}
                       data-excel-col={5}
@@ -960,6 +988,7 @@ export default function InTransitPage({
                   <td>
                     <input
                       className="cell-input cell-input--date"
+                      readOnly={readOnly}
                       data-excel-paste
                       data-excel-row={rowIdx}
                       data-excel-col={6}
@@ -971,6 +1000,7 @@ export default function InTransitPage({
                   <td>
                     <input
                       className="cell-input cell-input--date cell-input--date-eta-wh"
+                      readOnly={readOnly}
                       data-excel-paste
                       data-excel-row={rowIdx}
                       data-excel-col={7}
@@ -983,6 +1013,7 @@ export default function InTransitPage({
                   <td>
                     <input
                       className={`cell-input ${deliveryLocationToneClass(row.deliveryLocation)}`.trim()}
+                      readOnly={readOnly}
                       data-excel-paste
                       data-excel-row={rowIdx}
                       data-excel-col={8}
@@ -995,6 +1026,7 @@ export default function InTransitPage({
                   <td className="cell--center">
                     <input
                       type="checkbox"
+                      disabled={readOnly}
                       data-excel-paste
                       data-excel-row={rowIdx}
                       data-excel-col={9}
@@ -1006,6 +1038,7 @@ export default function InTransitPage({
                   <td className="transit-page__td--remark">
                     <input
                       className="cell-input transit-page__cell-input--remark"
+                      readOnly={readOnly}
                       data-excel-paste
                       data-excel-row={rowIdx}
                       data-excel-col={10}
@@ -1016,6 +1049,7 @@ export default function InTransitPage({
                   <td>
                     <input
                       className="cell-input transit-page__cell-input--tctech"
+                      readOnly={readOnly}
                       data-excel-paste
                       data-excel-row={rowIdx}
                       data-excel-col={11}
@@ -1027,6 +1061,7 @@ export default function InTransitPage({
                     <button
                       type="button"
                       className="btn btn--ghost transit-page__btn-del"
+                      disabled={readOnly}
                       onClick={() => requestDeleteRow(row.id)}
                     >
                       <BilingualLabel label={L.transitRowDelete} as="span" />
@@ -1135,6 +1170,7 @@ export default function InTransitPage({
                     <td className="cell--center">
                       <input
                         type="checkbox"
+                        disabled={readOnly}
                         checked={receiptCancelPickIds.has(transitRowIdKey(row.id))}
                         onChange={() => toggleReceiptCancelPick(row.id)}
                         aria-label={formatKoEnInline(L.receiptCancelPickRow)}
@@ -1241,6 +1277,7 @@ export default function InTransitPage({
                     <input
                       type="checkbox"
                       className="transit-mobile__arrived-input"
+                      disabled={readOnly}
                       checked={!!row.arrived}
                       onChange={(e) => updateRow(row.id, { arrived: e.target.checked })}
                     />
@@ -1258,7 +1295,7 @@ export default function InTransitPage({
           <button
             type="button"
             className="btn btn--primary transit-mobile__commit"
-            disabled={mobileReceiptCount === 0}
+            disabled={readOnly || mobileReceiptCount === 0}
             onClick={handleMobileInboundCommit}
           >
             <span className="transit-mobile__commit-inner">

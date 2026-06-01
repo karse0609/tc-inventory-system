@@ -115,6 +115,7 @@ export default function MasterDataPage({
   deliveryPlans = [],
   inTransit = [],
   opsMeta,
+  readOnly = false,
 }) {
   const isMobile = useMobileSimpleLayout()
   const products = getEnabledProducts()
@@ -167,17 +168,20 @@ export default function MasterDataPage({
   }
 
   function handleSave() {
+    if (readOnly) return
     if (typeof onPersistMasterItems === 'function') onPersistMasterItems(masterItems)
     flashSaved()
   }
 
   function updateRow(id, patch) {
+    if (readOnly) return
     const next = { ...patch }
     if ('modelName' in next) next.modelName = normalizeModel(next.modelName)
     setMasterItems((rows) => rows.map((r) => (r.id === id ? { ...r, ...next } : r)))
   }
 
   function handleAdd() {
+    if (readOnly) return
     setMasterItems((rows) => [
       ...rows,
       {
@@ -196,6 +200,7 @@ export default function MasterDataPage({
   }
 
   function handleDelete(id) {
+    if (readOnly) return
     setMasterItems((rows) => rows.filter((r) => r.id !== id))
     setSelected((s) => {
       const n = new Set(s)
@@ -237,6 +242,7 @@ export default function MasterDataPage({
 
   const onMasterPasteMatrix = useCallback(
     (matrix, cell) => {
+      if (readOnly) return
       const dispRow = Number(cell.dataset.excelRow)
       const dispCol = Number(cell.dataset.excelCol)
       if (!Number.isFinite(dispRow) || !Number.isFinite(dispCol)) return
@@ -254,16 +260,17 @@ export default function MasterDataPage({
         return out.next
       })
     },
-    [appliedSearch],
+    [appliedSearch, readOnly],
   )
 
   useGridNativePaste({
     tableRef: masterTableRef,
-    enabled: !isMobile,
+    enabled: !isMobile && !readOnly,
     onPasteMatrix: onMasterPasteMatrix,
   })
 
   const applyMasterMatrix = useCallback((matrix, startRowIdx, startColIdx = 0) => {
+    if (readOnly) return
     setExcelMsg('')
     setInvalidIds(new Set())
     const errs = []
@@ -331,9 +338,10 @@ export default function MasterDataPage({
 
     setInvalidIds(bad)
     setExcelMsg(errs.length ? `!${errs.join('\n')}` : formatKoEn(L.excelUploadApplied))
-  }, [])
+  }, [readOnly])
 
   async function handleMasterUpload(ev) {
+    if (readOnly) return
     const file = ev.target.files?.[0]
     ev.target.value = ''
     if (!file) return
@@ -388,18 +396,26 @@ export default function MasterDataPage({
         <p className="page__desc">
           <BilingualLabel label={L.warehouseInventorySubtitle} as="span" />
         </p>
+        {readOnly ? (
+          <p className="page__hint page__hint--info" role="status">
+            <BilingualLabel label={L.partnerReadOnlyInventory} as="span" />
+          </p>
+        ) : null}
         <PageDataToolbar
-          hideUpload={isMobile}
+          hideUpload={isMobile || readOnly}
           hideDownload={isMobile}
           onUploadChange={handleMasterUpload}
           onDownload={handleDownloadXlsx}
           downloadDisabled={displayedRows.length === 0}
           onSave={handleSave}
+          saveDisabled={readOnly}
           message={excelMsg}
           extra={
+            readOnly ? null : (
             <button type="button" className="btn btn--ghost btn--toolbar" onClick={handleAdd}>
               <BilingualLabel label={L.warehouseAddItem} as="span" />
             </button>
+            )
           }
           searchSlot={
             <form
@@ -470,6 +486,7 @@ export default function MasterDataPage({
                 <input
                   type="checkbox"
                   aria-label="Select all"
+                  disabled={readOnly}
                   checked={
                     displayedRows.length > 0 && selected.size === displayedRows.length
                   }
@@ -518,6 +535,7 @@ export default function MasterDataPage({
                   <td className="cell--center">
                     <input
                       type="checkbox"
+                      disabled={readOnly}
                       checked={selected.has(row.id)}
                       onChange={() => toggleSelect(row.id)}
                       aria-label={`Select ${row.partNo}`}
@@ -528,6 +546,7 @@ export default function MasterDataPage({
                       className="cell-input"
                       list="model-options"
                       value={row.modelName}
+                      readOnly={readOnly}
                       data-excel-paste
                       data-excel-row={rowIdx}
                       data-excel-col={0}
@@ -538,6 +557,7 @@ export default function MasterDataPage({
                     <input
                       className="cell-input"
                       value={row.partNo}
+                      readOnly={readOnly}
                       data-excel-paste
                       data-excel-row={rowIdx}
                       data-excel-col={1}
@@ -548,6 +568,7 @@ export default function MasterDataPage({
                     <input
                       className="cell-input master-table__desc"
                       value={row.description}
+                      readOnly={readOnly}
                       data-excel-paste
                       data-excel-row={rowIdx}
                       data-excel-col={2}
@@ -559,6 +580,7 @@ export default function MasterDataPage({
                       className="cell-input cell-input--num"
                       type="number"
                       value={row.currentStock}
+                      readOnly={readOnly}
                       data-excel-paste
                       data-excel-row={rowIdx}
                       data-excel-col={3}
@@ -575,6 +597,7 @@ export default function MasterDataPage({
                       className="cell-input cell-input--num"
                       type="number"
                       value={row.weeklyDemand}
+                      readOnly={readOnly}
                       data-excel-paste
                       data-excel-row={rowIdx}
                       data-excel-col={4}
@@ -589,6 +612,7 @@ export default function MasterDataPage({
                       type="number"
                       min={0}
                       value={row.safetyStockWeeks ?? MIN_MANAGEMENT_WEEKS}
+                      readOnly={readOnly}
                       data-excel-paste
                       data-excel-row={rowIdx}
                       data-excel-col={5}
@@ -605,6 +629,7 @@ export default function MasterDataPage({
                       type="number"
                       min={0}
                       value={row.leadTime ?? 0}
+                      readOnly={readOnly}
                       data-excel-paste
                       data-excel-row={rowIdx}
                       data-excel-col={6}
@@ -617,6 +642,7 @@ export default function MasterDataPage({
                     <select
                       className="cell-input"
                       value={row.status}
+                      disabled={readOnly}
                       data-excel-paste
                       data-excel-row={rowIdx}
                       data-excel-col={7}
@@ -630,6 +656,7 @@ export default function MasterDataPage({
                     <button
                       type="button"
                       className="btn btn--ghost btn--toolbar"
+                      disabled={readOnly}
                       onClick={() => handleDelete(row.id)}
                     >
                       <BilingualLabel label={L.transitRowDelete} as="span" />

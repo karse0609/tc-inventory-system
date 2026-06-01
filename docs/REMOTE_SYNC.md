@@ -1,11 +1,15 @@
-# PC · 모바일 공통 재고 동기화 (Vercel + Upstash Redis)
+# PC · 모바일 공통 재고 동기화 (Vercel + Upstash Redis) — **v2.0 보류**
+
+현재 **베타·안정화 빌드**에서는 클라이언트가 **`VITE_INVENTORY_REMOTE_SYNC=true`일 때만** API를 호출합니다 (`VITE_INVENTORY_SYNC_TOKEN`만으로는 켜지지 않음).  
+`vercel.json`의 빌드 env는 기본 **`VITE_INVENTORY_REMOTE_SYNC=false`** 입니다.  
+서버의 `api/inventory.js`는 **Redis 연동을 사용하지 않으며** `503 cloud_sync_disabled`만 반환합니다(v2.0에서 재개 예정).
 
 브라우저 `localStorage`는 **기기별**이라 PC와 휴대폰에서 서로 다른 데이터가 보일 수 있습니다.  
-아래를 설정하면 **동일한 JSON 스냅샷**을 Upstash Redis에 저장하고, 모든 클라이언트가 그 데이터를 기준으로 동작합니다. `localStorage`는 **캐시·오프라인용**으로만 유지됩니다.
+v2.0에서 동기를 켜면 **동일한 JSON 스냅샷**을 Upstash Redis에 저장하는 방식을 다시 적용할 수 있습니다.
 
-## 동작 요약
+## 동작 요약 (원격 동기가 켜진 빌드에서만)
 
-- 원격 동기화가 켜져 있으면, 로그인 직후 **첫 `GET /api/inventory`가 끝날 때까지** 메인 화면 대신 동기화 스플래시를 보여 **로컬 `localStorage`가 화면에 먼저 덮어쓰이지 않게** 합니다. 완료 후 `importAppDataBackup`으로 서버 스냅샷이 React state에 반영되고, 그때부터 `localStorage`는 그 결과를 저장하는 캐시 역할만 합니다.
+- 원격 동기화가 켜져 있으면, 로그인 직후 **첫 `GET /api/inventory`가 끝날 때까지** 메인 화면 대신 동기화 스플래시를 보여 **로컬 `localStorage`가 화면에 먼저 덮어쓰이지 않게** 합니다. **pull이 실패·비JSON 응답·타임아웃이어도** 로컬 데이터를 유지한 채 스플래시를 닫고 대시보드로 진입합니다(동기 오류는 사용자에게 표시하지 않음).
 - 로그인 후 **서버에서 스냅샷을 한 번 불러옵니다** (없으면 404 → 로컬 캐시 유지).
 - 재고 관련 상태가 바뀌면 **약 1.8초 후 자동으로 서버에 저장**합니다.
 - 운송중 화면에서 **입고 처리** 또는 PC에서 **입고 취소**를 완료하면, 짧은 지연 후 **즉시 push → pull** 하여 다른 기기와 맞춥니다.
@@ -54,8 +58,8 @@
 
 | 이름 | 값 |
 |------|-----|
-| `VITE_INVENTORY_SYNC_TOKEN` | `INVENTORY_SYNC_TOKEN`과 **동일**한 문자열. **비어 있지 않으면** 클라이언트에서 클라우드 동기화 사용 |
-| `VITE_INVENTORY_REMOTE_SYNC` (선택) | 레거시 표시용; 동기 ON/OFF는 **토큰 유무**로만 결정됩니다. Vercel 빌드에서는 `vercel.json`의 `build.env`로 `true`가 주입될 수 있습니다 |
+| `VITE_INVENTORY_SYNC_TOKEN` | `INVENTORY_SYNC_TOKEN`과 **동일**한 문자열(원격을 켤 때 필요). **토큰만으로는 동기가 켜지지 않습니다.** |
+| `VITE_INVENTORY_REMOTE_SYNC` | **`true`**(문자열)일 때만 클라이언트가 `/api/inventory`를 호출합니다. 기본 빌드는 `vercel.json`에서 `false` |
 | `VITE_DEBUG_REMOTE_SYNC` (선택) | `true`이면 fetch 응답 본문 앞부분 등 **추가 디버그 로그** |
 
 > `VITE_*` 값은 번들에 포함됩니다. 내부용·팀 공유 비밀으로 취급하고, 공개 저장소에는 커밋하지 마세요.
@@ -64,11 +68,10 @@
 
 저장소 루트의 `api/inventory.js`가 Vercel Serverless Function으로 배포됩니다.
 
-- `GET /api/inventory` — 스냅샷 JSON
-- `PUT /api/inventory` — 전체 스냅샷 덮어쓰기  
-- 헤더: `x-tc-inv-sync-token: <INVENTORY_SYNC_TOKEN>`
+- **현재(베타 복구 빌드):** `GET`/`PUT` 모두 **503** `{ "ok": false, "error": "cloud_sync_disabled" }` — Upstash·로컬 디스크 미사용.
+- **v2.0 예정:** Redis 키 `tc-inventory:snapshot` GET/PUT, 헤더 `x-tc-inv-sync-token: <INVENTORY_SYNC_TOKEN>`.
 
-로컬 `npm run dev`에서는 `/api/inventory`가 없을 수 있어 **pull이 실패**할 수 있습니다. 클라우드 동기를 끈 것처럼 쓰려면 **`VITE_INVENTORY_SYNC_TOKEN`을 비우고** 빌드/실행하세요.
+로컬 `npm run dev`에서는 `/api/inventory`가 없을 수 있습니다. 클라우드 동기를 끄려면 **`VITE_INVENTORY_REMOTE_SYNC`를 `true`로 두지 않거나**, 토큰을 비우면 됩니다.
 
 ## 5. 모바일/PWA 메뉴·권한
 

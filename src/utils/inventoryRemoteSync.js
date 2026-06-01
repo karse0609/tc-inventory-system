@@ -5,14 +5,20 @@ import { logRemoteSync, remoteSyncVerbose, REMOTE_SYNC_LOG_PREFIX } from './remo
 
 const META_KEY = 'tc-inv-remote-meta'
 
+/** 원격 재고 API fetch 타임아웃 (체크포인트·망 끊김에서 부트스트랩이 무한 대기하지 않도록) */
+const REMOTE_FETCH_TIMEOUT_MS = 15000
+
 /**
- * 클라우드 재고 스냅샷 API 사용 여부.
- * - 빌드에 `VITE_INVENTORY_SYNC_TOKEN` 이 비어 있지 않으면 ON (VITE_INVENTORY_REMOTE_SYNC 값과 무관).
- *   Vercel에서 REMOTE 플래그를 false로 둔 경우에도 모바일 Refresh·PC pull이 동작하도록 함.
- * - 토큰이 없으면 OFF(로컬 전용).
+ * 클라우드 재고 스냅샷 API 사용 여부 (v2.0까지 기본 OFF).
+ * - `VITE_INVENTORY_SYNC_TOKEN` 이 있고
+ * - `VITE_INVENTORY_REMOTE_SYNC` 가 대소문자 무관 `"true"` 일 때만 ON.
+ * - 베타·안정화 빌드는 `vercel.json` / Vercel 환경 변수로 REMOTE 를 false 로 두면 API를 호출하지 않습니다.
  */
 export function inventoryRemoteSyncEnabled() {
-  return !!String(import.meta.env.VITE_INVENTORY_SYNC_TOKEN || '').trim()
+  const token = String(import.meta.env.VITE_INVENTORY_SYNC_TOKEN || '').trim()
+  if (!token) return false
+  const flag = String(import.meta.env.VITE_INVENTORY_REMOTE_SYNC || '').trim().toLowerCase()
+  return flag === 'true'
 }
 
 export function buildInventoryRemoteUrl() {
@@ -70,6 +76,8 @@ export async function inventoryRemoteRequest(method, jsonBody) {
     tokenHeaderPresent: tokenPresent,
     bodyBytes: jsonBody != null ? JSON.stringify(jsonBody).length : 0,
   })
+  const controller = new AbortController()
+  const timeoutId = setTimeout(() => controller.abort(), REMOTE_FETCH_TIMEOUT_MS)
   let res
   try {
     res = await fetch(url, {
@@ -82,21 +90,29 @@ export async function inventoryRemoteRequest(method, jsonBody) {
       cache: 'no-store',
       credentials: 'same-origin',
       mode: fetchMode,
+      signal: controller.signal,
       body: jsonBody != null ? JSON.stringify(jsonBody) : undefined,
     })
   } catch (err) {
-    const ms = (typeof performance !== 'undefined' ? performance.now() : Date.now()) - t0
+    const msErr = (typeof performance !== 'undefined' ? performance.now() : Date.now()) - t0
     const name = err && typeof err === 'object' && 'name' in err ? String(err.name) : 'Error'
     const message = err && typeof err === 'object' && 'message' in err ? String(err.message) : String(err)
     console.error(REMOTE_SYNC_LOG_PREFIX, 'fetch:network-error', {
       method,
       url,
-      ms: Math.round(ms),
+      ms: Math.round(msErr),
       name,
       message,
       hint: 'Safari: VPN/Private Relay/기업망에서 차단되면 TypeError: Load failed 가 흔합니다.',
     })
-    return { ok: false, error: `network:${name}:${message}`, status: 0 }
+    const aborted = name === 'AbortError'
+    return {
+      ok: false,
+      error: aborted ? 'timeout' : `network:${name}:${message}`,
+      status: 0,
+    }
+  } finally {
+    clearTimeout(timeoutId)
   }
   const ms = (typeof performance !== 'undefined' ? performance.now() : Date.now()) - t0
   const text = await res.text()
@@ -105,6 +121,15 @@ export async function inventoryRemoteRequest(method, jsonBody) {
     data = text ? JSON.parse(text) : null
   } catch {
     data = { raw: text }
+  }
+  /** 200 + HTML(예: 보안 체크포인트)이면 JSON이 아니므로 실패로 취급 */
+  if (res.ok && data && typeof data === 'object' && 'raw' in data) {
+    return {
+      ok: false,
+      status: res.status,
+      error: 'non_json_response',
+      data,
+    }
   }
   const bodyPreview =
     remoteSyncVerbose() && text

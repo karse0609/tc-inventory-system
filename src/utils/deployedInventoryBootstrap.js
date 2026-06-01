@@ -1,5 +1,6 @@
 import snapshot from '../data/deployed-inventory-snapshot.json'
 import { parseAppDataImport, persistInventoryPatchToLocalStorage } from './appDataBackup'
+import { inventoryRemoteSyncEnabled } from './inventoryRemoteSync'
 
 const LS_KEY = 'tc-inv-deployed-revision-applied'
 
@@ -10,6 +11,8 @@ const LS_KEY = 'tc-inv-deployed-revision-applied'
  */
 export function applyDeployedInventorySnapshotIfNeeded() {
   if (typeof window === 'undefined') return
+  /** 서버 JSON 동기화가 켜져 있으면 서버 GET이 단일 소스 — 번들 스냅샷으로 로컬을 덮어쓰지 않음 */
+  if (inventoryRemoteSyncEnabled()) return
   if (import.meta.env.VITE_SKIP_DEPLOYED_SNAPSHOT === 'true') return
 
   const target = Number(snapshot?.deployedRevision ?? 1)

@@ -173,12 +173,14 @@ function App() {
   })
 
   const appendArrivalLedger = useCallback((entries) => {
+    if (isPartnerTestViewer(authUser)) return
     if (!Array.isArray(entries) || !entries.length) return
     setArrivalLedger((prev) => [...prev, ...entries])
-  }, [])
+  }, [authUser])
 
   const applyReceiptCancellation = useCallback(
     (rows, cancelledByLabel) => {
+      if (isPartnerTestViewer(authUser)) return
       if (!Array.isArray(rows) || !rows.length) return
 
       console.log('4. applyReceiptCancellation 시작')
@@ -253,7 +255,7 @@ function App() {
         })),
       ])
     },
-    [],
+    [authUser],
   )
 
   useEffect(() => {
@@ -270,16 +272,19 @@ function App() {
   }, [loggedInUserId, authUser])
 
   const persistMasterItems = useCallback((rows) => {
+    if (isPartnerTestViewer(authUser)) return
     setMasterItems(rows)
-  }, [])
+  }, [authUser])
 
   const persistPlanStore = useCallback(({ cells, weekConfirmations }) => {
+    if (isPartnerTestViewer(authUser)) return
     setPlanStore({ cells, weekConfirmations })
-  }, [])
+  }, [authUser])
 
   const persistInTransit = useCallback((rows) => {
+    if (isPartnerTestViewer(authUser)) return
     setInTransit(rows)
-  }, [])
+  }, [authUser])
 
   /** 창고·출고·운송중: 모바일 조회 전용 레이아웃에서는 localStorage에 재고 스냅샷을 쓰지 않음(PC·원격이 단일 정본) */
   useEffect(() => {
@@ -324,6 +329,7 @@ function App() {
   }, [receiptCancelLedger, isMobileWarehouseNav])
 
   const resetAllData = useCallback(() => {
+    if (isPartnerTestViewer(authUser)) return
     Object.values(storageKeys).forEach((k) => localStorage.removeItem(k))
     setMasterItems(buildSeedMasterItems())
     setPlanStore({
@@ -338,7 +344,7 @@ function App() {
     setUnitCostKrwBySku({})
     setArrivalLedger([])
     setReceiptCancelLedger([])
-  }, [])
+  }, [authUser])
 
   const downloadAppDataBackup = useCallback(() => {
     const payload = buildAppDataSnapshot({
@@ -385,8 +391,6 @@ function App() {
     receiptCancelLedger,
     users,
   ])
-
-  const pullRemoteInventoryRef = useRef(async () => ({ ok: false }))
 
   const importAppDataBackup = useCallback((parsed, syncSource = 'manual', importOpts = {}) => {
     const persistLocal = importOpts.persistLocal !== false
@@ -494,27 +498,29 @@ function App() {
       status: r.status,
       error: r.ok ? undefined : r.error,
     })
-    if (!r.ok) {
-      if (r.status === 404) {
-        console.log('[tc-inv sync] pullRemoteInventory:empty-server (404, keep local until push)')
-        setRemoteUi((u) => ({ ...u, error: '' }))
-        return { ok: true, empty: true }
+    const data = r.ok ? r.data : null
+    const usable =
+      r.ok && data && typeof data === 'object' && data.payload && typeof data.payload === 'object'
+    if (!usable) {
+      if (!r.ok) {
+        console.warn('[tc-inv sync] pullRemoteInventory: keep-local (HTTP/network)', {
+          status: r.status,
+          error: r.error,
+        })
+      } else {
+        console.warn('[tc-inv sync] pullRemoteInventory: keep-local (no payload)', {
+          keys: data && typeof data === 'object' ? Object.keys(data) : [],
+        })
       }
-      setRemoteUi((u) => ({ ...u, error: String(r.error || 'pull_failed') }))
-      return { ok: false, error: String(r.error || 'pull_failed') }
-    }
-    const data = r.data
-    if (!data?.payload) {
-      console.warn('[tc-inv sync] pullRemoteInventory:no-payload', { keys: data ? Object.keys(data) : [] })
-      setRemoteUi((u) => ({ ...u, error: 'no_payload' }))
-      return { ok: false, error: 'no_payload' }
+      setRemoteUi((u) => ({ ...u, error: '' }))
+      return { ok: true, empty: true }
     }
     console.log('[tc-inv sync] pullRemoteInventory → importAppDataBackup', {
       updatedAt: data.updatedAt,
       hasPayload: true,
     })
     applyingRemoteRef.current = true
-    const persistLocal = !isMobileWarehouseNavRef.current
+    const persistLocal = true
     importAppDataBackup(data, 'remote-pull', { persistLocal })
     if (data.updatedAt) writeRemoteMeta({ lastRemoteUpdatedAt: data.updatedAt })
     writeRemoteMeta({ lastPullOkAt: new Date().toISOString() })
@@ -525,10 +531,6 @@ function App() {
     console.log('[tc-inv sync] pullRemoteInventory:complete (state updated from server)')
     return { ok: true }
   }, [authUser, importAppDataBackup])
-
-  useEffect(() => {
-    pullRemoteInventoryRef.current = pullRemoteInventory
-  }, [pullRemoteInventory])
 
   const mobileTransitRows = useMemo(() => getInTransitPcActiveViewRows(inTransit), [inTransit])
 
@@ -609,7 +611,11 @@ function App() {
         setRemoteUi((u) => ({ ...u, error: '', lastOk: new Date().toISOString() }))
         return { ok: true }
       }
-      setRemoteUi((u) => ({ ...u, error: String(r.error || 'push_failed') }))
+      console.warn(REMOTE_SYNC_LOG_PREFIX, 'pushRemoteInventory:skipped', {
+        ok: r.ok,
+        status: r.status,
+        error: r.error,
+      })
       return { ok: false }
     } finally {
       if (!silent) setRemoteUi((u) => ({ ...u, busyPush: false }))
@@ -637,25 +643,25 @@ function App() {
       queueMicrotask(() => setRemoteHydratedLogged(true, 'effect:remote-sync-off'))
       return undefined
     }
-    if (isMobileWarehouseNav) {
-      queueMicrotask(() => setRemoteHydratedLogged(true, 'effect:mobile-skip-remote-bootstrap'))
-      return undefined
-    }
     const gen = ++remoteBootstrapGenRef.current
     queueMicrotask(() => {
       setRemoteHydratedLogged(false, 'effect:remote-bootstrap:pre-pull')
       setRemoteUi((u) => ({ ...u, error: '' }))
     })
     void (async () => {
-      logRemoteSync('bootstrap:pull-begin', { gen, userId: String(authUser.userId || authUser.id || '') })
-      const pullResult = await pullRemoteInventory()
-      logRemoteSync('bootstrap:pull-finished', {
-        gen,
-        currentGen: remoteBootstrapGenRef.current,
-        pullOk: pullResult?.ok,
-        empty: pullResult?.empty,
-        skippedStaleGen: remoteBootstrapGenRef.current !== gen,
-      })
+      try {
+        logRemoteSync('bootstrap:pull-begin', { gen, userId: String(authUser.userId || authUser.id || '') })
+        const pullResult = await pullRemoteInventory()
+        logRemoteSync('bootstrap:pull-finished', {
+          gen,
+          currentGen: remoteBootstrapGenRef.current,
+          pullOk: pullResult?.ok,
+          empty: pullResult?.empty,
+          skippedStaleGen: remoteBootstrapGenRef.current !== gen,
+        })
+      } catch (e) {
+        console.error(REMOTE_SYNC_LOG_PREFIX, 'bootstrap:pull-unhandled', e)
+      }
       if (remoteBootstrapGenRef.current !== gen) return
       queueMicrotask(() =>
         setRemoteHydratedLogged(true, 'effect:remote-bootstrap:after-pull'),
@@ -664,7 +670,7 @@ function App() {
     return () => {
       remoteBootstrapGenRef.current += 1
     }
-  }, [authUser, pullRemoteInventory, setRemoteHydratedLogged, isMobileWarehouseNav])
+  }, [authUser, pullRemoteInventory, setRemoteHydratedLogged])
 
   useEffect(() => {
     if (!authUser || !inventoryRemoteSyncEnabled()) return undefined
@@ -675,47 +681,43 @@ function App() {
     const t = window.setTimeout(() => {
       if (applyingRemoteRef.current) return
       void pushRemoteInventoryNow({ silent: true })
-    }, 1800)
+    }, 400)
     return () => window.clearTimeout(t)
   }, [snapshotJson, authUser, remoteHydrated, pushRemoteInventoryNow, isMobileWarehouseNav])
 
   useEffect(() => {
     if (!authUser || !inventoryRemoteSyncEnabled()) return undefined
-    if (isMobileWarehouseNav) return undefined
     const id = window.setInterval(() => {
       if (document.visibilityState !== 'visible') return
       void pullRemoteInventory()
     }, 45000)
     return () => window.clearInterval(id)
-  }, [authUser, pullRemoteInventory, isMobileWarehouseNav])
+  }, [authUser, pullRemoteInventory])
 
   useEffect(() => {
     if (!authUser || !inventoryRemoteSyncEnabled()) return undefined
-    if (isMobileWarehouseNav) return undefined
     const onVis = () => {
       if (document.visibilityState === 'visible') void pullRemoteInventory()
     }
     document.addEventListener('visibilitychange', onVis)
     return () => document.removeEventListener('visibilitychange', onVis)
-  }, [authUser, pullRemoteInventory, isMobileWarehouseNav])
+  }, [authUser, pullRemoteInventory])
 
   useEffect(() => {
     if (!authUser || !inventoryRemoteSyncEnabled()) return undefined
-    if (isMobileWarehouseNav) return undefined
     const onFocus = () => {
       void pullRemoteInventory()
     }
     window.addEventListener('focus', onFocus)
     return () => window.removeEventListener('focus', onFocus)
-  }, [authUser, pullRemoteInventory, isMobileWarehouseNav])
+  }, [authUser, pullRemoteInventory])
 
-  /** PC만: 뷰 전환 시 서버 pull. 모바일(v1)은 클라우드 동기 비활성. */
+  /** 뷰 전환 시 서버 pull (PC·모바일 공통) */
   useEffect(() => {
     if (!authUser || !inventoryRemoteSyncEnabled() || !remoteHydrated) return undefined
-    if (isMobileWarehouseNav) return undefined
     /* eslint-disable-next-line react-hooks/set-state-in-effect -- pullRemoteInventory updates UI via async GET + setState */
     void pullRemoteInventory()
-  }, [authUser, remoteHydrated, pullRemoteInventory, view, isMobileWarehouseNav])
+  }, [authUser, remoteHydrated, pullRemoteInventory, view])
 
   const visibleNav = useMemo(
     () =>
@@ -853,11 +855,6 @@ function App() {
     }
     writeBrowserSessionUserId(u.id)
     setLoggedInUserId(u.id)
-    if (inventoryRemoteSyncEnabled() && !prefersMobileSimpleLayout()) {
-      window.setTimeout(() => {
-        void pullRemoteInventoryRef.current()
-      }, 0)
-    }
     return true
   }
 
@@ -887,8 +884,8 @@ function App() {
     )
   }
 
-  const blockingRemoteBootstrap =
-    inventoryRemoteSyncEnabled() && authUser && !remoteHydrated && !isMobileWarehouseNav
+  /** 모바일·test 계정도 첫 GET 전에는 로컬 시드가 보이지 않도록 동일하게 대기 */
+  const blockingRemoteBootstrap = inventoryRemoteSyncEnabled() && authUser && !remoteHydrated
 
   if (blockingRemoteBootstrap) {
     return (
@@ -899,11 +896,6 @@ function App() {
           <p className="remote-sync-splash__sub">Loading latest inventory from server…</p>
           {remoteUi.busyPull ? (
             <p className="remote-sync-splash__hint">잠시만 기다려 주세요. (Please wait.)</p>
-          ) : null}
-          {remoteUi.error ? (
-            <p className="remote-sync-splash__error" role="alert">
-              {remoteUi.error}
-            </p>
           ) : null}
           <button
             type="button"
@@ -930,19 +922,7 @@ function App() {
           </span>
         </div>
       ) : null}
-      {!isMobileWarehouseNav && isAdminUser(authUser) && inventoryRemoteSyncEnabled() && remoteUi.error ? (
-        <div className="remote-sync-banner remote-sync-banner--error" role="alert">
-          <span className="remote-sync-banner__text">{remoteUi.error}</span>
-          <button type="button" className="btn btn--ghost btn--sm" onClick={() => void pullRemoteInventory()}>
-            다시 시도
-          </button>
-        </div>
-      ) : null}
-      {!isMobileWarehouseNav &&
-      isAdminUser(authUser) &&
-      inventoryRemoteSyncEnabled() &&
-      !remoteUi.error &&
-      remoteHydrated ? (
+      {!isMobileWarehouseNav && isAdminUser(authUser) && inventoryRemoteSyncEnabled() && remoteHydrated ? (
         <div className="remote-sync-banner remote-sync-banner--on" role="status">
           <span className="remote-sync-banner__text">
             <BilingualLabel label={L.remoteSyncBannerOn} as="span" />
@@ -1009,10 +989,10 @@ function App() {
               weekConfirmations={weekConfirmations}
               inTransitContainers={inTransit}
               opsMeta={opsMeta}
-              setOpsMeta={setOpsMeta}
+              setOpsMeta={isPartnerTestViewer(authUser) ? undefined : setOpsMeta}
               unitCostKrwBySku={unitCostKrwBySku}
               arrivalLedger={arrivalLedger}
-              readOnlyMobile={false}
+              readOnlyMobile={isPartnerTestViewer(authUser)}
               isAdminViewer={isAdminUser(authUser)}
             />
           )}
@@ -1024,6 +1004,7 @@ function App() {
               deliveryPlans={deliveryPlans}
               inTransit={inTransit}
               opsMeta={opsMeta}
+              readOnly={isPartnerTestViewer(authUser)}
             />
           )}
           {view === 'delivery' && (
@@ -1036,6 +1017,7 @@ function App() {
               registerUnsavedGuard={registerUnsavedGuard}
               opsMeta={opsMeta}
               onRequestRemoteSync={scheduleRemoteSyncAfterMutation}
+              inventoryReadOnly={isPartnerTestViewer(authUser)}
             />
           )}
           {view === 'transit' && (
@@ -1051,6 +1033,7 @@ function App() {
                 authUser ? String(authUser.name || authUser.userId || authUser.id || '').trim() : ''
               }
               onRequestRemoteSync={scheduleRemoteSyncAfterMutation}
+              readOnly={isPartnerTestViewer(authUser)}
             />
           )}
           {view === 'projection' && (

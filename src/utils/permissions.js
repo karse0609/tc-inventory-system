@@ -22,7 +22,7 @@ export const VIEW_MENU_LABELS = Object.fromEntries(
   VIEW_IDS.map((id) => [id, VIEW_LABELS[id]]),
 )
 
-/** 미국 창고·파트너(test): 재고 예측·설정 메뉴만 숨김(나머지는 admin과 동일 노출) */
+/** 미국 창고·파트너(test): 대시보드·창고·출고·운송중 조회만. 재고 예측·설정 숨김 + UI/저장은 조회 전용(isPartnerTestViewer) */
 export const PARTNER_TEST_ROLE = 'PartnerTest'
 
 /** @typedef {{ dashboard?: boolean, master?: boolean, delivery?: boolean, transit?: boolean, projection?: boolean, settings?: boolean }} MenuPermissions */

@@ -49,6 +49,10 @@ export const L = {
     ko: '파트너 테스트 (미국 창고)',
     en: 'Partner test (US warehouse)',
   },
+  partnerReadOnlyInventory: {
+    ko: '이 계정은 조회 전용입니다. 재고 수정·저장·설정은 admin 계정에서만 가능합니다.',
+    en: 'This account is view-only. Inventory edits, saves, and Settings are available to the admin account only.',
+  },
   activeCol: { ko: '활성', en: 'Active' },
   menusCol: { ko: '메뉴', en: 'Menus' },
   pageSearchButton: { ko: '검색', en: 'Search' },
