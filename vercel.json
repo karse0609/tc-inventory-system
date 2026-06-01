@@ -1,4 +1,9 @@
 {
+  "build": {
+    "env": {
+      "VITE_INVENTORY_REMOTE_SYNC": "true"
+    }
+  },
   "headers": [
     {
       "source": "/assets/(.*)",

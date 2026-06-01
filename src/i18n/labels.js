@@ -405,9 +405,9 @@ export const L = {
   },
   mobileRefreshRequiresRemoteSync: {
     ko:
-      '클라우드 동기화가 꺼져 있어 서버에서 새로 불러올 수 없습니다. 배포 설정에 동기 토큰(VITE_INVENTORY_SYNC_TOKEN)이 포함되어 있는지, 또는 로컬 전용으로 끄려면 VITE_INVENTORY_REMOTE_SYNC=false 인지 확인해 주세요.',
+      '이 빌드에 클라우드 동기 토큰(VITE_INVENTORY_SYNC_TOKEN)이 없어 서버에서 새로 불러올 수 없습니다. Vercel 프로젝트 환경 변수에 토큰을 넣고 재배포하거나, 로컬에서는 .env에 동일 토큰을 설정한 뒤 다시 빌드해 주세요.',
     en:
-      'Cloud sync is off, so the app cannot refresh from the server. Ensure the build includes VITE_INVENTORY_SYNC_TOKEN, or set VITE_INVENTORY_REMOTE_SYNC=false for local-only mode.',
+      'This build has no VITE_INVENTORY_SYNC_TOKEN, so the app cannot refresh from the server. Add the token in your Vercel project Environment Variables and redeploy, or set it in .env locally and rebuild.',
   },
   mobileRefreshEmptyServer: {
     ko: '서버에 재고 스냅샷이 아직 없습니다. PC에서 저장·동기화한 뒤 다시 새로고침해 주세요.',
@@ -486,9 +486,8 @@ export const L = {
       'On Vercel, configure Upstash Redis and server env vars so this app uses a shared snapshot while localStorage stays a cache. PC and phone/PWA then see the same data. See docs/REMOTE_SYNC.md in the repo.',
   },
   settingsRemoteDisabled: {
-    ko: '동기화 비활성: 빌드에 VITE_INVENTORY_SYNC_TOKEN이 없거나, 로컬 전용으로 VITE_INVENTORY_REMOTE_SYNC=false 를 넣은 경우입니다. 그 외에는 토큰이 있으면 클라우드 스냅샷을 사용합니다.',
-    en:
-      'Sync off: no VITE_INVENTORY_SYNC_TOKEN in the build, or VITE_INVENTORY_REMOTE_SYNC=false for local-only. Otherwise a token enables the shared cloud snapshot.',
+    ko: '동기화 비활성: 빌드에 VITE_INVENTORY_SYNC_TOKEN이 비어 있습니다. 토큰을 넣으면 클라우드 스냅샷(서버 pull/push)이 켜집니다.',
+    en: 'Sync off: VITE_INVENTORY_SYNC_TOKEN is missing from this build. Adding the token enables the shared cloud snapshot (server pull/push).',
   },
   settingsRemoteActive: {
     ko: '동기화 사용 중 — 변경 후 약 1.8초 뒤 서버에 반영되며, 주기적으로 서버에서 불러옵니다.',

@@ -7,15 +7,12 @@ const META_KEY = 'tc-inv-remote-meta'
 
 /**
  * 클라우드 재고 스냅샷 API 사용 여부.
- * - `VITE_INVENTORY_SYNC_TOKEN` 이 빌드에 포함되어 있으면 기본 ON (운영에서 REMOTE 플래그 누락 시에도 모바일·PC 동일 동작).
- * - 로컬 전용으로 끄려면 `VITE_INVENTORY_REMOTE_SYNC=false` (또는 `0`) 를 명시하세요.
+ * - 빌드에 `VITE_INVENTORY_SYNC_TOKEN` 이 비어 있지 않으면 ON (VITE_INVENTORY_REMOTE_SYNC 값과 무관).
+ *   Vercel에서 REMOTE 플래그를 false로 둔 경우에도 모바일 Refresh·PC pull이 동작하도록 함.
+ * - 토큰이 없으면 OFF(로컬 전용).
  */
 export function inventoryRemoteSyncEnabled() {
-  const token = String(import.meta.env.VITE_INVENTORY_SYNC_TOKEN || '').trim()
-  if (!token) return false
-  const ex = String(import.meta.env.VITE_INVENTORY_REMOTE_SYNC ?? '').trim().toLowerCase()
-  if (ex === 'false' || ex === '0' || ex === 'off' || ex === 'no') return false
-  return true
+  return !!String(import.meta.env.VITE_INVENTORY_SYNC_TOKEN || '').trim()
 }
 
 export function buildInventoryRemoteUrl() {
