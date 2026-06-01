@@ -1,20 +1,11 @@
-import { normalizeTransitStatus, isTransitRowReceived } from '../../utils/inTransitStatus'
+import { isTransitRowReceived } from '../../utils/inTransitStatus'
 import BilingualLabel from '../BilingualLabel'
 import { L } from '../../i18n/labels'
+import { formatEtaWhDisplay } from '../../utils/transitDisplayFormat'
 import './mobile-shell.css'
 
-function formatQty(n) {
-  return new Intl.NumberFormat('ko-KR', { maximumFractionDigits: 0 }).format(Math.round(Number(n) || 0))
-}
-
-function formatEtaCell(raw) {
-  const s = String(raw ?? '').trim()
-  if (!s) return '—'
-  return s.length >= 10 && /^\d{4}-\d{2}-\d{2}/.test(s) ? s.slice(0, 10) : s
-}
-
 function statusClass(row) {
-  if (isTransitRowReceived(row)) return 'mobile-line-card__status--muted'
+  if (isTransitRowReceived(row)) return ''
   const eta = String(row?.etaWh ?? '').trim()
   if (!eta) return 'mobile-line-card__status--warn'
   return ''
@@ -22,6 +13,7 @@ function statusClass(row) {
 
 /**
  * 모바일 운송중 / 입고 대기 — 카드 리스트 (조회 전용)
+ * PC In-Transit Active 탭과 동일: 미입고 행만, ETA·수량 표기 동일 규칙.
  */
 export default function MobileTransitCards({ rows, titleLabel, mode }) {
   if (!rows?.length) {
@@ -49,8 +41,8 @@ export default function MobileTransitCards({ rows, titleLabel, mode }) {
       ) : null}
       <ul className="mobile-list">
         {rows.map((row) => {
-          const st = normalizeTransitStatus(row?.transitStatus)
           const sc = statusClass(row)
+          const etaShown = formatEtaWhDisplay(row.etaWh)
           return (
             <li key={row.id} className="mobile-line-card">
               <div className="mobile-line-card__row">
@@ -58,14 +50,18 @@ export default function MobileTransitCards({ rows, titleLabel, mode }) {
                   <div className="mobile-line-card__model">{row.modelName || '—'}</div>
                   <div className="mobile-line-card__part">{row.partNo || '—'}</div>
                 </div>
-                <div className="mobile-line-card__qty">{formatQty(row.qty)}</div>
+                <div className="mobile-line-card__qty">{row.qty ?? ''}</div>
               </div>
               <dl className="mobile-line-card__meta">
                 <dt>ETA W/H</dt>
-                <dd>{formatEtaCell(row.etaWh)}</dd>
-                <dt>Status</dt>
+                <dd>{etaShown || '—'}</dd>
+                <dt>
+                  <BilingualLabel label={L.status} as="span" compact />
+                </dt>
                 <dd>
-                  <span className={`mobile-line-card__status ${sc}`.trim()}>{st}</span>
+                  <span className={`mobile-line-card__status ${sc}`.trim()}>
+                    <BilingualLabel label={row.arrived ? L.boolYes : L.boolNo} as="span" compact />
+                  </span>
                 </dd>
               </dl>
             </li>

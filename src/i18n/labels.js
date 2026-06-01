@@ -108,6 +108,8 @@ export const L = {
   hbl: { ko: 'HBL', en: 'HBL' },
   tcTechNo: { ko: 'TC No', en: 'TC No' },
   status: { ko: '상태', en: 'Status' },
+  boolYes: { ko: '예', en: 'Yes' },
+  boolNo: { ko: '아니오', en: 'No' },
 
   thisWeekEtaSection: { ko: '이번주 도착 예정', en: 'This Week ETA' },
   delayWarning: { ko: '비고 있음', en: 'Note' },
@@ -400,6 +402,12 @@ export const L = {
   mobileWarehouseReadOnly: {
     ko: '창고 재고는 읽기 전용입니다. 수정은 PC에서 해 주세요.',
     en: 'Warehouse view is read-only. Edit on PC.',
+  },
+  mobileRefreshRequiresRemoteSync: {
+    ko:
+      '서버에서 최신 재고를 불러오려면 관리자 설정에서 클라우드 동기화를 켜 주세요. 동기화가 꺼져 있으면 이 브라우저에 저장된 데이터만 표시됩니다.',
+    en:
+      'Ask an admin to enable cloud sync in Settings to refresh from the server. While sync is off, only data stored in this browser is shown.',
   },
   inventoryProjectionScreen: { ko: '재고 예측', en: 'Inventory Projection' },
   inventoryProjectionSubtitle: {

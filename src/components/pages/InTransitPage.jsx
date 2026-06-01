@@ -15,6 +15,7 @@ import {
   parseShipmentScheduleExcel,
   ParseShipmentScheduleError,
 } from '../../utils/parseShipmentScheduleExcel'
+import { formatEtaWhDisplay } from '../../utils/transitDisplayFormat'
 import { MOBILE_SIMPLE_LAYOUT_MQ } from '../../utils/mobileLayout'
 import { inventoryRemoteSyncEnabled } from '../../utils/inventoryRemoteSync'
 import PageDataToolbar from '../grid/PageDataToolbar.jsx'
@@ -80,14 +81,6 @@ function buildTransitPastePatch(field, raw) {
 
 function lc(s) {
   return String(s ?? '').toLowerCase()
-}
-
-/** ETA W/H·이력: 가능하면 항상 YYYY-MM-DD로 표시 */
-function formatEtaWhDisplay(raw) {
-  const s = String(raw ?? '').trim()
-  if (!s) return ''
-  const iso = parseDateForInput(s)
-  return iso || s
 }
 
 /** 배송지(Location) 구분용 — 운영 화면용 차분한 텍스트 톤 클래스 */

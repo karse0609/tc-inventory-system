@@ -57,7 +57,7 @@ import MobileAppShell from './components/mobile/MobileAppShell.jsx'
 import MobileDashboardHome from './components/mobile/MobileDashboardHome.jsx'
 import MobileTransitCards from './components/mobile/MobileTransitCards.jsx'
 import MobileWarehouseCards from './components/mobile/MobileWarehouseCards.jsx'
-import { isInTransitRowActiveAsOf } from './utils/logisticsMetrics'
+import { getInTransitPcActiveViewRows } from './utils/inTransitPcView'
 import './App.css'
 import './components/pages/pages.css'
 
@@ -77,6 +77,9 @@ function defaultHomeView(authUser) {
 
 function App() {
   const isMobileWarehouseNav = useMobileSimpleLayout()
+  const isMobileWarehouseNavRef = useRef(isMobileWarehouseNav)
+  isMobileWarehouseNavRef.current = isMobileWarehouseNav
+
   const [users, setUsers] = useState(() => ensureUsersInStorage())
   const [loggedInUserId, setLoggedInUserId] = useState(() => getSessionUserId())
   const [view, setView] = useState('dashboard')
@@ -279,37 +282,47 @@ function App() {
     setInTransit(rows)
   }, [])
 
-  /** 창고·출고·운송중: 화면 draft는 저장 버튼 전까지 App 상태에 반영하지 않음. 직접 갱신만 localStorage 저장 */
+  /** 창고·출고·운송중: 모바일 조회 전용 레이아웃에서는 localStorage에 재고 스냅샷을 쓰지 않음(PC·원격이 단일 정본) */
   useEffect(() => {
+    if (isMobileWarehouseNav) return
     saveJson(storageKeys.master, masterItems)
-  }, [masterItems])
+  }, [masterItems, isMobileWarehouseNav])
   useEffect(() => {
+    if (isMobileWarehouseNav) return
     saveJson(storageKeys.plans, toPlansStorageValue(planStore.cells, planStore.weekConfirmations))
-  }, [planStore])
+  }, [planStore, isMobileWarehouseNav])
   useEffect(() => {
+    if (isMobileWarehouseNav) return
     saveJson(storageKeys.transit, inTransit)
-  }, [inTransit])
+  }, [inTransit, isMobileWarehouseNav])
   useEffect(() => {
+    if (isMobileWarehouseNav) return
     saveJson(storageKeys.ops, opsMeta)
-  }, [opsMeta])
+  }, [opsMeta, isMobileWarehouseNav])
   useEffect(() => {
+    if (isMobileWarehouseNav) return
     saveJson(storageKeys.weekly, weeklyPlans)
-  }, [weeklyPlans])
+  }, [weeklyPlans, isMobileWarehouseNav])
   useEffect(() => {
+    if (isMobileWarehouseNav) return
     saveJson(storageKeys.starting, startingInventory)
-  }, [startingInventory])
+  }, [startingInventory, isMobileWarehouseNav])
   useEffect(() => {
+    if (isMobileWarehouseNav) return
     saveJson(storageKeys.simSource, dataSimSource)
-  }, [dataSimSource])
+  }, [dataSimSource, isMobileWarehouseNav])
   useEffect(() => {
+    if (isMobileWarehouseNav) return
     saveJson(storageKeys.unitCostsKrw, unitCostKrwBySku)
-  }, [unitCostKrwBySku])
+  }, [unitCostKrwBySku, isMobileWarehouseNav])
   useEffect(() => {
+    if (isMobileWarehouseNav) return
     saveJson(storageKeys.arrivalLedger, arrivalLedger)
-  }, [arrivalLedger])
+  }, [arrivalLedger, isMobileWarehouseNav])
   useEffect(() => {
+    if (isMobileWarehouseNav) return
     saveJson(storageKeys.receiptCancelLedger, receiptCancelLedger)
-  }, [receiptCancelLedger])
+  }, [receiptCancelLedger, isMobileWarehouseNav])
 
   const resetAllData = useCallback(() => {
     Object.values(storageKeys).forEach((k) => localStorage.removeItem(k))
@@ -376,7 +389,8 @@ function App() {
 
   const pullRemoteInventoryRef = useRef(async () => ({ ok: false }))
 
-  const importAppDataBackup = useCallback((parsed, syncSource = 'manual') => {
+  const importAppDataBackup = useCallback((parsed, syncSource = 'manual', importOpts = {}) => {
+    const persistLocal = importOpts.persistLocal !== false
     const topKeys = parsed && typeof parsed === 'object' ? Object.keys(parsed) : []
     console.log('[tc-inv sync] importAppDataBackup:begin', { syncSource, topKeys })
     const result = parseAppDataImport(parsed)
@@ -421,8 +435,12 @@ function App() {
     if (patch.users != null) {
       setUsers(patch.users)
     }
-    persistInventoryPatchToLocalStorage(patch)
-    logRemoteSync('importAppDataBackup:persisted-local', { syncSource, appliedKeys })
+    if (persistLocal) {
+      persistInventoryPatchToLocalStorage(patch)
+      logRemoteSync('importAppDataBackup:persisted-local', { syncSource, appliedKeys })
+    } else {
+      logRemoteSync('importAppDataBackup:skip-local-persist', { syncSource, appliedKeys })
+    }
     console.log('[tc-inv sync] importAppDataBackup:done', { syncSource, appliedKeys })
   }, [])
 
@@ -496,7 +514,8 @@ function App() {
       hasPayload: true,
     })
     applyingRemoteRef.current = true
-    importAppDataBackup(data, 'remote-pull')
+    const persistLocal = !isMobileWarehouseNavRef.current
+    importAppDataBackup(data, 'remote-pull', { persistLocal })
     if (data.updatedAt) writeRemoteMeta({ lastRemoteUpdatedAt: data.updatedAt })
     writeRemoteMeta({ lastPullOkAt: new Date().toISOString() })
     requestAnimationFrame(() => {
@@ -511,11 +530,13 @@ function App() {
     pullRemoteInventoryRef.current = pullRemoteInventory
   }, [pullRemoteInventory])
 
-  const mobileTransitRows = useMemo(() => {
-    const ref = getKoreaCalendarDate()
-    const asOf = String(opsMeta?.asOfDate || ref).trim()
-    return (inTransit || []).filter((r) => isInTransitRowActiveAsOf(r, asOf, ref))
-  }, [inTransit, opsMeta.asOfDate])
+  const mobileTransitRows = useMemo(() => getInTransitPcActiveViewRows(inTransit), [inTransit])
+
+  /** 원격 동기화 ON일 때: PC는 view, 모바일은 하단 탭(mobileSection) 바뀔 때마다 서버에서 당김 */
+  const mobileNavPullKey = useMemo(
+    () => (isMobileWarehouseNav ? mobileSection : view),
+    [isMobileWarehouseNav, mobileSection, view],
+  )
 
   const handleMobileSection = useCallback(
     (id) => {
@@ -533,11 +554,11 @@ function App() {
   const handleMobileRefresh = useCallback(async () => {
     setMobileRefreshing(true)
     try {
-      if (inventoryRemoteSyncEnabled()) {
-        await pullRemoteInventory()
-      } else {
-        window.location.reload()
+      if (!inventoryRemoteSyncEnabled()) {
+        window.alert(formatKoEnInline(L.mobileRefreshRequiresRemoteSync))
+        return
       }
+      await pullRemoteInventory()
     } finally {
       setMobileRefreshing(false)
     }
@@ -660,13 +681,14 @@ function App() {
     if (!authUser || !inventoryRemoteSyncEnabled()) return undefined
     if (isPartnerTestViewer(authUser)) return undefined
     if (!remoteHydrated) return undefined
+    if (isMobileWarehouseNav) return undefined
     if (applyingRemoteRef.current) return undefined
     const t = window.setTimeout(() => {
       if (applyingRemoteRef.current) return
       void pushRemoteInventoryNow({ silent: true })
     }, 1800)
     return () => window.clearTimeout(t)
-  }, [snapshotJson, authUser, remoteHydrated, pushRemoteInventoryNow])
+  }, [snapshotJson, authUser, remoteHydrated, pushRemoteInventoryNow, isMobileWarehouseNav])
 
   useEffect(() => {
     if (!authUser || !inventoryRemoteSyncEnabled()) return undefined
@@ -695,12 +717,12 @@ function App() {
     return () => window.removeEventListener('focus', onFocus)
   }, [authUser, pullRemoteInventory])
 
-  /** 로그인 후 첫 동기화가 끝난 뒤, 화면(탭) 전환 시마다 서버 최신본 재요청 */
+  /** PC: 뷰 전환 시 서버 최신본. 모바일: 하단 탭 전환 시 동일. */
   useEffect(() => {
     if (!authUser || !inventoryRemoteSyncEnabled() || !remoteHydrated) return undefined
     /* eslint-disable-next-line react-hooks/set-state-in-effect -- pullRemoteInventory updates UI via async GET + setState */
     void pullRemoteInventory()
-  }, [view, authUser, remoteHydrated, pullRemoteInventory])
+  }, [authUser, remoteHydrated, pullRemoteInventory, mobileNavPullKey])
 
   const visibleNav = useMemo(
     () =>
