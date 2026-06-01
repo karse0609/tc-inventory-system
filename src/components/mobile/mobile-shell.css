@@ -41,6 +41,27 @@
   margin-top: 0.25rem;
 }
 
+.mobile-shell__notice {
+  flex-shrink: 0;
+  margin: 0;
+  padding: 0.5rem 0.85rem;
+  font-size: 0.74rem;
+  line-height: 1.5;
+  color: #475569;
+  background: rgba(241, 245, 249, 0.98);
+  border-bottom: 1px solid rgba(148, 163, 184, 0.35);
+}
+
+.mobile-shell__notice .bilingual__ko-line,
+.mobile-shell__notice .bilingual__en-line {
+  display: block;
+  white-space: pre-line;
+}
+
+.mobile-shell__notice .bilingual {
+  margin: 0;
+}
+
 .mobile-shell__actions {
   display: flex;
   flex-direction: column;

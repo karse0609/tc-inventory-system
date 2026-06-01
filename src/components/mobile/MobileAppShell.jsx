@@ -1,4 +1,6 @@
 import './mobile-shell.css'
+import BilingualLabel from '../BilingualLabel'
+import { L } from '../../i18n/labels'
 
 const TABS = [
   { id: 'dashboard', label: 'Dashboard', icon: '▣' },
@@ -55,6 +57,10 @@ export default function MobileAppShell({
           ) : null}
         </div>
       </header>
+
+      <aside className="mobile-shell__notice" role="note">
+        <BilingualLabel label={L.mobileShellReadOnlyNotice} as="p" />
+      </aside>
 
       <main className="mobile-shell__main">{children}</main>
 

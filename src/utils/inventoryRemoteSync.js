@@ -6,14 +6,16 @@ import { logRemoteSync, remoteSyncVerbose, REMOTE_SYNC_LOG_PREFIX } from './remo
 const META_KEY = 'tc-inv-remote-meta'
 
 /**
- * Vercel 배포 + Upstash Redis 연동 시 PC/모바일 공통 데이터 소스
- * (VITE_INVENTORY_REMOTE_SYNC=true 및 토큰·서버 환경변수 필요)
+ * 클라우드 재고 스냅샷 API 사용 여부.
+ * - `VITE_INVENTORY_SYNC_TOKEN` 이 빌드에 포함되어 있으면 기본 ON (운영에서 REMOTE 플래그 누락 시에도 모바일·PC 동일 동작).
+ * - 로컬 전용으로 끄려면 `VITE_INVENTORY_REMOTE_SYNC=false` (또는 `0`) 를 명시하세요.
  */
 export function inventoryRemoteSyncEnabled() {
-  return (
-    import.meta.env.VITE_INVENTORY_REMOTE_SYNC === 'true' &&
-    !!String(import.meta.env.VITE_INVENTORY_SYNC_TOKEN || '').trim()
-  )
+  const token = String(import.meta.env.VITE_INVENTORY_SYNC_TOKEN || '').trim()
+  if (!token) return false
+  const ex = String(import.meta.env.VITE_INVENTORY_REMOTE_SYNC ?? '').trim().toLowerCase()
+  if (ex === 'false' || ex === '0' || ex === 'off' || ex === 'no') return false
+  return true
 }
 
 export function buildInventoryRemoteUrl() {

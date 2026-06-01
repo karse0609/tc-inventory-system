@@ -480,7 +480,7 @@ function App() {
   }, [authUser])
 
   const pullRemoteInventory = useCallback(async () => {
-    if (!inventoryRemoteSyncEnabled() || !authUser) return { ok: false }
+    if (!inventoryRemoteSyncEnabled() || !authUser) return { ok: false, error: 'remote_disabled' }
     const uid = String(authUser.userId || authUser.id || '').trim()
     console.log('[tc-inv sync] pullRemoteInventory:start', {
       userId: uid,
@@ -489,7 +489,7 @@ function App() {
     setRemoteUi((u) => ({ ...u, busyPull: true }))
     const r = await inventoryRemoteRequest('GET')
     setRemoteUi((u) => ({ ...u, busyPull: false }))
-    if (!authUser) return { ok: false }
+    if (!authUser) return { ok: false, error: 'not_authenticated' }
     console.log('[tc-inv sync] pullRemoteInventory:http', {
       ok: r.ok,
       status: r.status,
@@ -502,12 +502,13 @@ function App() {
         return { ok: true, empty: true }
       }
       setRemoteUi((u) => ({ ...u, error: String(r.error || 'pull_failed') }))
-      return { ok: false }
+      return { ok: false, error: String(r.error || 'pull_failed') }
     }
     const data = r.data
     if (!data?.payload) {
       console.warn('[tc-inv sync] pullRemoteInventory:no-payload', { keys: data ? Object.keys(data) : [] })
-      return { ok: false }
+      setRemoteUi((u) => ({ ...u, error: 'no_payload' }))
+      return { ok: false, error: 'no_payload' }
     }
     console.log('[tc-inv sync] pullRemoteInventory → importAppDataBackup', {
       updatedAt: data.updatedAt,
@@ -558,7 +559,19 @@ function App() {
         window.alert(formatKoEnInline(L.mobileRefreshRequiresRemoteSync))
         return
       }
-      await pullRemoteInventory()
+      const result = await pullRemoteInventory()
+      if (result?.ok && result?.empty) {
+        window.alert(formatKoEnInline(L.mobileRefreshEmptyServer))
+        return
+      }
+      if (!result?.ok) {
+        window.alert(
+          formatKoEnInline({
+            ko: `서버에서 최신 재고를 불러오지 못했습니다. (${String(result?.error || 'unknown')})`,
+            en: `Could not refresh the latest inventory from the server. (${String(result?.error || 'unknown')})`,
+          }),
+        )
+      }
     } finally {
       setMobileRefreshing(false)
     }

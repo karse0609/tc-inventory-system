@@ -54,8 +54,8 @@
 
 | 이름 | 값 |
 |------|-----|
-| `VITE_INVENTORY_REMOTE_SYNC` | `true` |
-| `VITE_INVENTORY_SYNC_TOKEN` | `INVENTORY_SYNC_TOKEN`과 **동일**한 문자열 |
+| `VITE_INVENTORY_SYNC_TOKEN` | `INVENTORY_SYNC_TOKEN`과 **동일**한 문자열 (**있으면 기본적으로 클라우드 동기화 ON**) |
+| `VITE_INVENTORY_REMOTE_SYNC` (선택) | 로컬 전용으로 끄려면 `false` / `0` / `off`. **비우거나 `true`면** 토큰이 있을 때 원격 사용 |
 | `VITE_DEBUG_REMOTE_SYNC` (선택) | `true`이면 fetch 응답 본문 앞부분 등 **추가 디버그 로그** |
 
 > `VITE_*` 값은 번들에 포함됩니다. 내부용·팀 공유 비밀으로 취급하고, 공개 저장소에는 커밋하지 마세요.
@@ -68,7 +68,7 @@
 - `PUT /api/inventory` — 전체 스냅샷 덮어쓰기  
 - 헤더: `x-tc-inv-sync-token: <INVENTORY_SYNC_TOKEN>`
 
-로컬 `npm run dev`에서는 이 API가 없으므로 **동기화는 꺼진 것처럼** 동작합니다(또는 `VITE_INVENTORY_REMOTE_SYNC`를 비워 두세요).
+로컬 `npm run dev`에서는 이 API가 없으므로 **pull이 실패**할 수 있습니다. 로컬에서 원격을 끄려면 `VITE_INVENTORY_REMOTE_SYNC=false` 이거나 `VITE_INVENTORY_SYNC_TOKEN`을 비우세요.
 
 ## 5. 모바일/PWA 메뉴·권한
 
