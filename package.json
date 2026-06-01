@@ -8,7 +8,8 @@
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "icons:pwa": "node scripts/compress-pwa-icons.mjs"
+    "icons:pwa": "node scripts/compress-pwa-icons.mjs",
+    "gen:deployed-snapshot": "vite-node scripts/generate-deployed-inventory-snapshot.mjs"
   },
   "dependencies": {
     "@upstash/redis": "^1.38.0",
@@ -27,6 +28,7 @@
     "globals": "^17.6.0",
     "sharp": "^0.34.5",
     "vite": "^8.0.12",
+    "vite-node": "^3.2.4",
     "vite-plugin-pwa": "^1.3.0"
   }
 }
