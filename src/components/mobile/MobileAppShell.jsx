@@ -11,16 +11,9 @@ const TABS = [
 
 /**
  * 모바일 전용 레이아웃 — PC `app-nav`와 무관
+ * v1: 클라우드 동기 UI 없음. 새로고침은 이 브라우저에 로드된 데이터 기준 전체 리로드만.
  */
-export default function MobileAppShell({
-  mobileSection,
-  onSection,
-  children,
-  onRefresh,
-  onLogout,
-  userLabel,
-  refreshing = false,
-}) {
+export default function MobileAppShell({ mobileSection, onSection, children, onReload, onLogout, userLabel }) {
   const today = new Date().toLocaleDateString('en-US', {
     weekday: 'short',
     year: 'numeric',
@@ -41,12 +34,14 @@ export default function MobileAppShell({
           <button
             type="button"
             className="mobile-shell__btn"
-            onClick={onRefresh}
-            disabled={refreshing}
-            aria-label="Refresh"
+            onClick={onReload}
+            aria-describedby="mobile-reload-hint"
           >
-            {refreshing ? '…' : '↻'} Refresh
+            <BilingualLabel label={L.mobileReloadPage} as="span" compact />
           </button>
+          <span id="mobile-reload-hint" className="mobile-shell__sr-only">
+            <BilingualLabel label={L.mobileReloadPageHint} as="span" />
+          </span>
           <button type="button" className="mobile-shell__btn mobile-shell__btn--primary" onClick={onLogout}>
             Logout
           </button>

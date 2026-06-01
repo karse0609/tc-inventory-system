@@ -375,6 +375,14 @@ export const L = {
     ko: '모바일은 조회 전용입니다. 저장·입고 반영은 PC에서 진행해 주세요.',
     en: 'Mobile is read-only. Saving and receiving are done on PC.',
   },
+  mobileReloadPage: {
+    ko: '화면 새로고침',
+    en: 'Reload page',
+  },
+  mobileReloadPageHint: {
+    ko: '이 탭을 처음부터 다시 불러와 화면을 갱신합니다.',
+    en: 'Reloads this browser tab to refresh the screen.',
+  },
   mobilePendingReceivingCard: {
     ko: '이번 주 입고 예정',
     en: 'Pending receiving (this week ETA)',

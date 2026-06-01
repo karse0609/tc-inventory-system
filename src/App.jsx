@@ -85,7 +85,6 @@ function App() {
   const [view, setView] = useState('dashboard')
   /** ≤700px 전용 하단 4탭 (PC 네비와 별개) */
   const [mobileSection, setMobileSection] = useState('dashboard')
-  const [mobileRefreshing, setMobileRefreshing] = useState(false)
 
   const authUser = useMemo(() => {
     if (!loggedInUserId) return null
@@ -533,12 +532,6 @@ function App() {
 
   const mobileTransitRows = useMemo(() => getInTransitPcActiveViewRows(inTransit), [inTransit])
 
-  /** 원격 동기화 ON일 때: PC는 view, 모바일은 하단 탭(mobileSection) 바뀔 때마다 서버에서 당김 */
-  const mobileNavPullKey = useMemo(
-    () => (isMobileWarehouseNav ? mobileSection : view),
-    [isMobileWarehouseNav, mobileSection, view],
-  )
-
   const handleMobileSection = useCallback(
     (id) => {
       setMobileSection(id)
@@ -552,30 +545,9 @@ function App() {
     [authUser],
   )
 
-  const handleMobileRefresh = useCallback(async () => {
-    setMobileRefreshing(true)
-    try {
-      if (!inventoryRemoteSyncEnabled()) {
-        window.alert(formatKoEnInline(L.mobileRefreshRequiresRemoteSync))
-        return
-      }
-      const result = await pullRemoteInventory()
-      if (result?.ok && result?.empty) {
-        window.alert(formatKoEnInline(L.mobileRefreshEmptyServer))
-        return
-      }
-      if (!result?.ok) {
-        window.alert(
-          formatKoEnInline({
-            ko: `서버에서 최신 재고를 불러오지 못했습니다. (${String(result?.error || 'unknown')})`,
-            en: `Could not refresh the latest inventory from the server. (${String(result?.error || 'unknown')})`,
-          }),
-        )
-      }
-    } finally {
-      setMobileRefreshing(false)
-    }
-  }, [pullRemoteInventory])
+  const handleMobileReload = useCallback(() => {
+    window.location.reload()
+  }, [])
 
   const snapshotJson = useMemo(
     () =>
@@ -665,6 +637,10 @@ function App() {
       queueMicrotask(() => setRemoteHydratedLogged(true, 'effect:remote-sync-off'))
       return undefined
     }
+    if (isMobileWarehouseNav) {
+      queueMicrotask(() => setRemoteHydratedLogged(true, 'effect:mobile-skip-remote-bootstrap'))
+      return undefined
+    }
     const gen = ++remoteBootstrapGenRef.current
     queueMicrotask(() => {
       setRemoteHydratedLogged(false, 'effect:remote-bootstrap:pre-pull')
@@ -688,7 +664,7 @@ function App() {
     return () => {
       remoteBootstrapGenRef.current += 1
     }
-  }, [authUser, pullRemoteInventory, setRemoteHydratedLogged])
+  }, [authUser, pullRemoteInventory, setRemoteHydratedLogged, isMobileWarehouseNav])
 
   useEffect(() => {
     if (!authUser || !inventoryRemoteSyncEnabled()) return undefined
@@ -705,37 +681,41 @@ function App() {
 
   useEffect(() => {
     if (!authUser || !inventoryRemoteSyncEnabled()) return undefined
+    if (isMobileWarehouseNav) return undefined
     const id = window.setInterval(() => {
       if (document.visibilityState !== 'visible') return
       void pullRemoteInventory()
     }, 45000)
     return () => window.clearInterval(id)
-  }, [authUser, pullRemoteInventory])
+  }, [authUser, pullRemoteInventory, isMobileWarehouseNav])
 
   useEffect(() => {
     if (!authUser || !inventoryRemoteSyncEnabled()) return undefined
+    if (isMobileWarehouseNav) return undefined
     const onVis = () => {
       if (document.visibilityState === 'visible') void pullRemoteInventory()
     }
     document.addEventListener('visibilitychange', onVis)
     return () => document.removeEventListener('visibilitychange', onVis)
-  }, [authUser, pullRemoteInventory])
+  }, [authUser, pullRemoteInventory, isMobileWarehouseNav])
 
   useEffect(() => {
     if (!authUser || !inventoryRemoteSyncEnabled()) return undefined
+    if (isMobileWarehouseNav) return undefined
     const onFocus = () => {
       void pullRemoteInventory()
     }
     window.addEventListener('focus', onFocus)
     return () => window.removeEventListener('focus', onFocus)
-  }, [authUser, pullRemoteInventory])
+  }, [authUser, pullRemoteInventory, isMobileWarehouseNav])
 
-  /** PC: 뷰 전환 시 서버 최신본. 모바일: 하단 탭 전환 시 동일. */
+  /** PC만: 뷰 전환 시 서버 pull. 모바일(v1)은 클라우드 동기 비활성. */
   useEffect(() => {
     if (!authUser || !inventoryRemoteSyncEnabled() || !remoteHydrated) return undefined
+    if (isMobileWarehouseNav) return undefined
     /* eslint-disable-next-line react-hooks/set-state-in-effect -- pullRemoteInventory updates UI via async GET + setState */
     void pullRemoteInventory()
-  }, [authUser, remoteHydrated, pullRemoteInventory, mobileNavPullKey])
+  }, [authUser, remoteHydrated, pullRemoteInventory, view, isMobileWarehouseNav])
 
   const visibleNav = useMemo(
     () =>
@@ -873,7 +853,7 @@ function App() {
     }
     writeBrowserSessionUserId(u.id)
     setLoggedInUserId(u.id)
-    if (inventoryRemoteSyncEnabled()) {
+    if (inventoryRemoteSyncEnabled() && !prefersMobileSimpleLayout()) {
       window.setTimeout(() => {
         void pullRemoteInventoryRef.current()
       }, 0)
@@ -908,7 +888,7 @@ function App() {
   }
 
   const blockingRemoteBootstrap =
-    inventoryRemoteSyncEnabled() && authUser && !remoteHydrated
+    inventoryRemoteSyncEnabled() && authUser && !remoteHydrated && !isMobileWarehouseNav
 
   if (blockingRemoteBootstrap) {
     return (
@@ -943,14 +923,14 @@ function App() {
 
   return (
     <div className={`app${isMobileWarehouseNav ? ' app--mobile-shell' : ''}`}>
-      {isAdminUser(authUser) && !inventoryRemoteSyncEnabled() ? (
+      {!isMobileWarehouseNav && isAdminUser(authUser) && !inventoryRemoteSyncEnabled() ? (
         <div className="remote-sync-banner remote-sync-banner--off" role="status">
           <span className="remote-sync-banner__text">
             <BilingualLabel label={L.remoteSyncBannerOff} as="span" />
           </span>
         </div>
       ) : null}
-      {isAdminUser(authUser) && inventoryRemoteSyncEnabled() && remoteUi.error ? (
+      {!isMobileWarehouseNav && isAdminUser(authUser) && inventoryRemoteSyncEnabled() && remoteUi.error ? (
         <div className="remote-sync-banner remote-sync-banner--error" role="alert">
           <span className="remote-sync-banner__text">{remoteUi.error}</span>
           <button type="button" className="btn btn--ghost btn--sm" onClick={() => void pullRemoteInventory()}>
@@ -958,7 +938,11 @@ function App() {
           </button>
         </div>
       ) : null}
-      {isAdminUser(authUser) && inventoryRemoteSyncEnabled() && !remoteUi.error && remoteHydrated ? (
+      {!isMobileWarehouseNav &&
+      isAdminUser(authUser) &&
+      inventoryRemoteSyncEnabled() &&
+      !remoteUi.error &&
+      remoteHydrated ? (
         <div className="remote-sync-banner remote-sync-banner--on" role="status">
           <span className="remote-sync-banner__text">
             <BilingualLabel label={L.remoteSyncBannerOn} as="span" />
@@ -971,10 +955,9 @@ function App() {
           <MobileAppShell
             mobileSection={mobileSection}
             onSection={handleMobileSection}
-            onRefresh={() => void handleMobileRefresh()}
+            onReload={handleMobileReload}
             onLogout={handleLogout}
             userLabel={mobileUserLabel}
-            refreshing={mobileRefreshing}
           >
             {mobileSection === 'dashboard' ? (
               <MobileDashboardHome inTransit={inTransit} masterItems={masterItems} opsMeta={opsMeta} />
