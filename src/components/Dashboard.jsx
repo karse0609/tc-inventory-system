@@ -46,8 +46,8 @@ export default function Dashboard({
   setOpsMeta,
   unitCostKrwBySku,
   arrivalLedger = [],
-  /** 휴대폰·PWA: 조회 위주(기준일 수정·주간 ETA 표 숨김) */
-  readOnlyMobile = false,
+  /** Admin이 아닌 파트너(test) 등: 재고 금액(KRW) KPI 카드만 숨김 — 수량·커버리지·ETA는 동일 표시 */
+  hideFinancialKpis = false,
   /** Admin: 시스템·저장소 안내 / 일반 사용자: 사용 안내 */
   isAdminViewer = false,
 }) {
@@ -239,11 +239,7 @@ export default function Dashboard({
   }, [dashboardModelNames, selectedModelName])
 
   return (
-    <div
-      className={
-        readOnlyMobile ? 'dashboard dashboard--ops dashboard--mobile-readonly' : 'dashboard dashboard--ops'
-      }
-    >
+    <div className="dashboard dashboard--ops">
       <header className="dashboard__header">
         <div className="dashboard__header-main">
           <p className="dashboard__eyebrow">{opsMeta.subtitle}</p>
@@ -262,64 +258,48 @@ export default function Dashboard({
               <span className="dashboard__as-of-value">{koreaClock}</span>
             </div>
           </div>
-          {!readOnlyMobile ? (
-            <div className="dashboard__query-row">
-              <label className="dashboard__query-field">
-                <span className="dashboard__query-field-label">
-                  <BilingualLabel label={L.opsQueryDateKst} as="span" />
-                </span>
-                {typeof setOpsMeta === 'function' ? (
-                  <input
-                    type="date"
-                    className="dashboard__as-of-input cell-input"
-                    value={asOfDate || ''}
-                    onChange={(e) =>
-                      setOpsMeta((o) => ({ ...o, asOfDate: e.target.value || o.asOfDate }))
-                    }
-                    aria-label={formatKoEnInline(L.opsQueryDateKst)}
-                  />
-                ) : (
-                  <time className="dashboard__as-of-readonly" dateTime={asOfDate}>
-                    {asOfDate}
-                  </time>
-                )}
-              </label>
-              <label className="dashboard__query-field">
-                <span className="dashboard__query-field-label">
-                  <BilingualLabel label={L.model} as="span" />
-                </span>
-                <select
-                  className="dashboard__model-select-input cell-input"
-                  value={selectedModelName}
-                  onChange={(e) => setSelectedModelName(e.target.value)}
-                  aria-label={formatKoEnInline(L.model)}
-                >
-                  <option value={ALL_MODELS_VALUE} title={formatKoEnInline(L.dashboardModelAll)}>
-                    {L.dashboardModelAll.ko}
+          <div className="dashboard__query-row">
+            <label className="dashboard__query-field">
+              <span className="dashboard__query-field-label">
+                <BilingualLabel label={L.opsQueryDateKst} as="span" />
+              </span>
+              {typeof setOpsMeta === 'function' ? (
+                <input
+                  type="date"
+                  className="dashboard__as-of-input cell-input"
+                  value={asOfDate || ''}
+                  onChange={(e) =>
+                    setOpsMeta((o) => ({ ...o, asOfDate: e.target.value || o.asOfDate }))
+                  }
+                  aria-label={formatKoEnInline(L.opsQueryDateKst)}
+                />
+              ) : (
+                <time className="dashboard__as-of-readonly" dateTime={asOfDate}>
+                  {asOfDate}
+                </time>
+              )}
+            </label>
+            <label className="dashboard__query-field">
+              <span className="dashboard__query-field-label">
+                <BilingualLabel label={L.model} as="span" />
+              </span>
+              <select
+                className="dashboard__model-select-input cell-input"
+                value={selectedModelName}
+                onChange={(e) => setSelectedModelName(e.target.value)}
+                aria-label={formatKoEnInline(L.model)}
+              >
+                <option value={ALL_MODELS_VALUE} title={formatKoEnInline(L.dashboardModelAll)}>
+                  {L.dashboardModelAll.ko}
+                </option>
+                {dashboardModelSelectOptions.map((name) => (
+                  <option key={name} value={name}>
+                    {name}
                   </option>
-                  {dashboardModelSelectOptions.map((name) => (
-                    <option key={name} value={name}>
-                      {name}
-                    </option>
-                  ))}
-                </select>
-              </label>
-            </div>
-          ) : (
-            <div className="dashboard__query-row dashboard__query-row--readonly">
-              <span className="dashboard__query-readonly">
-                <BilingualLabel label={L.opsQueryDateKst} as="span" />: {asOfDate}
-              </span>
-              <span className="dashboard__query-readonly">
-                <BilingualLabel label={L.model} as="span" />:{' '}
-                {selectedModelName === ALL_MODELS_VALUE ? (
-                  <BilingualLabel label={L.dashboardModelAll} as="span" />
-                ) : (
-                  selectedModelName
-                )}
-              </span>
-            </div>
-          )}
+                ))}
+              </select>
+            </label>
+          </div>
         </div>
       </header>
 
@@ -334,11 +314,12 @@ export default function Dashboard({
           inventorySummary.portfolioCoverageWeeks ?? inventorySummary.minCoverageWeeks
         }
         unit={opsMeta.unit}
+        hideFinancialKpis={hideFinancialKpis}
       />
 
       <DashboardRoleGuidance
         isAdmin={isAdminViewer}
-        showLedgerHint={showLedgerHint && !readOnlyMobile}
+        showLedgerHint={showLedgerHint}
         inventoryRemoteSyncEnabled={inventoryRemoteSyncEnabled()}
       />
 
@@ -349,7 +330,6 @@ export default function Dashboard({
         unit={opsMeta.unit}
       />
 
-      {!readOnlyMobile ? (
       <section className="dashboard__week-eta card" aria-labelledby="dash-week-eta-heading">
         <h2 id="dash-week-eta-heading" className="dashboard__week-eta-title">
           <BilingualLabel label={L.thisWeekEtaSection} as="span" />
@@ -407,7 +387,6 @@ export default function Dashboard({
           </div>
         )}
       </section>
-      ) : null}
     </div>
   )
 }

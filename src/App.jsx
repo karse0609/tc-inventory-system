@@ -1039,10 +1039,10 @@ function App() {
               weekConfirmations={weekConfirmations}
               inTransitContainers={inTransit}
               opsMeta={opsMeta}
-              setOpsMeta={isPartnerTestViewer(authUser) ? undefined : setOpsMeta}
+              setOpsMeta={setOpsMeta}
               unitCostKrwBySku={unitCostKrwBySku}
               arrivalLedger={arrivalLedger}
-              readOnlyMobile={isPartnerTestViewer(authUser)}
+              hideFinancialKpis={isPartnerTestViewer(authUser)}
               isAdminViewer={isAdminUser(authUser)}
             />
           )}
