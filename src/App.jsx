@@ -53,6 +53,11 @@ import DeliveryPlanPage from './components/pages/DeliveryPlanPage.jsx'
 import InTransitPage from './components/pages/InTransitPage.jsx'
 import InventoryProjectionPage from './components/pages/InventoryProjectionPage.jsx'
 import SettingsPage from './components/pages/SettingsPage.jsx'
+import MobileAppShell from './components/mobile/MobileAppShell.jsx'
+import MobileDashboardHome from './components/mobile/MobileDashboardHome.jsx'
+import MobileTransitCards from './components/mobile/MobileTransitCards.jsx'
+import MobileWarehouseCards from './components/mobile/MobileWarehouseCards.jsx'
+import { isInTransitRowActiveAsOf } from './utils/logisticsMetrics'
 import './App.css'
 import './components/pages/pages.css'
 
@@ -61,11 +66,11 @@ function firstAllowedView(authUser) {
   return VIEW_IDS.find((id) => canAccessView(authUser, id)) ?? 'dashboard'
 }
 
-/** 좁은 화면(모바일·PWA): 입고(운송중) 화면을 기본 홈으로 */
+/** 좁은 화면(휴대폰·PWA): 요약 홈(대시보드)을 기본으로 */
 function defaultHomeView(authUser) {
   if (!authUser) return 'dashboard'
-  if (prefersMobileSimpleLayout() && canAccessView(authUser, 'transit')) {
-    return 'transit'
+  if (prefersMobileSimpleLayout()) {
+    return canAccessView(authUser, 'dashboard') ? 'dashboard' : firstAllowedView(authUser)
   }
   return firstAllowedView(authUser)
 }
@@ -75,6 +80,9 @@ function App() {
   const [users, setUsers] = useState(() => ensureUsersInStorage())
   const [loggedInUserId, setLoggedInUserId] = useState(() => getSessionUserId())
   const [view, setView] = useState('dashboard')
+  /** ≤700px 전용 하단 4탭 (PC 네비와 별개) */
+  const [mobileSection, setMobileSection] = useState('dashboard')
+  const [mobileRefreshing, setMobileRefreshing] = useState(false)
 
   const authUser = useMemo(() => {
     if (!loggedInUserId) return null
@@ -503,6 +511,38 @@ function App() {
     pullRemoteInventoryRef.current = pullRemoteInventory
   }, [pullRemoteInventory])
 
+  const mobileTransitRows = useMemo(() => {
+    const ref = getKoreaCalendarDate()
+    const asOf = String(opsMeta?.asOfDate || ref).trim()
+    return (inTransit || []).filter((r) => isInTransitRowActiveAsOf(r, asOf, ref))
+  }, [inTransit, opsMeta.asOfDate])
+
+  const handleMobileSection = useCallback(
+    (id) => {
+      setMobileSection(id)
+      const nextView = id === 'warehouse' ? 'master' : id === 'dashboard' ? 'dashboard' : 'transit'
+      if (!authUser) return
+      if (canAccessView(authUser, nextView)) {
+        setView(nextView)
+        window.history.replaceState(null, '', `#/${nextView}`)
+      }
+    },
+    [authUser],
+  )
+
+  const handleMobileRefresh = useCallback(async () => {
+    setMobileRefreshing(true)
+    try {
+      if (inventoryRemoteSyncEnabled()) {
+        await pullRemoteInventory()
+      } else {
+        window.location.reload()
+      }
+    } finally {
+      setMobileRefreshing(false)
+    }
+  }, [pullRemoteInventory])
+
   const snapshotJson = useMemo(
     () =>
       JSON.stringify(
@@ -688,6 +728,7 @@ function App() {
 
   const confirmLeaveView = useCallback(
     (fromView, toView) => {
+      if (isMobileWarehouseNav) return true
       if (!fromView || fromView === toView || !DRAFT_GUARD_VIEWS.has(fromView)) return true
       const checker = unsavedCheckersRef.current[fromView]
       if (typeof checker === 'function' && checker()) {
@@ -695,7 +736,7 @@ function App() {
       }
       return true
     },
-    [DRAFT_GUARD_VIEWS],
+    [DRAFT_GUARD_VIEWS, isMobileWarehouseNav],
   )
 
   const goView = useCallback(
@@ -729,6 +770,14 @@ function App() {
   }, [authUser, isMobileWarehouseNav])
 
   useEffect(() => {
+    if (!authUser || !isMobileWarehouseNav) return
+    const raw = window.location.hash.replace(/^#\/?/, '')
+    if (raw === 'master') setMobileSection('warehouse')
+    else if (raw === 'transit') setMobileSection('transit')
+    else setMobileSection('dashboard')
+  }, [authUser, isMobileWarehouseNav])
+
+  useEffect(() => {
     if (!authUser) return
     const onHash = () => {
       const raw = window.location.hash.replace(/^#\/?/, '')
@@ -752,6 +801,11 @@ function App() {
         return
       }
       setView(raw)
+      if (isMobileWarehouseNav) {
+        if (raw === 'master') setMobileSection('warehouse')
+        else if (raw === 'transit') setMobileSection('transit')
+        else setMobileSection('dashboard')
+      }
     }
     window.addEventListener('hashchange', onHash)
     return () => window.removeEventListener('hashchange', onHash)
@@ -796,6 +850,7 @@ function App() {
     clearSession()
     setLoggedInUserId(null)
     setView('dashboard')
+    setMobileSection('dashboard')
     window.history.replaceState(null, '', '#/')
   }
 
@@ -804,6 +859,7 @@ function App() {
     setUsers(ensureUsersInStorage())
     setLoggedInUserId(null)
     setView('dashboard')
+    setMobileSection('dashboard')
     window.history.replaceState(null, '', '#/')
   }
 
@@ -846,8 +902,12 @@ function App() {
     )
   }
 
+  const mobileUserLabel = authUser
+    ? String(authUser.name || authUser.userId || authUser.id || '').trim()
+    : ''
+
   return (
-    <div className="app">
+    <div className={`app${isMobileWarehouseNav ? ' app--mobile-shell' : ''}`}>
       {isAdminUser(authUser) && !inventoryRemoteSyncEnabled() ? (
         <div className="remote-sync-banner remote-sync-banner--off" role="status">
           <span className="remote-sync-banner__text">
@@ -870,121 +930,149 @@ function App() {
           </span>
         </div>
       ) : null}
-      <nav className="app-nav" aria-label="Main">
-        <span className="app-nav__brand" title="TC TECH 실시간 해외재고 관리">
-          TC TECH
-          <span className="app-nav__brand-sub">· 실시간 해외재고</span>
-        </span>
-        {visibleNav.map((v) => (
-          <button
-            key={v.id}
-            type="button"
-            className={`app-nav__btn ${view === v.id ? 'app-nav__btn--active' : ''}`}
-            onClick={() => goView(v.id)}
+
+      {isMobileWarehouseNav ? (
+        <>
+          <MobileAppShell
+            mobileSection={mobileSection}
+            onSection={handleMobileSection}
+            onRefresh={() => void handleMobileRefresh()}
+            onLogout={handleLogout}
+            userLabel={mobileUserLabel}
+            refreshing={mobileRefreshing}
           >
-            <BilingualLabel label={v.label} as="span" />
-          </button>
-        ))}
-        <div className="app-nav__user">
-          <span className="app-nav__user-meta" title={authUser.userId}>
-            {authUser.name || authUser.userId}
-            <span className="app-nav__role"> · {authUser.role}</span>
-          </span>
-          <button type="button" className="btn btn--ghost app-nav__logout" onClick={handleLogout}>
-            Logout
-          </button>
-        </div>
-      </nav>
+            {mobileSection === 'dashboard' ? (
+              <MobileDashboardHome inTransit={inTransit} masterItems={masterItems} opsMeta={opsMeta} />
+            ) : null}
+            {mobileSection === 'transit' ? (
+              <MobileTransitCards rows={mobileTransitRows} titleLabel={L.inTransitInventoryScreen} mode="transit" />
+            ) : null}
+            {mobileSection === 'receiving' ? (
+              <MobileTransitCards rows={mobileTransitRows} titleLabel={L.mobileReceivingTabTitle} mode="receiving" />
+            ) : null}
+            {mobileSection === 'warehouse' ? <MobileWarehouseCards masterItems={masterItems} /> : null}
+          </MobileAppShell>
+          <PwaInstallHint />
+        </>
+      ) : (
+        <>
+          <nav className="app-nav" aria-label="Main">
+            <span className="app-nav__brand" title="TC TECH 실시간 해외재고 관리">
+              TC TECH
+              <span className="app-nav__brand-sub">· 실시간 해외재고</span>
+            </span>
+            {visibleNav.map((v) => (
+              <button
+                key={v.id}
+                type="button"
+                className={`app-nav__btn ${view === v.id ? 'app-nav__btn--active' : ''}`}
+                onClick={() => goView(v.id)}
+              >
+                <BilingualLabel label={v.label} as="span" />
+              </button>
+            ))}
+            <div className="app-nav__user">
+              <span className="app-nav__user-meta" title={authUser.userId}>
+                {authUser.name || authUser.userId}
+                <span className="app-nav__role"> · {authUser.role}</span>
+              </span>
+              <button type="button" className="btn btn--ghost app-nav__logout" onClick={handleLogout}>
+                Logout
+              </button>
+            </div>
+          </nav>
 
-      <PwaInstallHint />
+          <PwaInstallHint />
 
-      {view === 'dashboard' && (
-        <Dashboard
-          masterItems={masterItems}
-          deliveryPlans={deliveryPlans}
-          weekConfirmations={weekConfirmations}
-          inTransitContainers={inTransit}
-          opsMeta={opsMeta}
-          setOpsMeta={isMobileWarehouseNav ? undefined : setOpsMeta}
-          unitCostKrwBySku={unitCostKrwBySku}
-          arrivalLedger={arrivalLedger}
-          readOnlyMobile={isMobileWarehouseNav}
-          isAdminViewer={isAdminUser(authUser)}
-        />
-      )}
-      {view === 'master' && (
-        <MasterDataPage
-          masterItems={masterItems}
-          onPersistMasterItems={persistMasterItems}
-          registerUnsavedGuard={registerUnsavedGuard}
-          deliveryPlans={deliveryPlans}
-          inTransit={inTransit}
-          opsMeta={opsMeta}
-        />
-      )}
-      {view === 'delivery' && (
-        <DeliveryPlanPage
-          masterItems={masterItems}
-          onPersistMasterItems={persistMasterItems}
-          deliveryPlans={deliveryPlans}
-          weekConfirmations={weekConfirmations}
-          onPersistPlanStore={persistPlanStore}
-          registerUnsavedGuard={registerUnsavedGuard}
-          opsMeta={opsMeta}
-          onRequestRemoteSync={scheduleRemoteSyncAfterMutation}
-        />
-      )}
-      {view === 'transit' && (
-        <InTransitPage
-          inTransit={inTransit}
-          onPersistInTransit={persistInTransit}
-          registerUnsavedGuard={registerUnsavedGuard}
-          setMasterItems={setMasterItems}
-          masterItems={masterItems}
-          appendArrivalLedger={appendArrivalLedger}
-          onApplyReceiptCancellation={applyReceiptCancellation}
-          currentUserLabel={
-            authUser ? String(authUser.name || authUser.userId || authUser.id || '').trim() : ''
-          }
-          onRequestRemoteSync={scheduleRemoteSyncAfterMutation}
-        />
-      )}
-      {view === 'projection' && (
-        <InventoryProjectionPage
-          masterItems={masterItems}
-          deliveryPlans={deliveryPlans}
-          weekConfirmations={weekConfirmations}
-          inTransit={inTransit}
-          opsMeta={opsMeta}
-        />
-      )}
-      {view === 'settings' && (
-        <SettingsPage
-          opsMeta={opsMeta}
-          setOpsMeta={setOpsMeta}
-          onResetAllData={resetAllData}
-          onDownloadAppDataBackup={downloadAppDataBackup}
-          onImportAppDataBackup={importAppDataBackup}
-          isAdmin={isAdminUser(authUser)}
-          users={users}
-          setUsers={setUsers}
-          currentUserId={authUser.id}
-          onForceAuthReset={handleForceAuthReset}
-          onNavigateView={goView}
-          masterItems={masterItems}
-          unitCostKrwBySku={unitCostKrwBySku}
-          setUnitCostKrwBySku={setUnitCostKrwBySku}
-          remoteSync={{
-            enabled: inventoryRemoteSyncEnabled(),
-            meta: readRemoteMeta(),
-            busyPull: remoteUi.busyPull,
-            busyPush: remoteUi.busyPush,
-            error: remoteUi.error,
-            lastOk: remoteUi.lastOk,
-            onPull: pullRemoteInventory,
-            onPush: () => pushRemoteInventoryNow({ silent: false }),
-          }}
-        />
+          {view === 'dashboard' && (
+            <Dashboard
+              masterItems={masterItems}
+              deliveryPlans={deliveryPlans}
+              weekConfirmations={weekConfirmations}
+              inTransitContainers={inTransit}
+              opsMeta={opsMeta}
+              setOpsMeta={setOpsMeta}
+              unitCostKrwBySku={unitCostKrwBySku}
+              arrivalLedger={arrivalLedger}
+              readOnlyMobile={false}
+              isAdminViewer={isAdminUser(authUser)}
+            />
+          )}
+          {view === 'master' && (
+            <MasterDataPage
+              masterItems={masterItems}
+              onPersistMasterItems={persistMasterItems}
+              registerUnsavedGuard={registerUnsavedGuard}
+              deliveryPlans={deliveryPlans}
+              inTransit={inTransit}
+              opsMeta={opsMeta}
+            />
+          )}
+          {view === 'delivery' && (
+            <DeliveryPlanPage
+              masterItems={masterItems}
+              onPersistMasterItems={persistMasterItems}
+              deliveryPlans={deliveryPlans}
+              weekConfirmations={weekConfirmations}
+              onPersistPlanStore={persistPlanStore}
+              registerUnsavedGuard={registerUnsavedGuard}
+              opsMeta={opsMeta}
+              onRequestRemoteSync={scheduleRemoteSyncAfterMutation}
+            />
+          )}
+          {view === 'transit' && (
+            <InTransitPage
+              inTransit={inTransit}
+              onPersistInTransit={persistInTransit}
+              registerUnsavedGuard={registerUnsavedGuard}
+              setMasterItems={setMasterItems}
+              masterItems={masterItems}
+              appendArrivalLedger={appendArrivalLedger}
+              onApplyReceiptCancellation={applyReceiptCancellation}
+              currentUserLabel={
+                authUser ? String(authUser.name || authUser.userId || authUser.id || '').trim() : ''
+              }
+              onRequestRemoteSync={scheduleRemoteSyncAfterMutation}
+            />
+          )}
+          {view === 'projection' && (
+            <InventoryProjectionPage
+              masterItems={masterItems}
+              deliveryPlans={deliveryPlans}
+              weekConfirmations={weekConfirmations}
+              inTransit={inTransit}
+              opsMeta={opsMeta}
+            />
+          )}
+          {view === 'settings' && (
+            <SettingsPage
+              opsMeta={opsMeta}
+              setOpsMeta={setOpsMeta}
+              onResetAllData={resetAllData}
+              onDownloadAppDataBackup={downloadAppDataBackup}
+              onImportAppDataBackup={importAppDataBackup}
+              isAdmin={isAdminUser(authUser)}
+              users={users}
+              setUsers={setUsers}
+              currentUserId={authUser.id}
+              onForceAuthReset={handleForceAuthReset}
+              onNavigateView={goView}
+              masterItems={masterItems}
+              unitCostKrwBySku={unitCostKrwBySku}
+              setUnitCostKrwBySku={setUnitCostKrwBySku}
+              remoteSync={{
+                enabled: inventoryRemoteSyncEnabled(),
+                meta: readRemoteMeta(),
+                busyPull: remoteUi.busyPull,
+                busyPush: remoteUi.busyPush,
+                error: remoteUi.error,
+                lastOk: remoteUi.lastOk,
+                onPull: pullRemoteInventory,
+                onPush: () => pushRemoteInventoryNow({ silent: false }),
+              }}
+            />
+          )}
+        </>
       )}
     </div>
   )

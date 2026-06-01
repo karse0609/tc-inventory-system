@@ -5,6 +5,10 @@
   overflow-x: hidden;
 }
 
+.app--mobile-shell {
+  background: #eef1f5;
+}
+
 .app--remote-syncing {
   display: flex;
   align-items: center;

@@ -1,0 +1,78 @@
+import './mobile-shell.css'
+
+const TABS = [
+  { id: 'dashboard', label: 'Dashboard', icon: '▣' },
+  { id: 'transit', label: 'In-Transit', icon: '◈' },
+  { id: 'receiving', label: 'Receiving', icon: '◇' },
+  { id: 'warehouse', label: 'Inventory', icon: '▤' },
+]
+
+/**
+ * 모바일 전용 레이아웃 — PC `app-nav`와 무관
+ */
+export default function MobileAppShell({
+  mobileSection,
+  onSection,
+  children,
+  onRefresh,
+  onLogout,
+  userLabel,
+  refreshing = false,
+}) {
+  const today = new Date().toLocaleDateString('en-US', {
+    weekday: 'short',
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+    timeZone: 'Asia/Seoul',
+  })
+
+  return (
+    <div className="mobile-shell">
+      <header className="mobile-shell__header">
+        <div>
+          <div className="mobile-shell__brand">TC TECH</div>
+          <div className="mobile-shell__sub">Mobile Inventory</div>
+          <div className="mobile-shell__date">{today} (KST)</div>
+        </div>
+        <div className="mobile-shell__actions">
+          <button
+            type="button"
+            className="mobile-shell__btn"
+            onClick={onRefresh}
+            disabled={refreshing}
+            aria-label="Refresh"
+          >
+            {refreshing ? '…' : '↻'} Refresh
+          </button>
+          <button type="button" className="mobile-shell__btn mobile-shell__btn--primary" onClick={onLogout}>
+            Logout
+          </button>
+          {userLabel ? (
+            <span style={{ fontSize: '0.72rem', color: '#64748b', maxWidth: '8rem', textAlign: 'right' }}>
+              {userLabel}
+            </span>
+          ) : null}
+        </div>
+      </header>
+
+      <main className="mobile-shell__main">{children}</main>
+
+      <nav className="mobile-shell__nav" aria-label="Mobile primary">
+        {TABS.map((t) => (
+          <button
+            key={t.id}
+            type="button"
+            className={`mobile-shell__nav-btn ${mobileSection === t.id ? 'mobile-shell__nav-btn--active' : ''}`}
+            onClick={() => onSection(t.id)}
+          >
+            <span className="mobile-shell__nav-icon" aria-hidden>
+              {t.icon}
+            </span>
+            {t.label}
+          </button>
+        ))}
+      </nav>
+    </div>
+  )
+}

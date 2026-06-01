@@ -6,8 +6,11 @@ import { useEffect, useState } from 'react'
  */
 export const MOBILE_SIMPLE_LAYOUT_MQ = '(max-width: 700px)'
 
-/** PWA·휴대폰 창고 입고 전용: 상단 네비에 노출할 뷰 id (PC는 전체 메뉴 유지) */
-export const MOBILE_WAREHOUSE_NAV_VIEW_IDS = ['dashboard', 'transit']
+/** PWA·휴대폰: URL·해시에 허용할 뷰 id (PC는 전체 메뉴 유지) */
+export const MOBILE_WAREHOUSE_NAV_VIEW_IDS = ['dashboard', 'transit', 'master']
+
+/** 앱 하단 4탭 (로직 전용, VIEW_IDS와 별개) */
+export const MOBILE_TAB_IDS = /** @type {const} */ (['dashboard', 'transit', 'receiving', 'warehouse'])
 
 export function prefersMobileSimpleLayout() {
   if (typeof window === 'undefined') return false

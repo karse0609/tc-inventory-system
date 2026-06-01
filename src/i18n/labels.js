@@ -369,6 +369,38 @@ export const L = {
     ko: '표시할 운송중 재고가 없습니다. 검색 조건을 바꿔 보세요.',
     en: 'No in-transit lines to show. Try adjusting search.',
   },
+  mobileReadOnlyHint: {
+    ko: '모바일은 조회 전용입니다. 저장·입고 반영은 PC에서 진행해 주세요.',
+    en: 'Mobile is read-only. Saving and receiving are done on PC.',
+  },
+  mobilePendingReceivingCard: {
+    ko: '이번 주 입고 예정',
+    en: 'Pending receiving (this week ETA)',
+  },
+  mobilePendingReceivingSub: {
+    ko: '대시보드 주간 ETA와 동일 기준입니다.',
+    en: 'Same window as dashboard This Week ETA.',
+  },
+  mobileReceivingTestMode: {
+    ko: '테스트 모드 — 여기서의 입고 연습은 실제 데이터에 저장되지 않습니다.',
+    en: 'Test mode — receiving practice here is not saved to live data.',
+  },
+  mobileReceivingTabTitle: {
+    ko: '입고 (미리보기)',
+    en: 'Receiving (preview)',
+  },
+  mobileTransitEmpty: {
+    ko: '표시할 운송중 행이 없습니다.',
+    en: 'No in-transit rows to show.',
+  },
+  mobileWarehouseEmpty: {
+    ko: '표시할 창고 품목이 없습니다.',
+    en: 'No warehouse items to show.',
+  },
+  mobileWarehouseReadOnly: {
+    ko: '창고 재고는 읽기 전용입니다. 수정은 PC에서 해 주세요.',
+    en: 'Warehouse view is read-only. Edit on PC.',
+  },
   inventoryProjectionScreen: { ko: '재고 예측', en: 'Inventory Projection' },
   inventoryProjectionSubtitle: {
     ko:
