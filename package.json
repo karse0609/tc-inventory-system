@@ -10,7 +10,8 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "icons:pwa": "node scripts/compress-pwa-icons.mjs",
-    "gen:deployed-snapshot": "vite-node scripts/generate-deployed-inventory-snapshot.mjs"
+    "gen:deployed-snapshot": "vite-node scripts/generate-deployed-inventory-snapshot.mjs",
+    "merge:deployed-snapshot": "vite-node scripts/merge-admin-export-to-deployed.mjs"
   },
   "dependencies": {
     "react": "^19.2.6",

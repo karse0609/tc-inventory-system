@@ -3,7 +3,7 @@
 운송중·창고 재고·입고 처리 등을 다루는 웹앱입니다.
 
 - **기본 로그인(로컬 시드)**: `admin` / `1234` (전체 메뉴), `test` / `1234` (대시보드·금액 KPI는 admin과 동일; 상단 메뉴에서 **재고 예측·설정**만 숨김). 사용자 데이터는 브라우저 `localStorage`에 저장됩니다.
-- **PC ↔ 서버 동기(선택, v2.0)**: Upstash Redis + `/api/inventory`는 추후 재개 예정입니다. 현재 베타 빌드는 기본 **로컬·배포 스냅샷** 중심입니다. 예정 설정은 [docs/REMOTE_SYNC.md](docs/REMOTE_SYNC.md) 참고.
+- **PC ↔ 서버 동기(선택, v2.0)**: Upstash Redis + `/api/inventory`는 추후 재개 예정입니다. 현재 베타 빌드는 기본 **로컬·배포 스냅샷** 중심입니다. Admin JSON을 배포 스냅샷에 넣는 절차는 [docs/DEPLOYED_INVENTORY_SNAPSHOT.md](docs/DEPLOYED_INVENTORY_SNAPSHOT.md) 참고.
 - **모바일(좁은 화면)**: v1은 조회 전용이며 클라우드 pull/push·동기 배너를 사용하지 않습니다. 향후 모바일 동기는 [docs/MOBILE_SYNC_V2.md](docs/MOBILE_SYNC_V2.md) 참고.
 - 환경 변수 예시: [.env.example](.env.example)
 
