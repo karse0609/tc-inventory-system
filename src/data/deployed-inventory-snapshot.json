@@ -1,7 +1,7 @@
 {
   "tcInvExportVersion": 1,
-  "deployedRevision": 3,
-  "exportedAt": "2026-06-01T04:53:01.846Z",
+  "deployedRevision": 4,
+  "exportedAt": "2026-06-02T07:02:53.519Z",
   "app": "tc-inventory-system",
   "payload": {
     "tc-inv-master-items": [
@@ -12,7 +12,7 @@
         "description": "Drive Chasiss",
         "currentStock": 75,
         "unitPrice": 650,
-        "weeklyDemand": 22,
+        "weeklyDemand": 24,
         "safetyStockWeeks": 4,
         "leadTime": 35,
         "status": "Active"
@@ -24,7 +24,7 @@
         "description": "Drive Chasiss",
         "currentStock": 79,
         "unitPrice": 55,
-        "weeklyDemand": 18,
+        "weeklyDemand": 20,
         "safetyStockWeeks": 4,
         "leadTime": 35,
         "status": "Active"
@@ -36,7 +36,7 @@
         "description": "Drive Chasiss",
         "currentStock": 78,
         "unitPrice": 120,
-        "weeklyDemand": 16,
+        "weeklyDemand": 15,
         "safetyStockWeeks": 4,
         "leadTime": 35,
         "status": "Active"
