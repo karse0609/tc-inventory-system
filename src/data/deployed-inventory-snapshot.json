@@ -1,7 +1,7 @@
 {
   "tcInvExportVersion": 1,
-  "deployedRevision": 5,
-  "exportedAt": "2026-06-04T02:35:28.338Z",
+  "deployedRevision": 6,
+  "exportedAt": "2026-06-05T04:28:32.663Z",
   "app": "tc-inventory-system",
   "payload": {
     "tc-inv-master-items": [
@@ -232,7 +232,8 @@
           "weekStartDate": "2026-05-25",
           "qty": 58,
           "planQty": 58,
-          "confirmedQty": 58,
+          "shipped": false,
+          "confirmedQty": 0,
           "locked": false
         },
         {
@@ -242,6 +243,7 @@
           "weekStartDate": "2026-05-04",
           "qty": 76,
           "planQty": 76,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -252,6 +254,7 @@
           "weekStartDate": "2026-05-11",
           "qty": 76,
           "planQty": 76,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -262,6 +265,7 @@
           "weekStartDate": "2026-05-18",
           "qty": 76,
           "planQty": 76,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -272,7 +276,8 @@
           "weekStartDate": "2026-06-01",
           "qty": 76,
           "planQty": 76,
-          "confirmedQty": 76,
+          "shipped": false,
+          "confirmedQty": 0,
           "locked": false
         },
         {
@@ -282,6 +287,7 @@
           "weekStartDate": "2026-06-08",
           "qty": 76,
           "planQty": 76,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -292,6 +298,7 @@
           "weekStartDate": "2026-06-15",
           "qty": 76,
           "planQty": 76,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -302,6 +309,7 @@
           "weekStartDate": "2026-06-22",
           "qty": 76,
           "planQty": 76,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -312,6 +320,7 @@
           "weekStartDate": "2026-06-29",
           "qty": 76,
           "planQty": 76,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -322,6 +331,7 @@
           "weekStartDate": "2026-07-06",
           "qty": 76,
           "planQty": 76,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -332,6 +342,7 @@
           "weekStartDate": "2026-07-13",
           "qty": 76,
           "planQty": 76,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -342,6 +353,7 @@
           "weekStartDate": "2026-07-20",
           "qty": 90,
           "planQty": 90,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -352,6 +364,7 @@
           "weekStartDate": "2026-07-27",
           "qty": 76,
           "planQty": 76,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -362,6 +375,7 @@
           "weekStartDate": "2026-08-03",
           "qty": 90,
           "planQty": 90,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -372,6 +386,7 @@
           "weekStartDate": "2026-08-10",
           "qty": 76,
           "planQty": 76,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -382,6 +397,7 @@
           "weekStartDate": "2026-08-17",
           "qty": 90,
           "planQty": 90,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -392,6 +408,7 @@
           "weekStartDate": "2026-08-24",
           "qty": 76,
           "planQty": 76,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -402,6 +419,7 @@
           "weekStartDate": "2026-08-31",
           "qty": 76,
           "planQty": 76,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -412,6 +430,7 @@
           "weekStartDate": "2026-09-07",
           "qty": 57,
           "planQty": 57,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -422,6 +441,7 @@
           "weekStartDate": "2026-09-14",
           "qty": 90,
           "planQty": 90,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -432,6 +452,7 @@
           "weekStartDate": "2026-09-21",
           "qty": 90,
           "planQty": 90,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -442,6 +463,7 @@
           "weekStartDate": "2026-09-28",
           "qty": 76,
           "planQty": 76,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -452,6 +474,7 @@
           "weekStartDate": "2026-10-05",
           "qty": 76,
           "planQty": 76,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -462,6 +485,7 @@
           "weekStartDate": "2026-10-12",
           "qty": 76,
           "planQty": 76,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -472,6 +496,7 @@
           "weekStartDate": "2026-10-19",
           "qty": 76,
           "planQty": 76,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -482,6 +507,7 @@
           "weekStartDate": "2026-10-26",
           "qty": 76,
           "planQty": 76,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -492,6 +518,7 @@
           "weekStartDate": "2026-05-18",
           "qty": 3,
           "planQty": 3,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -502,7 +529,8 @@
           "weekStartDate": "2026-05-25",
           "qty": 2,
           "planQty": 2,
-          "confirmedQty": 2,
+          "shipped": false,
+          "confirmedQty": 0,
           "locked": false
         },
         {
@@ -512,7 +540,8 @@
           "weekStartDate": "2026-06-01",
           "qty": 4,
           "planQty": 4,
-          "confirmedQty": 4,
+          "shipped": false,
+          "confirmedQty": 0,
           "locked": false
         },
         {
@@ -522,6 +551,7 @@
           "weekStartDate": "2026-06-08",
           "qty": 4,
           "planQty": 4,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -532,6 +562,7 @@
           "weekStartDate": "2026-06-15",
           "qty": 4,
           "planQty": 4,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -542,6 +573,7 @@
           "weekStartDate": "2026-06-22",
           "qty": 4,
           "planQty": 4,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -552,6 +584,7 @@
           "weekStartDate": "2026-06-29",
           "qty": 4,
           "planQty": 4,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -562,6 +595,7 @@
           "weekStartDate": "2026-07-06",
           "qty": 4,
           "planQty": 4,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -572,6 +606,7 @@
           "weekStartDate": "2026-07-13",
           "qty": 4,
           "planQty": 4,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -582,6 +617,7 @@
           "weekStartDate": "2026-07-20",
           "qty": 4,
           "planQty": 4,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -592,6 +628,7 @@
           "weekStartDate": "2026-07-27",
           "qty": 4,
           "planQty": 4,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -602,6 +639,7 @@
           "weekStartDate": "2026-08-03",
           "qty": 4,
           "planQty": 4,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -612,6 +650,7 @@
           "weekStartDate": "2026-08-10",
           "qty": 4,
           "planQty": 4,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -622,6 +661,7 @@
           "weekStartDate": "2026-08-17",
           "qty": 4,
           "planQty": 4,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -632,6 +672,7 @@
           "weekStartDate": "2026-08-24",
           "qty": 4,
           "planQty": 4,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -642,6 +683,7 @@
           "weekStartDate": "2026-08-31",
           "qty": 4,
           "planQty": 4,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -652,6 +694,7 @@
           "weekStartDate": "2026-09-07",
           "qty": 4,
           "planQty": 4,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -662,6 +705,7 @@
           "weekStartDate": "2026-09-14",
           "qty": 4,
           "planQty": 4,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -672,6 +716,7 @@
           "weekStartDate": "2026-09-21",
           "qty": 4,
           "planQty": 4,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -682,6 +727,7 @@
           "weekStartDate": "2026-09-28",
           "qty": 4,
           "planQty": 4,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -692,6 +738,7 @@
           "weekStartDate": "2026-10-05",
           "qty": 4,
           "planQty": 4,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -702,6 +749,7 @@
           "weekStartDate": "2026-10-12",
           "qty": 4,
           "planQty": 4,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -712,6 +760,7 @@
           "weekStartDate": "2026-10-19",
           "qty": 4,
           "planQty": 4,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -722,6 +771,7 @@
           "weekStartDate": "2026-10-26",
           "qty": 4,
           "planQty": 4,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -732,6 +782,7 @@
           "weekStartDate": "2026-05-11",
           "qty": 11,
           "planQty": 11,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -742,6 +793,7 @@
           "weekStartDate": "2026-05-18",
           "qty": 3,
           "planQty": 3,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -752,7 +804,8 @@
           "weekStartDate": "2026-05-25",
           "qty": 2,
           "planQty": 2,
-          "confirmedQty": 2,
+          "shipped": false,
+          "confirmedQty": 0,
           "locked": false
         },
         {
@@ -762,7 +815,8 @@
           "weekStartDate": "2026-06-01",
           "qty": 4,
           "planQty": 4,
-          "confirmedQty": 4,
+          "shipped": false,
+          "confirmedQty": 0,
           "locked": false
         },
         {
@@ -772,6 +826,7 @@
           "weekStartDate": "2026-06-08",
           "qty": 4,
           "planQty": 4,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -782,6 +837,7 @@
           "weekStartDate": "2026-06-15",
           "qty": 4,
           "planQty": 4,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -792,6 +848,7 @@
           "weekStartDate": "2026-06-22",
           "qty": 4,
           "planQty": 4,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -802,6 +859,7 @@
           "weekStartDate": "2026-06-29",
           "qty": 4,
           "planQty": 4,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -812,6 +870,7 @@
           "weekStartDate": "2026-07-06",
           "qty": 4,
           "planQty": 4,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -822,6 +881,7 @@
           "weekStartDate": "2026-07-13",
           "qty": 4,
           "planQty": 4,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -832,6 +892,7 @@
           "weekStartDate": "2026-07-20",
           "qty": 4,
           "planQty": 4,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -842,6 +903,7 @@
           "weekStartDate": "2026-07-27",
           "qty": 4,
           "planQty": 4,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -852,6 +914,7 @@
           "weekStartDate": "2026-08-03",
           "qty": 4,
           "planQty": 4,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -862,6 +925,7 @@
           "weekStartDate": "2026-08-10",
           "qty": 4,
           "planQty": 4,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -872,6 +936,7 @@
           "weekStartDate": "2026-08-17",
           "qty": 4,
           "planQty": 4,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -882,6 +947,7 @@
           "weekStartDate": "2026-08-24",
           "qty": 4,
           "planQty": 4,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -892,6 +958,7 @@
           "weekStartDate": "2026-08-31",
           "qty": 4,
           "planQty": 4,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -902,6 +969,7 @@
           "weekStartDate": "2026-09-07",
           "qty": 4,
           "planQty": 4,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -912,6 +980,7 @@
           "weekStartDate": "2026-09-14",
           "qty": 4,
           "planQty": 4,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -922,6 +991,7 @@
           "weekStartDate": "2026-09-21",
           "qty": 4,
           "planQty": 4,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -932,6 +1002,7 @@
           "weekStartDate": "2026-09-28",
           "qty": 4,
           "planQty": 4,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -942,6 +1013,7 @@
           "weekStartDate": "2026-10-05",
           "qty": 4,
           "planQty": 4,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -952,6 +1024,7 @@
           "weekStartDate": "2026-10-12",
           "qty": 4,
           "planQty": 4,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -962,6 +1035,7 @@
           "weekStartDate": "2026-10-19",
           "qty": 4,
           "planQty": 4,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -972,6 +1046,7 @@
           "weekStartDate": "2026-10-26",
           "qty": 4,
           "planQty": 4,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -982,6 +1057,7 @@
           "weekStartDate": "2026-05-11",
           "qty": 11,
           "planQty": 11,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -992,6 +1068,7 @@
           "weekStartDate": "2026-05-18",
           "qty": 4,
           "planQty": 4,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -1002,7 +1079,8 @@
           "weekStartDate": "2026-05-25",
           "qty": 1,
           "planQty": 1,
-          "confirmedQty": 1,
+          "shipped": false,
+          "confirmedQty": 0,
           "locked": false
         },
         {
@@ -1012,6 +1090,7 @@
           "weekStartDate": "2026-06-08",
           "qty": 4,
           "planQty": 4,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -1022,6 +1101,7 @@
           "weekStartDate": "2026-06-15",
           "qty": 4,
           "planQty": 4,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -1032,6 +1112,7 @@
           "weekStartDate": "2026-06-22",
           "qty": 4,
           "planQty": 4,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -1042,6 +1123,7 @@
           "weekStartDate": "2026-06-29",
           "qty": 4,
           "planQty": 4,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -1052,6 +1134,7 @@
           "weekStartDate": "2026-07-06",
           "qty": 4,
           "planQty": 4,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -1062,6 +1145,7 @@
           "weekStartDate": "2026-07-13",
           "qty": 4,
           "planQty": 4,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -1072,6 +1156,7 @@
           "weekStartDate": "2026-07-20",
           "qty": 4,
           "planQty": 4,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -1082,6 +1167,7 @@
           "weekStartDate": "2026-07-27",
           "qty": 4,
           "planQty": 4,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -1092,6 +1178,7 @@
           "weekStartDate": "2026-08-03",
           "qty": 4,
           "planQty": 4,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -1102,6 +1189,7 @@
           "weekStartDate": "2026-08-10",
           "qty": 4,
           "planQty": 4,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -1112,6 +1200,7 @@
           "weekStartDate": "2026-08-17",
           "qty": 4,
           "planQty": 4,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -1122,6 +1211,7 @@
           "weekStartDate": "2026-08-24",
           "qty": 4,
           "planQty": 4,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -1132,6 +1222,7 @@
           "weekStartDate": "2026-08-31",
           "qty": 4,
           "planQty": 4,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -1142,6 +1233,7 @@
           "weekStartDate": "2026-09-07",
           "qty": 4,
           "planQty": 4,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -1152,6 +1244,7 @@
           "weekStartDate": "2026-09-14",
           "qty": 4,
           "planQty": 4,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -1162,6 +1255,7 @@
           "weekStartDate": "2026-09-21",
           "qty": 4,
           "planQty": 4,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -1172,6 +1266,7 @@
           "weekStartDate": "2026-09-28",
           "qty": 4,
           "planQty": 4,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -1182,6 +1277,7 @@
           "weekStartDate": "2026-10-05",
           "qty": 4,
           "planQty": 4,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -1192,6 +1288,7 @@
           "weekStartDate": "2026-10-12",
           "qty": 4,
           "planQty": 4,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -1202,6 +1299,7 @@
           "weekStartDate": "2026-10-19",
           "qty": 4,
           "planQty": 4,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -1212,6 +1310,7 @@
           "weekStartDate": "2026-10-26",
           "qty": 4,
           "planQty": 4,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -1222,6 +1321,7 @@
           "weekStartDate": "2026-05-11",
           "qty": 28,
           "planQty": 28,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -1232,6 +1332,7 @@
           "weekStartDate": "2026-05-18",
           "qty": 18,
           "planQty": 18,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -1242,7 +1343,8 @@
           "weekStartDate": "2026-05-25",
           "qty": 16,
           "planQty": 16,
-          "confirmedQty": 16,
+          "shipped": false,
+          "confirmedQty": 0,
           "locked": false
         },
         {
@@ -1252,7 +1354,8 @@
           "weekStartDate": "2026-06-01",
           "qty": 22,
           "planQty": 22,
-          "confirmedQty": 22,
+          "shipped": false,
+          "confirmedQty": 0,
           "locked": false
         },
         {
@@ -1262,6 +1365,7 @@
           "weekStartDate": "2026-06-08",
           "qty": 23,
           "planQty": 23,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -1272,6 +1376,7 @@
           "weekStartDate": "2026-06-15",
           "qty": 20,
           "planQty": 20,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -1282,6 +1387,7 @@
           "weekStartDate": "2026-06-22",
           "qty": 20,
           "planQty": 20,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -1292,6 +1398,7 @@
           "weekStartDate": "2026-06-29",
           "qty": 20,
           "planQty": 20,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -1302,6 +1409,7 @@
           "weekStartDate": "2026-07-06",
           "qty": 20,
           "planQty": 20,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -1312,6 +1420,7 @@
           "weekStartDate": "2026-07-13",
           "qty": 20,
           "planQty": 20,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -1322,6 +1431,7 @@
           "weekStartDate": "2026-07-20",
           "qty": 20,
           "planQty": 20,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -1332,6 +1442,7 @@
           "weekStartDate": "2026-07-27",
           "qty": 20,
           "planQty": 20,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -1342,6 +1453,7 @@
           "weekStartDate": "2026-08-03",
           "qty": 16,
           "planQty": 16,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -1352,6 +1464,7 @@
           "weekStartDate": "2026-08-10",
           "qty": 16,
           "planQty": 16,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -1362,6 +1475,7 @@
           "weekStartDate": "2026-08-17",
           "qty": 16,
           "planQty": 16,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -1372,6 +1486,7 @@
           "weekStartDate": "2026-08-24",
           "qty": 16,
           "planQty": 16,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -1382,6 +1497,7 @@
           "weekStartDate": "2026-08-31",
           "qty": 16,
           "planQty": 16,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -1392,6 +1508,7 @@
           "weekStartDate": "2026-09-07",
           "qty": 9,
           "planQty": 9,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -1402,6 +1519,7 @@
           "weekStartDate": "2026-09-14",
           "qty": 11,
           "planQty": 11,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -1412,6 +1530,7 @@
           "weekStartDate": "2026-09-21",
           "qty": 11,
           "planQty": 11,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -1422,6 +1541,7 @@
           "weekStartDate": "2026-09-28",
           "qty": 11,
           "planQty": 11,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -1432,6 +1552,7 @@
           "weekStartDate": "2026-10-05",
           "qty": 11,
           "planQty": 11,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -1442,6 +1563,7 @@
           "weekStartDate": "2026-10-12",
           "qty": 11,
           "planQty": 11,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -1452,6 +1574,7 @@
           "weekStartDate": "2026-10-19",
           "qty": 11,
           "planQty": 11,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -1462,6 +1585,7 @@
           "weekStartDate": "2026-10-26",
           "qty": 11,
           "planQty": 11,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -1472,6 +1596,7 @@
           "weekStartDate": "2026-05-11",
           "qty": 8,
           "planQty": 8,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -1482,6 +1607,7 @@
           "weekStartDate": "2026-05-18",
           "qty": 6,
           "planQty": 6,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -1492,7 +1618,8 @@
           "weekStartDate": "2026-05-25",
           "qty": 8,
           "planQty": 8,
-          "confirmedQty": 8,
+          "shipped": false,
+          "confirmedQty": 0,
           "locked": false
         },
         {
@@ -1502,7 +1629,8 @@
           "weekStartDate": "2026-06-01",
           "qty": 8,
           "planQty": 8,
-          "confirmedQty": 8,
+          "shipped": false,
+          "confirmedQty": 0,
           "locked": false
         },
         {
@@ -1512,6 +1640,7 @@
           "weekStartDate": "2026-06-08",
           "qty": 18,
           "planQty": 18,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -1522,6 +1651,7 @@
           "weekStartDate": "2026-06-15",
           "qty": 15,
           "planQty": 15,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -1532,6 +1662,7 @@
           "weekStartDate": "2026-06-22",
           "qty": 15,
           "planQty": 15,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -1542,6 +1673,7 @@
           "weekStartDate": "2026-06-29",
           "qty": 15,
           "planQty": 15,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -1552,6 +1684,7 @@
           "weekStartDate": "2026-07-06",
           "qty": 15,
           "planQty": 15,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -1562,6 +1695,7 @@
           "weekStartDate": "2026-07-13",
           "qty": 15,
           "planQty": 15,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -1572,6 +1706,7 @@
           "weekStartDate": "2026-07-20",
           "qty": 15,
           "planQty": 15,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -1582,6 +1717,7 @@
           "weekStartDate": "2026-07-27",
           "qty": 15,
           "planQty": 15,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -1592,6 +1728,7 @@
           "weekStartDate": "2026-08-03",
           "qty": 13,
           "planQty": 13,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -1602,6 +1739,7 @@
           "weekStartDate": "2026-08-10",
           "qty": 13,
           "planQty": 13,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -1612,6 +1750,7 @@
           "weekStartDate": "2026-08-17",
           "qty": 13,
           "planQty": 13,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -1622,6 +1761,7 @@
           "weekStartDate": "2026-08-24",
           "qty": 13,
           "planQty": 13,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -1632,6 +1772,7 @@
           "weekStartDate": "2026-08-31",
           "qty": 13,
           "planQty": 13,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -1642,6 +1783,7 @@
           "weekStartDate": "2026-09-07",
           "qty": 7,
           "planQty": 7,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -1652,6 +1794,7 @@
           "weekStartDate": "2026-09-14",
           "qty": 10,
           "planQty": 10,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -1662,6 +1805,7 @@
           "weekStartDate": "2026-09-21",
           "qty": 10,
           "planQty": 10,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -1672,6 +1816,7 @@
           "weekStartDate": "2026-09-28",
           "qty": 10,
           "planQty": 10,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -1682,6 +1827,7 @@
           "weekStartDate": "2026-10-05",
           "qty": 10,
           "planQty": 10,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -1692,6 +1838,7 @@
           "weekStartDate": "2026-10-12",
           "qty": 10,
           "planQty": 10,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -1702,6 +1849,7 @@
           "weekStartDate": "2026-10-19",
           "qty": 10,
           "planQty": 10,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -1712,6 +1860,7 @@
           "weekStartDate": "2026-10-26",
           "qty": 10,
           "planQty": 10,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -1722,6 +1871,7 @@
           "weekStartDate": "2026-05-11",
           "qty": 11,
           "planQty": 11,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -1732,6 +1882,7 @@
           "weekStartDate": "2026-05-11",
           "qty": 4,
           "planQty": 4,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -1742,6 +1893,7 @@
           "weekStartDate": "2026-05-18",
           "qty": 4,
           "planQty": 4,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -1752,6 +1904,7 @@
           "weekStartDate": "2026-06-08",
           "qty": 5,
           "planQty": 5,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -1762,6 +1915,7 @@
           "weekStartDate": "2026-06-15",
           "qty": 3,
           "planQty": 3,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -1772,6 +1926,7 @@
           "weekStartDate": "2026-06-22",
           "qty": 3,
           "planQty": 3,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -1782,6 +1937,7 @@
           "weekStartDate": "2026-06-29",
           "qty": 2,
           "planQty": 2,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -1792,6 +1948,7 @@
           "weekStartDate": "2026-07-06",
           "qty": 1,
           "planQty": 1,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -1802,6 +1959,7 @@
           "weekStartDate": "2026-07-13",
           "qty": 2,
           "planQty": 2,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -1812,6 +1970,7 @@
           "weekStartDate": "2026-07-20",
           "qty": 2,
           "planQty": 2,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -1822,6 +1981,7 @@
           "weekStartDate": "2026-07-27",
           "qty": 2,
           "planQty": 2,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -1832,6 +1992,7 @@
           "weekStartDate": "2026-08-03",
           "qty": 4,
           "planQty": 4,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -1842,6 +2003,7 @@
           "weekStartDate": "2026-08-10",
           "qty": 2,
           "planQty": 2,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -1852,6 +2014,7 @@
           "weekStartDate": "2026-08-17",
           "qty": 2,
           "planQty": 2,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -1862,6 +2025,7 @@
           "weekStartDate": "2026-08-24",
           "qty": 2,
           "planQty": 2,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -1872,6 +2036,7 @@
           "weekStartDate": "2026-05-11",
           "qty": 6,
           "planQty": 6,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -1882,7 +2047,8 @@
           "weekStartDate": "2026-05-25",
           "qty": 4,
           "planQty": 4,
-          "confirmedQty": 4,
+          "shipped": false,
+          "confirmedQty": 0,
           "locked": false
         },
         {
@@ -1892,7 +2058,8 @@
           "weekStartDate": "2026-06-01",
           "qty": 4,
           "planQty": 4,
-          "confirmedQty": 4,
+          "shipped": false,
+          "confirmedQty": 0,
           "locked": false
         },
         {
@@ -1902,6 +2069,7 @@
           "weekStartDate": "2026-06-08",
           "qty": 5,
           "planQty": 5,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -1912,6 +2080,7 @@
           "weekStartDate": "2026-06-15",
           "qty": 3,
           "planQty": 3,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -1922,6 +2091,7 @@
           "weekStartDate": "2026-06-22",
           "qty": 3,
           "planQty": 3,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -1932,6 +2102,7 @@
           "weekStartDate": "2026-06-29",
           "qty": 2,
           "planQty": 2,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -1942,6 +2113,7 @@
           "weekStartDate": "2026-07-06",
           "qty": 1,
           "planQty": 1,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -1952,6 +2124,7 @@
           "weekStartDate": "2026-07-13",
           "qty": 2,
           "planQty": 2,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -1962,6 +2135,7 @@
           "weekStartDate": "2026-07-20",
           "qty": 2,
           "planQty": 2,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -1972,6 +2146,7 @@
           "weekStartDate": "2026-07-27",
           "qty": 2,
           "planQty": 2,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -1982,6 +2157,7 @@
           "weekStartDate": "2026-08-03",
           "qty": 4,
           "planQty": 4,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -1992,6 +2168,7 @@
           "weekStartDate": "2026-08-10",
           "qty": 2,
           "planQty": 2,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -2002,6 +2179,7 @@
           "weekStartDate": "2026-08-17",
           "qty": 2,
           "planQty": 2,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -2012,6 +2190,7 @@
           "weekStartDate": "2026-08-24",
           "qty": 2,
           "planQty": 2,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -2022,6 +2201,7 @@
           "weekStartDate": "2026-05-11",
           "qty": 5,
           "planQty": 5,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -2032,7 +2212,8 @@
           "weekStartDate": "2026-05-25",
           "qty": 4,
           "planQty": 4,
-          "confirmedQty": 4,
+          "shipped": false,
+          "confirmedQty": 0,
           "locked": false
         },
         {
@@ -2042,6 +2223,7 @@
           "weekStartDate": "2026-06-08",
           "qty": 5,
           "planQty": 5,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -2052,6 +2234,7 @@
           "weekStartDate": "2026-06-15",
           "qty": 3,
           "planQty": 3,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -2062,6 +2245,7 @@
           "weekStartDate": "2026-06-22",
           "qty": 3,
           "planQty": 3,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -2072,6 +2256,7 @@
           "weekStartDate": "2026-06-29",
           "qty": 2,
           "planQty": 2,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -2082,6 +2267,7 @@
           "weekStartDate": "2026-07-06",
           "qty": 1,
           "planQty": 1,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -2092,6 +2278,7 @@
           "weekStartDate": "2026-07-13",
           "qty": 2,
           "planQty": 2,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -2102,6 +2289,7 @@
           "weekStartDate": "2026-07-20",
           "qty": 2,
           "planQty": 2,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -2112,6 +2300,7 @@
           "weekStartDate": "2026-07-27",
           "qty": 2,
           "planQty": 2,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -2122,6 +2311,7 @@
           "weekStartDate": "2026-08-03",
           "qty": 4,
           "planQty": 4,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -2132,6 +2322,7 @@
           "weekStartDate": "2026-08-10",
           "qty": 2,
           "planQty": 2,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -2142,6 +2333,7 @@
           "weekStartDate": "2026-08-17",
           "qty": 2,
           "planQty": 2,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -2152,6 +2344,7 @@
           "weekStartDate": "2026-08-24",
           "qty": 2,
           "planQty": 2,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -2162,6 +2355,7 @@
           "weekStartDate": "2026-05-11",
           "qty": 5,
           "planQty": 5,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -2172,7 +2366,8 @@
           "weekStartDate": "2026-05-25",
           "qty": 4,
           "planQty": 4,
-          "confirmedQty": 4,
+          "shipped": false,
+          "confirmedQty": 0,
           "locked": false
         },
         {
@@ -2182,6 +2377,7 @@
           "weekStartDate": "2026-06-08",
           "qty": 5,
           "planQty": 5,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -2192,6 +2388,7 @@
           "weekStartDate": "2026-06-15",
           "qty": 3,
           "planQty": 3,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -2202,6 +2399,7 @@
           "weekStartDate": "2026-06-22",
           "qty": 3,
           "planQty": 3,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -2212,6 +2410,7 @@
           "weekStartDate": "2026-06-29",
           "qty": 2,
           "planQty": 2,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -2222,6 +2421,7 @@
           "weekStartDate": "2026-07-06",
           "qty": 1,
           "planQty": 1,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -2232,6 +2432,7 @@
           "weekStartDate": "2026-07-13",
           "qty": 2,
           "planQty": 2,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -2242,6 +2443,7 @@
           "weekStartDate": "2026-07-20",
           "qty": 2,
           "planQty": 2,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -2252,6 +2454,7 @@
           "weekStartDate": "2026-07-27",
           "qty": 2,
           "planQty": 2,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -2262,6 +2465,7 @@
           "weekStartDate": "2026-08-03",
           "qty": 4,
           "planQty": 4,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -2272,6 +2476,7 @@
           "weekStartDate": "2026-08-10",
           "qty": 2,
           "planQty": 2,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -2282,6 +2487,7 @@
           "weekStartDate": "2026-08-17",
           "qty": 2,
           "planQty": 2,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -2292,6 +2498,7 @@
           "weekStartDate": "2026-08-24",
           "qty": 2,
           "planQty": 2,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -2302,6 +2509,7 @@
           "weekStartDate": "2026-05-11",
           "qty": 5,
           "planQty": 5,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -2312,7 +2520,8 @@
           "weekStartDate": "2026-05-25",
           "qty": 2,
           "planQty": 2,
-          "confirmedQty": 2,
+          "shipped": false,
+          "confirmedQty": 0,
           "locked": false
         },
         {
@@ -2322,7 +2531,8 @@
           "weekStartDate": "2026-06-01",
           "qty": 3,
           "planQty": 3,
-          "confirmedQty": 3,
+          "shipped": false,
+          "confirmedQty": 0,
           "locked": false
         },
         {
@@ -2332,6 +2542,7 @@
           "weekStartDate": "2026-06-08",
           "qty": 5,
           "planQty": 5,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -2342,6 +2553,7 @@
           "weekStartDate": "2026-06-15",
           "qty": 3,
           "planQty": 3,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -2352,6 +2564,7 @@
           "weekStartDate": "2026-06-22",
           "qty": 3,
           "planQty": 3,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -2362,6 +2575,7 @@
           "weekStartDate": "2026-06-29",
           "qty": 2,
           "planQty": 2,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -2372,6 +2586,7 @@
           "weekStartDate": "2026-07-06",
           "qty": 1,
           "planQty": 1,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -2382,6 +2597,7 @@
           "weekStartDate": "2026-07-13",
           "qty": 2,
           "planQty": 2,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -2392,6 +2608,7 @@
           "weekStartDate": "2026-07-20",
           "qty": 2,
           "planQty": 2,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -2402,6 +2619,7 @@
           "weekStartDate": "2026-07-27",
           "qty": 2,
           "planQty": 2,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -2412,6 +2630,7 @@
           "weekStartDate": "2026-08-03",
           "qty": 4,
           "planQty": 4,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -2422,6 +2641,7 @@
           "weekStartDate": "2026-08-10",
           "qty": 2,
           "planQty": 2,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -2432,6 +2652,7 @@
           "weekStartDate": "2026-08-17",
           "qty": 2,
           "planQty": 2,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -2442,6 +2663,7 @@
           "weekStartDate": "2026-08-24",
           "qty": 2,
           "planQty": 2,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -2452,6 +2674,7 @@
           "weekStartDate": "2026-05-11",
           "qty": 4,
           "planQty": 4,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -2462,7 +2685,8 @@
           "weekStartDate": "2026-05-25",
           "qty": 4,
           "planQty": 4,
-          "confirmedQty": 4,
+          "shipped": false,
+          "confirmedQty": 0,
           "locked": false
         },
         {
@@ -2472,6 +2696,7 @@
           "weekStartDate": "2026-06-15",
           "qty": 1,
           "planQty": 1,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -2482,6 +2707,7 @@
           "weekStartDate": "2026-06-22",
           "qty": 1,
           "planQty": 1,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -2492,6 +2718,7 @@
           "weekStartDate": "2026-06-29",
           "qty": 2,
           "planQty": 2,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -2502,6 +2729,7 @@
           "weekStartDate": "2026-07-06",
           "qty": 3,
           "planQty": 3,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -2512,6 +2740,7 @@
           "weekStartDate": "2026-07-13",
           "qty": 3,
           "planQty": 3,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -2522,6 +2751,7 @@
           "weekStartDate": "2026-07-20",
           "qty": 2,
           "planQty": 2,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -2532,6 +2762,7 @@
           "weekStartDate": "2026-07-27",
           "qty": 2,
           "planQty": 2,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -2542,6 +2773,7 @@
           "weekStartDate": "2026-08-10",
           "qty": 2,
           "planQty": 2,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -2552,6 +2784,7 @@
           "weekStartDate": "2026-05-11",
           "qty": 32,
           "planQty": 32,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -2562,6 +2795,7 @@
           "weekStartDate": "2026-05-18",
           "qty": 25,
           "planQty": 25,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -2572,7 +2806,8 @@
           "weekStartDate": "2026-05-25",
           "qty": 28,
           "planQty": 28,
-          "confirmedQty": 28,
+          "shipped": false,
+          "confirmedQty": 0,
           "locked": false
         },
         {
@@ -2582,7 +2817,8 @@
           "weekStartDate": "2026-06-01",
           "qty": 25,
           "planQty": 25,
-          "confirmedQty": 25,
+          "shipped": false,
+          "confirmedQty": 0,
           "locked": false
         },
         {
@@ -2592,6 +2828,7 @@
           "weekStartDate": "2026-06-08",
           "qty": 33,
           "planQty": 33,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -2602,6 +2839,7 @@
           "weekStartDate": "2026-06-15",
           "qty": 27,
           "planQty": 27,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -2612,6 +2850,7 @@
           "weekStartDate": "2026-06-22",
           "qty": 27,
           "planQty": 27,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -2622,6 +2861,7 @@
           "weekStartDate": "2026-06-29",
           "qty": 27,
           "planQty": 27,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -2632,6 +2872,7 @@
           "weekStartDate": "2026-07-06",
           "qty": 27,
           "planQty": 27,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -2642,6 +2883,7 @@
           "weekStartDate": "2026-07-13",
           "qty": 33,
           "planQty": 33,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -2652,6 +2894,7 @@
           "weekStartDate": "2026-07-20",
           "qty": 27,
           "planQty": 27,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -2662,6 +2905,7 @@
           "weekStartDate": "2026-07-27",
           "qty": 27,
           "planQty": 27,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -2672,6 +2916,7 @@
           "weekStartDate": "2026-08-03",
           "qty": 27,
           "planQty": 27,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -2682,6 +2927,7 @@
           "weekStartDate": "2026-08-10",
           "qty": 33,
           "planQty": 33,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -2692,6 +2938,7 @@
           "weekStartDate": "2026-08-17",
           "qty": 27,
           "planQty": 27,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -2702,6 +2949,7 @@
           "weekStartDate": "2026-08-24",
           "qty": 27,
           "planQty": 27,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -2712,6 +2960,7 @@
           "weekStartDate": "2026-08-31",
           "qty": 27,
           "planQty": 27,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -2722,6 +2971,7 @@
           "weekStartDate": "2026-09-07",
           "qty": 19,
           "planQty": 19,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -2732,6 +2982,7 @@
           "weekStartDate": "2026-09-14",
           "qty": 31,
           "planQty": 31,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -2742,6 +2993,7 @@
           "weekStartDate": "2026-09-21",
           "qty": 25,
           "planQty": 25,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -2752,6 +3004,7 @@
           "weekStartDate": "2026-09-28",
           "qty": 25,
           "planQty": 25,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -2762,6 +3015,7 @@
           "weekStartDate": "2026-10-05",
           "qty": 21,
           "planQty": 21,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -2772,6 +3026,7 @@
           "weekStartDate": "2026-10-12",
           "qty": 21,
           "planQty": 21,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -2782,6 +3037,7 @@
           "weekStartDate": "2026-10-19",
           "qty": 21,
           "planQty": 21,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -2792,6 +3048,7 @@
           "weekStartDate": "2026-10-26",
           "qty": 21,
           "planQty": 21,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -2802,6 +3059,7 @@
           "weekStartDate": "2026-05-11",
           "qty": 12,
           "planQty": 12,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -2812,6 +3070,7 @@
           "weekStartDate": "2026-05-18",
           "qty": 6,
           "planQty": 6,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -2822,7 +3081,8 @@
           "weekStartDate": "2026-05-25",
           "qty": 10,
           "planQty": 10,
-          "confirmedQty": 10,
+          "shipped": false,
+          "confirmedQty": 0,
           "locked": false
         },
         {
@@ -2832,6 +3092,7 @@
           "weekStartDate": "2026-06-08",
           "qty": 10,
           "planQty": 10,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -2842,6 +3103,7 @@
           "weekStartDate": "2026-06-15",
           "qty": 9,
           "planQty": 9,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -2852,6 +3114,7 @@
           "weekStartDate": "2026-06-22",
           "qty": 9,
           "planQty": 9,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -2862,6 +3125,7 @@
           "weekStartDate": "2026-06-29",
           "qty": 9,
           "planQty": 9,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -2872,6 +3136,7 @@
           "weekStartDate": "2026-07-06",
           "qty": 9,
           "planQty": 9,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -2882,6 +3147,7 @@
           "weekStartDate": "2026-07-13",
           "qty": 10,
           "planQty": 10,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -2892,6 +3158,7 @@
           "weekStartDate": "2026-07-20",
           "qty": 9,
           "planQty": 9,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -2902,6 +3169,7 @@
           "weekStartDate": "2026-07-27",
           "qty": 9,
           "planQty": 9,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -2912,6 +3180,7 @@
           "weekStartDate": "2026-08-03",
           "qty": 9,
           "planQty": 9,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -2922,6 +3191,7 @@
           "weekStartDate": "2026-08-10",
           "qty": 11,
           "planQty": 11,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -2932,6 +3202,7 @@
           "weekStartDate": "2026-08-17",
           "qty": 9,
           "planQty": 9,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -2942,6 +3213,7 @@
           "weekStartDate": "2026-08-24",
           "qty": 9,
           "planQty": 9,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -2952,6 +3224,7 @@
           "weekStartDate": "2026-08-31",
           "qty": 10,
           "planQty": 10,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -2962,6 +3235,7 @@
           "weekStartDate": "2026-09-07",
           "qty": 8,
           "planQty": 8,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -2972,6 +3246,7 @@
           "weekStartDate": "2026-09-14",
           "qty": 13,
           "planQty": 13,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -2982,6 +3257,7 @@
           "weekStartDate": "2026-09-21",
           "qty": 10,
           "planQty": 10,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -2992,6 +3268,7 @@
           "weekStartDate": "2026-09-28",
           "qty": 10,
           "planQty": 10,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -3002,6 +3279,7 @@
           "weekStartDate": "2026-10-05",
           "qty": 10,
           "planQty": 10,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -3012,6 +3290,7 @@
           "weekStartDate": "2026-10-12",
           "qty": 10,
           "planQty": 10,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -3022,6 +3301,7 @@
           "weekStartDate": "2026-10-19",
           "qty": 10,
           "planQty": 10,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -3032,6 +3312,7 @@
           "weekStartDate": "2026-10-26",
           "qty": 10,
           "planQty": 10,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -3042,6 +3323,7 @@
           "weekStartDate": "2026-05-11",
           "qty": 10,
           "planQty": 10,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -3052,6 +3334,7 @@
           "weekStartDate": "2026-05-18",
           "qty": 6,
           "planQty": 6,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -3062,7 +3345,8 @@
           "weekStartDate": "2026-05-25",
           "qty": 10,
           "planQty": 10,
-          "confirmedQty": 10,
+          "shipped": false,
+          "confirmedQty": 0,
           "locked": false
         },
         {
@@ -3072,7 +3356,8 @@
           "weekStartDate": "2026-06-01",
           "qty": 8,
           "planQty": 8,
-          "confirmedQty": 8,
+          "shipped": false,
+          "confirmedQty": 0,
           "locked": false
         },
         {
@@ -3082,6 +3367,7 @@
           "weekStartDate": "2026-06-08",
           "qty": 9,
           "planQty": 9,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -3092,6 +3378,7 @@
           "weekStartDate": "2026-06-15",
           "qty": 8,
           "planQty": 8,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -3102,6 +3389,7 @@
           "weekStartDate": "2026-06-22",
           "qty": 8,
           "planQty": 8,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -3112,6 +3400,7 @@
           "weekStartDate": "2026-06-29",
           "qty": 8,
           "planQty": 8,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -3122,6 +3411,7 @@
           "weekStartDate": "2026-07-06",
           "qty": 8,
           "planQty": 8,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -3132,6 +3422,7 @@
           "weekStartDate": "2026-07-13",
           "qty": 9,
           "planQty": 9,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -3142,6 +3433,7 @@
           "weekStartDate": "2026-07-20",
           "qty": 8,
           "planQty": 8,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -3152,6 +3444,7 @@
           "weekStartDate": "2026-07-27",
           "qty": 8,
           "planQty": 8,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -3162,6 +3455,7 @@
           "weekStartDate": "2026-08-03",
           "qty": 8,
           "planQty": 8,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -3172,6 +3466,7 @@
           "weekStartDate": "2026-08-10",
           "qty": 10,
           "planQty": 10,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -3182,6 +3477,7 @@
           "weekStartDate": "2026-08-17",
           "qty": 8,
           "planQty": 8,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -3192,6 +3488,7 @@
           "weekStartDate": "2026-08-24",
           "qty": 8,
           "planQty": 8,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -3202,6 +3499,7 @@
           "weekStartDate": "2026-08-31",
           "qty": 9,
           "planQty": 9,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -3212,6 +3510,7 @@
           "weekStartDate": "2026-09-07",
           "qty": 6,
           "planQty": 6,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -3222,6 +3521,7 @@
           "weekStartDate": "2026-09-14",
           "qty": 11,
           "planQty": 11,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -3232,6 +3532,7 @@
           "weekStartDate": "2026-09-21",
           "qty": 9,
           "planQty": 9,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -3242,6 +3543,7 @@
           "weekStartDate": "2026-09-28",
           "qty": 9,
           "planQty": 9,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -3252,6 +3554,7 @@
           "weekStartDate": "2026-10-05",
           "qty": 9,
           "planQty": 9,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -3262,6 +3565,7 @@
           "weekStartDate": "2026-10-12",
           "qty": 9,
           "planQty": 9,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -3272,6 +3576,7 @@
           "weekStartDate": "2026-10-19",
           "qty": 9,
           "planQty": 9,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -3282,6 +3587,7 @@
           "weekStartDate": "2026-10-26",
           "qty": 9,
           "planQty": 9,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -3292,6 +3598,7 @@
           "weekStartDate": "2026-05-11",
           "qty": 24,
           "planQty": 24,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -3302,6 +3609,7 @@
           "weekStartDate": "2026-05-18",
           "qty": 24,
           "planQty": 24,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -3312,7 +3620,8 @@
           "weekStartDate": "2026-05-25",
           "qty": 21,
           "planQty": 21,
-          "confirmedQty": 21,
+          "shipped": false,
+          "confirmedQty": 0,
           "locked": false
         },
         {
@@ -3322,7 +3631,8 @@
           "weekStartDate": "2026-06-01",
           "qty": 17,
           "planQty": 17,
-          "confirmedQty": 17,
+          "shipped": false,
+          "confirmedQty": 0,
           "locked": false
         },
         {
@@ -3332,6 +3642,7 @@
           "weekStartDate": "2026-06-08",
           "qty": 27,
           "planQty": 27,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -3342,6 +3653,7 @@
           "weekStartDate": "2026-06-15",
           "qty": 23,
           "planQty": 23,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -3352,6 +3664,7 @@
           "weekStartDate": "2026-06-22",
           "qty": 23,
           "planQty": 23,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -3362,6 +3675,7 @@
           "weekStartDate": "2026-06-29",
           "qty": 23,
           "planQty": 23,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -3372,6 +3686,7 @@
           "weekStartDate": "2026-07-06",
           "qty": 23,
           "planQty": 23,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -3382,6 +3697,7 @@
           "weekStartDate": "2026-07-13",
           "qty": 27,
           "planQty": 27,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -3392,6 +3708,7 @@
           "weekStartDate": "2026-07-20",
           "qty": 23,
           "planQty": 23,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -3402,6 +3719,7 @@
           "weekStartDate": "2026-07-27",
           "qty": 23,
           "planQty": 23,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -3412,6 +3730,7 @@
           "weekStartDate": "2026-08-03",
           "qty": 23,
           "planQty": 23,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -3422,6 +3741,7 @@
           "weekStartDate": "2026-08-10",
           "qty": 27,
           "planQty": 27,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -3432,6 +3752,7 @@
           "weekStartDate": "2026-08-17",
           "qty": 22,
           "planQty": 22,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -3442,6 +3763,7 @@
           "weekStartDate": "2026-08-24",
           "qty": 22,
           "planQty": 22,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -3452,6 +3774,7 @@
           "weekStartDate": "2026-08-31",
           "qty": 22,
           "planQty": 22,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -3462,6 +3785,7 @@
           "weekStartDate": "2026-09-07",
           "qty": 14,
           "planQty": 14,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -3472,6 +3796,7 @@
           "weekStartDate": "2026-09-14",
           "qty": 24,
           "planQty": 24,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -3482,6 +3807,7 @@
           "weekStartDate": "2026-09-21",
           "qty": 19,
           "planQty": 19,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -3492,6 +3818,7 @@
           "weekStartDate": "2026-09-28",
           "qty": 19,
           "planQty": 19,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -3502,6 +3829,7 @@
           "weekStartDate": "2026-10-05",
           "qty": 15,
           "planQty": 15,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -3512,6 +3840,7 @@
           "weekStartDate": "2026-10-12",
           "qty": 15,
           "planQty": 15,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -3522,6 +3851,7 @@
           "weekStartDate": "2026-10-19",
           "qty": 15,
           "planQty": 15,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -3532,6 +3862,7 @@
           "weekStartDate": "2026-10-26",
           "qty": 15,
           "planQty": 15,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -3542,6 +3873,7 @@
           "weekStartDate": "2026-05-11",
           "qty": 10,
           "planQty": 10,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -3552,6 +3884,7 @@
           "weekStartDate": "2026-05-18",
           "qty": 5,
           "planQty": 5,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -3562,7 +3895,8 @@
           "weekStartDate": "2026-05-25",
           "qty": 8,
           "planQty": 8,
-          "confirmedQty": 8,
+          "shipped": false,
+          "confirmedQty": 0,
           "locked": false
         },
         {
@@ -3572,7 +3906,8 @@
           "weekStartDate": "2026-06-01",
           "qty": 4,
           "planQty": 4,
-          "confirmedQty": 4,
+          "shipped": false,
+          "confirmedQty": 0,
           "locked": false
         },
         {
@@ -3582,6 +3917,7 @@
           "weekStartDate": "2026-06-08",
           "qty": 10,
           "planQty": 10,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -3592,6 +3928,7 @@
           "weekStartDate": "2026-06-15",
           "qty": 9,
           "planQty": 9,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -3602,6 +3939,7 @@
           "weekStartDate": "2026-06-22",
           "qty": 9,
           "planQty": 9,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -3612,6 +3950,7 @@
           "weekStartDate": "2026-06-29",
           "qty": 9,
           "planQty": 9,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -3622,6 +3961,7 @@
           "weekStartDate": "2026-07-06",
           "qty": 9,
           "planQty": 9,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -3632,6 +3972,7 @@
           "weekStartDate": "2026-07-13",
           "qty": 10,
           "planQty": 10,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -3642,6 +3983,7 @@
           "weekStartDate": "2026-07-20",
           "qty": 9,
           "planQty": 9,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -3652,6 +3994,7 @@
           "weekStartDate": "2026-07-27",
           "qty": 9,
           "planQty": 9,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -3662,6 +4005,7 @@
           "weekStartDate": "2026-08-03",
           "qty": 9,
           "planQty": 9,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -3672,6 +4016,7 @@
           "weekStartDate": "2026-08-10",
           "qty": 11,
           "planQty": 11,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -3682,6 +4027,7 @@
           "weekStartDate": "2026-08-17",
           "qty": 9,
           "planQty": 9,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -3692,6 +4038,7 @@
           "weekStartDate": "2026-08-24",
           "qty": 9,
           "planQty": 9,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -3702,6 +4049,7 @@
           "weekStartDate": "2026-08-31",
           "qty": 9,
           "planQty": 9,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -3712,6 +4060,7 @@
           "weekStartDate": "2026-09-07",
           "qty": 7,
           "planQty": 7,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -3722,6 +4071,7 @@
           "weekStartDate": "2026-09-14",
           "qty": 11,
           "planQty": 11,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -3732,6 +4082,7 @@
           "weekStartDate": "2026-09-21",
           "qty": 9,
           "planQty": 9,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -3742,6 +4093,7 @@
           "weekStartDate": "2026-09-28",
           "qty": 9,
           "planQty": 9,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -3752,6 +4104,7 @@
           "weekStartDate": "2026-10-05",
           "qty": 9,
           "planQty": 9,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -3762,6 +4115,7 @@
           "weekStartDate": "2026-10-12",
           "qty": 9,
           "planQty": 9,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -3772,6 +4126,7 @@
           "weekStartDate": "2026-10-19",
           "qty": 9,
           "planQty": 9,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -3782,6 +4137,7 @@
           "weekStartDate": "2026-10-26",
           "qty": 9,
           "planQty": 9,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -3792,7 +4148,8 @@
           "weekStartDate": "2026-05-25",
           "qty": 4,
           "planQty": 4,
-          "confirmedQty": 4,
+          "shipped": false,
+          "confirmedQty": 0,
           "locked": false
         },
         {
@@ -3802,6 +4159,7 @@
           "weekStartDate": "2026-05-11",
           "qty": 32,
           "planQty": 32,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -3812,6 +4170,7 @@
           "weekStartDate": "2026-05-18",
           "qty": 24,
           "planQty": 24,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -3822,7 +4181,8 @@
           "weekStartDate": "2026-05-25",
           "qty": 18,
           "planQty": 18,
-          "confirmedQty": 18,
+          "shipped": false,
+          "confirmedQty": 0,
           "locked": false
         },
         {
@@ -3832,7 +4192,8 @@
           "weekStartDate": "2026-06-01",
           "qty": 24,
           "planQty": 24,
-          "confirmedQty": 24,
+          "shipped": false,
+          "confirmedQty": 0,
           "locked": false
         },
         {
@@ -3842,6 +4203,7 @@
           "weekStartDate": "2026-06-08",
           "qty": 30,
           "planQty": 30,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -3852,6 +4214,7 @@
           "weekStartDate": "2026-06-15",
           "qty": 25,
           "planQty": 25,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -3862,6 +4225,7 @@
           "weekStartDate": "2026-06-22",
           "qty": 25,
           "planQty": 25,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -3872,6 +4236,7 @@
           "weekStartDate": "2026-06-29",
           "qty": 25,
           "planQty": 25,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -3882,6 +4247,7 @@
           "weekStartDate": "2026-07-06",
           "qty": 25,
           "planQty": 25,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -3892,6 +4258,7 @@
           "weekStartDate": "2026-07-13",
           "qty": 25,
           "planQty": 25,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -3902,6 +4269,7 @@
           "weekStartDate": "2026-07-20",
           "qty": 25,
           "planQty": 25,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -3912,6 +4280,7 @@
           "weekStartDate": "2026-07-27",
           "qty": 25,
           "planQty": 25,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -3922,6 +4291,7 @@
           "weekStartDate": "2026-08-03",
           "qty": 16,
           "planQty": 16,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -3932,6 +4302,7 @@
           "weekStartDate": "2026-08-10",
           "qty": 16,
           "planQty": 16,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -3942,6 +4313,7 @@
           "weekStartDate": "2026-08-17",
           "qty": 16,
           "planQty": 16,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -3952,6 +4324,7 @@
           "weekStartDate": "2026-08-24",
           "qty": 16,
           "planQty": 16,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -3962,6 +4335,7 @@
           "weekStartDate": "2026-08-31",
           "qty": 16,
           "planQty": 16,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -3972,6 +4346,7 @@
           "weekStartDate": "2026-09-07",
           "qty": 9,
           "planQty": 9,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -3982,6 +4357,7 @@
           "weekStartDate": "2026-09-14",
           "qty": 12,
           "planQty": 12,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -3992,6 +4368,7 @@
           "weekStartDate": "2026-09-21",
           "qty": 12,
           "planQty": 12,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -4002,6 +4379,7 @@
           "weekStartDate": "2026-09-28",
           "qty": 12,
           "planQty": 12,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -4012,6 +4390,7 @@
           "weekStartDate": "2026-10-05",
           "qty": 12,
           "planQty": 12,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -4022,6 +4401,7 @@
           "weekStartDate": "2026-10-12",
           "qty": 12,
           "planQty": 12,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -4032,6 +4412,7 @@
           "weekStartDate": "2026-10-19",
           "qty": 12,
           "planQty": 12,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -4042,6 +4423,7 @@
           "weekStartDate": "2026-10-26",
           "qty": 12,
           "planQty": 12,
+          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -4052,7 +4434,8 @@
           "weekStartDate": "2026-06-01",
           "qty": 8,
           "planQty": 8,
-          "confirmedQty": 8,
+          "shipped": false,
+          "confirmedQty": 0,
           "locked": false
         }
       ],
@@ -6029,6 +6412,426 @@
         "remark": "",
         "arrived": false,
         "tcTechNo": "TCG-6130",
+        "transitStatus": "운송중",
+        "receiptDate": "",
+        "receivedBy": "",
+        "receivedAtIso": "",
+        "forwarder": "",
+        "hbl": ""
+      },
+      {
+        "id": "tr-10547bac-d0e3-4092-bc9b-05d6d587f160",
+        "containerNo": "FCIU9172633",
+        "modelName": "S85XC",
+        "partNo": "1268562",
+        "qty": 6,
+        "etdTcTech": "2026-06-02",
+        "etdPort": "2026-06-05",
+        "etaPort": "2026-06-19",
+        "etaWh": "",
+        "deliveryLocation": "Moseslake, USA",
+        "remark": "",
+        "arrived": false,
+        "tcTechNo": "TCG-6139",
+        "transitStatus": "운송중",
+        "receiptDate": "",
+        "receivedBy": "",
+        "receivedAtIso": "",
+        "forwarder": "",
+        "hbl": ""
+      },
+      {
+        "id": "tr-8ed4e4c4-c227-475c-9e21-c88f32bf7ba3",
+        "containerNo": "SEGU4448137",
+        "modelName": "S85XC",
+        "partNo": "1268562",
+        "qty": 6,
+        "etdTcTech": "2026-06-02",
+        "etdPort": "2026-06-05",
+        "etaPort": "2026-06-19",
+        "etaWh": "",
+        "deliveryLocation": "Moseslake, USA",
+        "remark": "",
+        "arrived": false,
+        "tcTechNo": "TCG-6140",
+        "transitStatus": "운송중",
+        "receiptDate": "",
+        "receivedBy": "",
+        "receivedAtIso": "",
+        "forwarder": "",
+        "hbl": ""
+      },
+      {
+        "id": "tr-bd2b4d90-7aa0-462e-af78-2b7d1213b418",
+        "containerNo": "TCNU5568513",
+        "modelName": "S85XC",
+        "partNo": "1268562",
+        "qty": 6,
+        "etdTcTech": "2026-06-02",
+        "etdPort": "2026-06-05",
+        "etaPort": "2026-06-19",
+        "etaWh": "",
+        "deliveryLocation": "Moseslake, USA",
+        "remark": "",
+        "arrived": false,
+        "tcTechNo": "TCG-6141",
+        "transitStatus": "운송중",
+        "receiptDate": "",
+        "receivedBy": "",
+        "receivedAtIso": "",
+        "forwarder": "",
+        "hbl": ""
+      },
+      {
+        "id": "tr-4fbc3264-f003-4a7c-b532-cead8c94bb08",
+        "containerNo": "TCKU6341134",
+        "modelName": "S85XC",
+        "partNo": "1268562",
+        "qty": 6,
+        "etdTcTech": "2026-06-02",
+        "etdPort": "2026-06-05",
+        "etaPort": "2026-06-19",
+        "etaWh": "",
+        "deliveryLocation": "Moseslake, USA",
+        "remark": "",
+        "arrived": false,
+        "tcTechNo": "TCG-6142",
+        "transitStatus": "운송중",
+        "receiptDate": "",
+        "receivedBy": "",
+        "receivedAtIso": "",
+        "forwarder": "",
+        "hbl": ""
+      },
+      {
+        "id": "tr-07836d7e-24b5-46f2-83bb-fead3ad5d388",
+        "containerNo": "MSNU9120521",
+        "modelName": "S45XC",
+        "partNo": "1290073",
+        "qty": 12,
+        "etdTcTech": "2026-06-02",
+        "etdPort": "2026-06-05",
+        "etaPort": "2026-06-19",
+        "etaWh": "",
+        "deliveryLocation": "Moseslake, USA",
+        "remark": "",
+        "arrived": false,
+        "tcTechNo": "TCG-6136",
+        "transitStatus": "운송중",
+        "receiptDate": "",
+        "receivedBy": "",
+        "receivedAtIso": "",
+        "forwarder": "",
+        "hbl": ""
+      },
+      {
+        "id": "tr-4a8bd717-c4cf-4a84-83d1-417847707f13",
+        "containerNo": "MSNU9120521",
+        "modelName": "ML 12",
+        "partNo": "88969",
+        "qty": 15,
+        "etdTcTech": "2026-06-02",
+        "etdPort": "2026-06-05",
+        "etaPort": "2026-06-19",
+        "etaWh": "",
+        "deliveryLocation": "Moseslake, USA",
+        "remark": "",
+        "arrived": false,
+        "tcTechNo": "TCG-6136",
+        "transitStatus": "운송중",
+        "receiptDate": "",
+        "receivedBy": "",
+        "receivedAtIso": "",
+        "forwarder": "",
+        "hbl": ""
+      },
+      {
+        "id": "tr-522e3988-9637-4bab-b275-cd36488c26cd",
+        "containerNo": "MSMU8616508",
+        "modelName": "S45XC",
+        "partNo": "1290073",
+        "qty": 12,
+        "etdTcTech": "2026-06-02",
+        "etdPort": "2026-06-05",
+        "etaPort": "2026-06-19",
+        "etaWh": "",
+        "deliveryLocation": "Moseslake, USA",
+        "remark": "",
+        "arrived": false,
+        "tcTechNo": "TCG-6137",
+        "transitStatus": "운송중",
+        "receiptDate": "",
+        "receivedBy": "",
+        "receivedAtIso": "",
+        "forwarder": "",
+        "hbl": ""
+      },
+      {
+        "id": "tr-a394506c-4185-49f2-bbf5-05296ec2009f",
+        "containerNo": "MSMU8616508",
+        "modelName": "ML 12",
+        "partNo": "88969",
+        "qty": 10,
+        "etdTcTech": "2026-06-02",
+        "etdPort": "2026-06-05",
+        "etaPort": "2026-06-19",
+        "etaWh": "",
+        "deliveryLocation": "Moseslake, USA",
+        "remark": "",
+        "arrived": false,
+        "tcTechNo": "TCG-6137",
+        "transitStatus": "운송중",
+        "receiptDate": "",
+        "receivedBy": "",
+        "receivedAtIso": "",
+        "forwarder": "",
+        "hbl": ""
+      },
+      {
+        "id": "tr-d8efcd57-9b39-44d1-b160-611cfd45015d",
+        "containerNo": "MSDU5988233",
+        "modelName": "Z80",
+        "partNo": "237329",
+        "qty": 6,
+        "etdTcTech": "2026-06-02",
+        "etdPort": "2026-06-05",
+        "etaPort": "2026-06-19",
+        "etaWh": "",
+        "deliveryLocation": "Moseslake, USA",
+        "remark": "",
+        "arrived": false,
+        "tcTechNo": "TCG-6138",
+        "transitStatus": "운송중",
+        "receiptDate": "",
+        "receivedBy": "",
+        "receivedAtIso": "",
+        "forwarder": "",
+        "hbl": ""
+      },
+      {
+        "id": "tr-a8cc6ff2-51d7-4c12-b70e-37f5651d2f1c",
+        "containerNo": "BMOU6263454",
+        "modelName": "GS1930E",
+        "partNo": "1303742",
+        "qty": 42,
+        "etdTcTech": "2026-06-04",
+        "etdPort": "2026-06-11",
+        "etaPort": "2026-06-24",
+        "etaWh": "",
+        "deliveryLocation": "Redmond, USA",
+        "remark": "",
+        "arrived": false,
+        "tcTechNo": "TCG-6143",
+        "transitStatus": "운송중",
+        "receiptDate": "",
+        "receivedBy": "",
+        "receivedAtIso": "",
+        "forwarder": "",
+        "hbl": ""
+      },
+      {
+        "id": "tr-87190173-0538-408c-8f3a-37eff8e3dfd6",
+        "containerNo": "BMOU6038812",
+        "modelName": "GS4655",
+        "partNo": "1292085",
+        "qty": 6,
+        "etdTcTech": "2026-06-04",
+        "etdPort": "2026-06-11",
+        "etaPort": "2026-06-24",
+        "etaWh": "",
+        "deliveryLocation": "Redmond, USA",
+        "remark": "",
+        "arrived": false,
+        "tcTechNo": "TCG-6144",
+        "transitStatus": "운송중",
+        "receiptDate": "",
+        "receivedBy": "",
+        "receivedAtIso": "",
+        "forwarder": "",
+        "hbl": ""
+      },
+      {
+        "id": "tr-8ab43649-c2e7-4120-b674-6f1eb33a3a0d",
+        "containerNo": "BMOU6038812",
+        "modelName": "GS4655",
+        "partNo": "1287153",
+        "qty": 3,
+        "etdTcTech": "2026-06-04",
+        "etdPort": "2026-06-11",
+        "etaPort": "2026-06-24",
+        "etaWh": "",
+        "deliveryLocation": "Redmond, USA",
+        "remark": "",
+        "arrived": false,
+        "tcTechNo": "TCG-6144",
+        "transitStatus": "운송중",
+        "receiptDate": "",
+        "receivedBy": "",
+        "receivedAtIso": "",
+        "forwarder": "",
+        "hbl": ""
+      },
+      {
+        "id": "tr-039e517d-2edf-4888-876b-c33817913cb2",
+        "containerNo": "BMOU6038812",
+        "modelName": "GS4655",
+        "partNo": "1289380",
+        "qty": 3,
+        "etdTcTech": "2026-06-04",
+        "etdPort": "2026-06-11",
+        "etaPort": "2026-06-24",
+        "etaWh": "",
+        "deliveryLocation": "Redmond, USA",
+        "remark": "",
+        "arrived": false,
+        "tcTechNo": "TCG-6144",
+        "transitStatus": "운송중",
+        "receiptDate": "",
+        "receivedBy": "",
+        "receivedAtIso": "",
+        "forwarder": "",
+        "hbl": ""
+      },
+      {
+        "id": "tr-d8a0f9db-5129-4d8e-87df-dfa95c0c2126",
+        "containerNo": "BMOU6038812",
+        "modelName": "GS1930E",
+        "partNo": "1303742",
+        "qty": 12,
+        "etdTcTech": "2026-06-04",
+        "etdPort": "2026-06-11",
+        "etaPort": "2026-06-24",
+        "etaWh": "",
+        "deliveryLocation": "Redmond, USA",
+        "remark": "",
+        "arrived": false,
+        "tcTechNo": "TCG-6144",
+        "transitStatus": "운송중",
+        "receiptDate": "",
+        "receivedBy": "",
+        "receivedAtIso": "",
+        "forwarder": "",
+        "hbl": ""
+      },
+      {
+        "id": "tr-364d6415-0f19-4223-b939-da6e79c0b555",
+        "containerNo": "BMOU6256840",
+        "modelName": "GS1930E",
+        "partNo": "1303742",
+        "qty": 12,
+        "etdTcTech": "2026-06-04",
+        "etdPort": "2026-06-11",
+        "etaPort": "2026-06-24",
+        "etaWh": "",
+        "deliveryLocation": "Redmond, USA",
+        "remark": "",
+        "arrived": false,
+        "tcTechNo": "TCG-6145",
+        "transitStatus": "운송중",
+        "receiptDate": "",
+        "receivedBy": "",
+        "receivedAtIso": "",
+        "forwarder": "",
+        "hbl": ""
+      },
+      {
+        "id": "tr-41fad8ee-4d60-4eef-b5f2-99d39ae3fdcf",
+        "containerNo": "BMOU6256840",
+        "modelName": "Z45",
+        "partNo": "229306",
+        "qty": 10,
+        "etdTcTech": "2026-06-04",
+        "etdPort": "2026-06-11",
+        "etaPort": "2026-06-24",
+        "etaWh": "",
+        "deliveryLocation": "Redmond, USA",
+        "remark": "",
+        "arrived": false,
+        "tcTechNo": "TCG-6145",
+        "transitStatus": "운송중",
+        "receiptDate": "",
+        "receivedBy": "",
+        "receivedAtIso": "",
+        "forwarder": "",
+        "hbl": ""
+      },
+      {
+        "id": "tr-d2090233-149a-4a74-85ca-21d3e5dee62b",
+        "containerNo": "BMOU6038134",
+        "modelName": "Z45",
+        "partNo": "1272701",
+        "qty": 10,
+        "etdTcTech": "2026-06-04",
+        "etdPort": "2026-06-11",
+        "etaPort": "2026-06-24",
+        "etaWh": "",
+        "deliveryLocation": "Redmond, USA",
+        "remark": "",
+        "arrived": false,
+        "tcTechNo": "TCG-6146",
+        "transitStatus": "운송중",
+        "receiptDate": "",
+        "receivedBy": "",
+        "receivedAtIso": "",
+        "forwarder": "",
+        "hbl": ""
+      },
+      {
+        "id": "tr-c19a44c8-0237-4b39-a6b4-49e3dab33bfa",
+        "containerNo": "BMOU6038134",
+        "modelName": "Z45",
+        "partNo": "229306",
+        "qty": 10,
+        "etdTcTech": "2026-06-04",
+        "etdPort": "2026-06-11",
+        "etaPort": "2026-06-24",
+        "etaWh": "",
+        "deliveryLocation": "Redmond, USA",
+        "remark": "",
+        "arrived": false,
+        "tcTechNo": "TCG-6146",
+        "transitStatus": "운송중",
+        "receiptDate": "",
+        "receivedBy": "",
+        "receivedAtIso": "",
+        "forwarder": "",
+        "hbl": ""
+      },
+      {
+        "id": "tr-26b189a1-703c-4175-b4b8-0b9785a3b4f5",
+        "containerNo": "BMOU6042469",
+        "modelName": "Z45",
+        "partNo": "1272701",
+        "qty": 10,
+        "etdTcTech": "2026-06-04",
+        "etdPort": "2026-06-11",
+        "etaPort": "2026-06-24",
+        "etaWh": "",
+        "deliveryLocation": "Redmond, USA",
+        "remark": "",
+        "arrived": false,
+        "tcTechNo": "TCG-6147",
+        "transitStatus": "운송중",
+        "receiptDate": "",
+        "receivedBy": "",
+        "receivedAtIso": "",
+        "forwarder": "",
+        "hbl": ""
+      },
+      {
+        "id": "tr-87f2b175-260a-4b6f-b03e-1f205d804fbb",
+        "containerNo": "BMOU6042469",
+        "modelName": "Z40",
+        "partNo": "110545",
+        "qty": 10,
+        "etdTcTech": "2026-06-04",
+        "etdPort": "2026-06-11",
+        "etaPort": "2026-06-24",
+        "etaWh": "",
+        "deliveryLocation": "Redmond, USA",
+        "remark": "",
+        "arrived": false,
+        "tcTechNo": "TCG-6147",
         "transitStatus": "운송중",
         "receiptDate": "",
         "receivedBy": "",
