@@ -1,9 +1,13 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
+import { ensureAgGridModules } from './agGridModules.js'
+import 'ag-grid-community/styles/ag-grid.css'
+import 'ag-grid-community/styles/ag-theme-quartz.css'
 import './index.css'
 import App from './App.jsx'
 import { applyDeployedInventorySnapshotIfNeeded } from './utils/deployedInventoryBootstrap'
 
+ensureAgGridModules()
 applyDeployedInventorySnapshotIfNeeded()
 
 if (import.meta.env.PROD) {

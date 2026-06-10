@@ -1,12 +1,13 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useImperativeHandle, useLayoutEffect, useMemo, useRef, useState, forwardRef } from 'react'
+import { AgGridReact } from 'ag-grid-react'
 import useUnsavedDraft from '../../hooks/useUnsavedDraft'
 import BilingualLabel from '../BilingualLabel'
 import { operationsMeta } from '../../data/logisticsSampleData'
 import { formatKoEn, formatKoEnInline, L } from '../../i18n/labels'
 import { buildWeekHorizon, planWeekMonday } from '../../utils/deliveryPlanHorizon'
 import { getWeekRange } from '../../utils/logisticsMetrics'
-import useGridNativePaste from '../../hooks/useGridNativePaste'
 import { parseQtyCell } from '../../utils/excelGridClipboard'
+import { matrixFromClipboardText, copyGridSelectionAsTsv } from '../../utils/agGridClipboard'
 import { downloadXlsxFromAoA, readXlsxFirstSheetMatrix } from '../../utils/excelFile'
 import { useMobileSimpleLayout } from '../../utils/mobileLayout'
 import { cloneJson } from '../../utils/draftState'
@@ -25,6 +26,7 @@ import {
   logDeliveryPlanSaveWarehouseDebug,
 } from '../../utils/deliveryPlanModel'
 import PageDataToolbar from '../grid/PageDataToolbar.jsx'
+import '../grid/tc-inv-ag-grid.css'
 import '../logistics/ops.css'
 import './pages.css'
 import './DeliveryPlanPage.css'
@@ -141,49 +143,74 @@ function buildPartRows(masterItems, deliveryPlans, draftRows) {
   return rows
 }
 
-function WeekCell({
-  col,
-  plan,
-  disabled,
-  asOfDate,
-  onQtyChange,
-  onFocusAnchor,
-  rowIndex,
-  weekIdx,
-  weekConfirmed,
-}) {
-  const mon = weekStartFromCol(col)
-  const weekRange = getWeekRange(asOfDate)
-  const isFutureWeek = mon > weekRange.end
-  const lockedByRow = plan?.locked === true
-  const lockedByPolicy = FUTURE_WEEKS_LOCKED && isFutureWeek
-  const readOnly = disabled || lockedByRow || lockedByPolicy
-  const val = plan?.qty ?? ''
-  const ariaWeek = `${formatKoEnInline(L.deliveryPlanWeeklyQty)} · ${col.headerShort}`
+function weekFieldId(wk) {
+  return `wk_${wk}`
+}
+
+const DpWeekHeader = forwardRef(function DpWeekHeader(props, ref) {
+  useImperativeHandle(ref, () => ({
+    refresh() {
+      return true
+    },
+  }))
+  const ctx = props.context || {}
+  const weekMonday = props.column?.getColDef?.()?.context?.weekMonday
+  const col = props.column?.getColDef?.()?.context?.columnMeta
+  const headerShort = col?.headerShort ?? col?.week ?? ''
+  const title = `${col?.week ?? ''} · ${weekMonday ?? ''}`
+  const weekConfirmed = weekMonday ? ctx.getWeekConfirmed?.(weekMonday) : false
+  const headerLocked = weekMonday ? ctx.isWeekHeaderLocked?.(weekMonday) : false
 
   return (
-    <td
-      className={`dp-week-cell dp-week-col${weekConfirmed ? ' dp-week-cell--week-confirmed' : ''}`.trim()}
-      title={`${col.week} · ${mon}`}
-    >
-      <div className="dp-week-cell-inner">
+    <div className="dp-week-head ag-header-cell-comp-wrapper" title={title}>
+      <span className="dp-week-head__date">{headerShort}</span>
+      <label className="dp-week-head__confirm">
         <input
-          className="dp-input dp-input--qty"
-          type="number"
-          min={0}
-          step={1}
-          disabled={readOnly}
-          aria-label={ariaWeek}
-          value={val === '' ? '' : val}
-          data-excel-paste
-          data-dp-row={rowIndex}
-          data-dp-kind="week"
-          data-dp-week-idx={weekIdx}
-          onChange={(e) => onQtyChange(col, e.target.value)}
-          onFocus={() => onFocusAnchor?.()}
+          type="checkbox"
+          checked={!!weekConfirmed}
+          disabled={headerLocked || ctx.inventoryReadOnly}
+          onChange={(e) => ctx.onWeekHeaderConfirmChange?.(weekMonday, e.target.checked)}
+          aria-label={formatKoEnInline(L.deliveryPlanWeekShipConfirm)}
         />
-      </div>
-    </td>
+        <span className="dp-week-head__confirm-text">
+          <BilingualLabel label={L.deliveryPlanWeekShipConfirm} as="span" compact />
+        </span>
+      </label>
+    </div>
+  )
+})
+
+function DpDeleteRenderer(props) {
+  const ctx = props.context || {}
+  const d = props.data || {}
+  const spec = {
+    rowKey: d.rowKey,
+    kind: d.kind,
+    draftId: d.draftId,
+    modelName: d.modelName,
+    partNo: d.partNo,
+  }
+  const canQuickRemoveDraft =
+    spec.kind === 'draft' && (!String(spec.modelName || '').trim() || !String(spec.partNo || '').trim())
+  const showDeleteConfirm = spec.kind === 'master' || spec.kind === 'plan' || (spec.kind === 'draft' && !canQuickRemoveDraft)
+  const deleteDisabled = spec.kind === 'draft' && canQuickRemoveDraft ? false : !spec.modelName || !spec.partNo
+  const deleteDisabledOrReadOnly = deleteDisabled || ctx.inventoryReadOnly
+
+  return (
+    <button
+      type="button"
+      className="btn btn--ghost dp-btn-delete-row"
+      disabled={deleteDisabledOrReadOnly}
+      title={formatKoEnInline(L.actionDelete)}
+      aria-label={formatKoEnInline(L.actionDelete)}
+      onClick={() => {
+        if (deleteDisabledOrReadOnly) return
+        if (showDeleteConfirm) ctx.requestDeleteRow?.(spec)
+        else ctx.removeDraft?.(spec.draftId)
+      }}
+    >
+      <BilingualLabel label={L.actionDelete} as="span" />
+    </button>
   )
 }
 
@@ -259,13 +286,11 @@ export default function DeliveryPlanPage({
   const [searchModel, setSearchModel] = useState('')
   const [searchPart, setSearchPart] = useState('')
   const [appliedPartSearch, setAppliedPartSearch] = useState(() => ({ ...EMPTY_PART_SEARCH }))
-  /** 붙여넣기 시작 위치: 행 인덱스 + 열 앵커(모델/부품/주차) */
-  const pasteAnchorRef = useRef({ rowIndex: 0, colKind: 'week', weekColIndex: 0 })
   /** 직전 출고저장(재고 반영 기준) 스냅샷 — 자동 저장 중간값으로 prev가 깨져 중복 차감되지 않도록 ref 유지 */
   const lastWarehouseBaselineRef = useRef(
     serializeWarehouseBaselinePlansSnapshot(savedDeliveryPlans, savedWeekConfirmations),
   )
-  const dpTableRef = useRef(null)
+  const gridApiRef = useRef(null)
 
   const columns = useMemo(
     () => buildWeekHorizon(asOfDate, pastWeeks, futureWeeks, weekOffset),
@@ -370,25 +395,34 @@ export default function DeliveryPlanPage({
     setDraftRows((r) => [...r, { id: newId('draft'), modelName: '', partNo: '' }])
   }
 
-  function updateDraft(draftId, patch) {
-    if (inventoryReadOnly) return
-    setDraftRows((rows) => rows.map((d) => (d.id === draftId ? { ...d, ...patch } : d)))
-  }
+  const removeDraft = useCallback(
+    (draftId) => {
+      if (inventoryReadOnly) return
+      setDraftRows((rows) => rows.filter((d) => d.id !== draftId))
+    },
+    [inventoryReadOnly, setDraftRows],
+  )
 
-  function removeDraft(draftId) {
-    if (inventoryReadOnly) return
-    setDraftRows((rows) => rows.filter((d) => d.id !== draftId))
-  }
+  const updateDraft = useCallback(
+    (draftId, patch) => {
+      if (inventoryReadOnly) return
+      setDraftRows((rows) => rows.map((d) => (d.id === draftId ? { ...d, ...patch } : d)))
+    },
+    [inventoryReadOnly, setDraftRows],
+  )
 
-  function requestDeleteRow(spec) {
-    if (inventoryReadOnly) return
-    const { modelName, partNo, kind, draftId } = spec
-    if (kind === 'draft' && (!String(modelName || '').trim() || !String(partNo || '').trim())) {
-      removeDraft(draftId)
-      return
-    }
-    setDeleteTarget({ modelName, partNo, kind, draftId })
-  }
+  const requestDeleteRow = useCallback(
+    (spec) => {
+      if (inventoryReadOnly) return
+      const { modelName, partNo, kind, draftId } = spec
+      if (kind === 'draft' && (!String(modelName || '').trim() || !String(partNo || '').trim())) {
+        removeDraft(draftId)
+        return
+      }
+      setDeleteTarget({ modelName, partNo, kind, draftId })
+    },
+    [inventoryReadOnly, removeDraft],
+  )
 
   function confirmDeletePartPlans() {
     if (inventoryReadOnly) return
@@ -409,22 +443,6 @@ export default function DeliveryPlanPage({
   function cancelDeletePartPlans() {
     setDeleteTarget(null)
   }
-
-  const toggleSelect = useCallback((rowKey) => {
-    setSelected((s) => {
-      const n = new Set(s)
-      if (n.has(rowKey)) n.delete(rowKey)
-      else n.add(rowKey)
-      return n
-    })
-  }, [])
-
-  const toggleSelectAll = useCallback(() => {
-    setSelected((s) => {
-      if (s.size === displayedPartRows.length && displayedPartRows.length > 0) return new Set()
-      return new Set(displayedPartRows.map((p) => p.rowKey))
-    })
-  }, [displayedPartRows])
 
   const weekPasteReadOnly = useCallback(
     (spec, col, plan) => {
@@ -600,32 +618,244 @@ export default function DeliveryPlanPage({
           : formatKoEn(L.excelUploadApplied),
       )
     },
-    [deliveryPlans, draftRows, partRows, columns, weekPasteReadOnly, inventoryReadOnly],
+    [deliveryPlans, draftRows, partRows, columns, weekPasteReadOnly, inventoryReadOnly, setDeliveryPlans, setDraftRows],
   )
 
-  const onDpPasteMatrix = useCallback(
-    (matrix, cell) => {
-      if (inventoryReadOnly) return
-      const el = cell
-      if (!(el instanceof HTMLElement)) return
-      const rowIndexDisp = Number(el.dataset.dpRow ?? NaN)
-      if (!Number.isFinite(rowIndexDisp)) return
-      const kind = el.dataset.dpKind || 'week'
-      const weekColIndex = Number(el.dataset.dpWeekIdx ?? 0) || 0
-      const spec = displayedPartRows[rowIndexDisp]
-      if (!spec) return
-      const startRowIdx = partRows.findIndex((p) => p.rowKey === spec.rowKey)
-      if (startRowIdx < 0) return
-      runPlanMatrixPaste(matrix, { rowIndex: rowIndexDisp, colKind: kind, weekColIndex }, startRowIdx)
+  const planGridRowData = useMemo(() => {
+    return displayedPartRows.map((spec) => {
+      const row = { ...spec }
+      for (const col of columns) {
+        const wk = weekStartFromCol(col)
+        const pl = planByKey.get(`${spec.modelName}\t${spec.partNo}\t${wk}`)
+        const q = pl?.qty
+        row[weekFieldId(wk)] = q == null || q === '' ? '' : q
+      }
+      return row
+    })
+  }, [displayedPartRows, columns, planByKey])
+
+  const planCopyColIds = useMemo(
+    () => ['modelName', 'partNo', ...columns.map((c) => weekFieldId(weekStartFromCol(c)))],
+    [columns],
+  )
+
+  const getWeekConfirmedCb = useCallback(
+    (wk) => isWeekConfirmed(weekConfirmations, wk),
+    [weekConfirmations],
+  )
+
+  const isWeekHeaderLockedCb = useCallback(
+    (wk) => {
+      const weekRangeHdr = getWeekRange(asOfDate)
+      const isFutureWeekHdr = wk > weekRangeHdr.end
+      return FUTURE_WEEKS_LOCKED && isFutureWeekHdr
     },
-    [displayedPartRows, partRows, runPlanMatrixPaste, inventoryReadOnly],
+    [asOfDate],
   )
 
-  useGridNativePaste({
-    tableRef: dpTableRef,
-    enabled: !isMobile && !inventoryReadOnly,
-    onPasteMatrix: onDpPasteMatrix,
-  })
+  const gridContext = useMemo(
+    () => ({
+      inventoryReadOnly,
+      getWeekConfirmed: getWeekConfirmedCb,
+      isWeekHeaderLocked: isWeekHeaderLockedCb,
+      onWeekHeaderConfirmChange,
+      requestDeleteRow,
+      removeDraft,
+    }),
+    [
+      inventoryReadOnly,
+      getWeekConfirmedCb,
+      isWeekHeaderLockedCb,
+      onWeekHeaderConfirmChange,
+      requestDeleteRow,
+      removeDraft,
+    ],
+  )
+
+  const columnDefs = useMemo(() => {
+    const defs = [
+      {
+        field: 'modelName',
+        headerName: formatKoEnInline(L.model),
+        editable: (p) => p.data.kind !== 'master' && !inventoryReadOnly,
+        pinned: 'left',
+        width: 140,
+        filter: 'agTextColumnFilter',
+        floatingFilter: true,
+      },
+      {
+        field: 'partNo',
+        headerName: formatKoEnInline(L.partNo),
+        editable: (p) => p.data.kind !== 'master' && !inventoryReadOnly,
+        pinned: 'left',
+        width: 120,
+        filter: 'agTextColumnFilter',
+        floatingFilter: true,
+      },
+    ]
+    for (const col of columns) {
+      const wk = weekStartFromCol(col)
+      const fid = weekFieldId(wk)
+      defs.push({
+        colId: fid,
+        field: fid,
+        headerComponent: 'DpWeekHeader',
+        context: { weekMonday: wk, columnMeta: col },
+        width: 96,
+        filter: 'agNumberColumnFilter',
+        floatingFilter: true,
+        type: 'numericColumn',
+        editable: (p) => {
+          const pl = planByKey.get(`${p.data.modelName}\t${p.data.partNo}\t${wk}`)
+          return !weekPasteReadOnly(p.data, col, pl)
+        },
+        cellClass: () =>
+          isWeekConfirmed(weekConfirmations, wk) ? 'dp-week-cell--week-confirmed' : undefined,
+      })
+    }
+    defs.push({
+      colId: 'dpDelete',
+      headerName: formatKoEnInline(L.actionDelete),
+      width: 88,
+      pinned: 'right',
+      sortable: false,
+      filter: false,
+      floatingFilter: false,
+      suppressMovable: true,
+      cellRenderer: 'DpDeleteRenderer',
+    })
+    return defs
+  }, [
+    columns,
+    inventoryReadOnly,
+    weekConfirmations,
+    planByKey,
+    weekPasteReadOnly,
+  ])
+
+  const defaultColDef = useMemo(
+    () => ({
+      sortable: true,
+      resizable: true,
+      singleClickEdit: true,
+    }),
+    [],
+  )
+
+  const getRowId = useCallback((p) => String(p.data?.rowKey ?? ''), [])
+
+  const getRowClass = useCallback(
+    (p) => (invalidRowKeys.has(p.data?.rowKey) ? 'row--excel-invalid' : undefined),
+    [invalidRowKeys],
+  )
+
+  const onGridReady = useCallback((e) => {
+    gridApiRef.current = e.api
+  }, [])
+
+  const onPlanCellValueChanged = useCallback(
+    (e) => {
+      if (inventoryReadOnly) return
+      const f = e.colDef?.field
+      const d = e.data
+      if (!f || !d) return
+      const v = e.newValue
+      if (f === 'modelName') {
+        const nm = normalizeModel(v)
+        if (d.kind === 'draft') updateDraft(d.draftId, { modelName: nm })
+        else if (d.kind === 'plan') {
+          setDeliveryPlans((plans) =>
+            plans.map((p) =>
+              `${p.modelName}\t${p.partNo}` === `${d.modelName}\t${d.partNo}` ? { ...p, modelName: nm } : p,
+            ),
+          )
+        }
+        return
+      }
+      if (f === 'partNo') {
+        const part = String(v ?? '')
+        if (d.kind === 'draft') updateDraft(d.draftId, { partNo: part })
+        else if (d.kind === 'plan') {
+          setDeliveryPlans((plans) =>
+            plans.map((p) =>
+              `${p.modelName}\t${p.partNo}` === `${d.modelName}\t${d.partNo}` ? { ...p, partNo: part } : p,
+            ),
+          )
+        }
+        return
+      }
+      if (f.startsWith('wk_')) {
+        const wk = f.slice(3)
+        const col = columns.find((c) => weekStartFromCol(c) === wk)
+        if (col) onQtyChange(d.modelName, d.partNo)(col, v === '' || v == null ? '' : String(v))
+      }
+    },
+    [inventoryReadOnly, columns, onQtyChange, setDeliveryPlans, updateDraft],
+  )
+
+  const applyPlanClipboardPaste = useCallback(
+    (api, text) => {
+      if (inventoryReadOnly) return
+      const matrix = matrixFromClipboardText(text)
+      if (!matrix.length) return
+      const cell = api.getFocusedCell()
+      if (!cell) return
+      const node = api.getDisplayedRowAtIndex(cell.rowIndex)
+      if (!node?.data?.rowKey) return
+      const colId = cell.column.getColId()
+      const rowIndexDisp = displayedPartRows.findIndex((r) => r.rowKey === node.data.rowKey)
+      if (rowIndexDisp < 0) return
+      const startRowIdx = partRows.findIndex((p) => p.rowKey === node.data.rowKey)
+      if (startRowIdx < 0) return
+      let anchor
+      if (colId === 'modelName') anchor = { rowIndex: rowIndexDisp, colKind: 'model', weekColIndex: 0 }
+      else if (colId === 'partNo') anchor = { rowIndex: rowIndexDisp, colKind: 'part', weekColIndex: 0 }
+      else if (colId.startsWith('wk_')) {
+        const wk = colId.slice(3)
+        const weekColIndex = Math.max(0, columns.findIndex((c) => weekStartFromCol(c) === wk))
+        anchor = { rowIndex: rowIndexDisp, colKind: 'week', weekColIndex }
+      } else return
+      runPlanMatrixPaste(matrix, anchor, startRowIdx)
+    },
+    [inventoryReadOnly, displayedPartRows, partRows, columns, runPlanMatrixPaste],
+  )
+
+  const onPlanCellKeyDown = useCallback(
+    (e) => {
+      const ev = e.event
+      if (!(ev.ctrlKey || ev.metaKey)) return
+      const k = String(ev.key || '').toLowerCase()
+      if (k === 'c') {
+        ev.preventDefault()
+        const tsv = copyGridSelectionAsTsv(e.api, planCopyColIds)
+        if (tsv) void navigator.clipboard.writeText(tsv).catch(() => {})
+        return
+      }
+      if (k === 'v' && !inventoryReadOnly) {
+        ev.preventDefault()
+        void navigator.clipboard.readText().then((t) => applyPlanClipboardPaste(e.api, t))
+      }
+    },
+    [planCopyColIds, inventoryReadOnly, applyPlanClipboardPaste],
+  )
+
+  const onSelectionChanged = useCallback((e) => {
+    const keys = new Set(e.api.getSelectedRows().map((r) => r.rowKey))
+    setSelected(keys)
+  }, [])
+
+  useLayoutEffect(() => {
+    const api = gridApiRef.current
+    if (!api) return
+    api.forEachNode((node) => {
+      const on = node.data && selected.has(node.data.rowKey)
+      node.setSelected(!!on, false, true)
+    })
+  }, [selected, planGridRowData])
+
+  useEffect(() => {
+    gridApiRef.current?.refreshHeader()
+  }, [weekConfirmations])
 
   async function handleDpUpload(ev) {
     if (inventoryReadOnly) return
@@ -873,223 +1103,36 @@ export default function DeliveryPlanPage({
         </div>
       )}
 
-      <div className="dp-table-wrap page__table">
-        <table ref={dpTableRef} className="dp-grid">
-          <thead>
-            <tr>
-              <th className="cell--center" style={{ width: '2rem' }}>
-                <input
-                  type="checkbox"
-                  aria-label="Select all"
-                  disabled={inventoryReadOnly}
-                  checked={
-                    displayedPartRows.length > 0 && selected.size === displayedPartRows.length
-                  }
-                  onChange={toggleSelectAll}
-                />
-              </th>
-              <th className="dp-th--sticky dp-col-model">
-                <BilingualLabel label={L.model} as="span" />
-              </th>
-              <th className="dp-th--sticky-end dp-col-part">
-                <BilingualLabel label={L.partNo} as="span" />
-              </th>
-              {columns.map((c) => {
-                const wk = weekStartFromCol(c)
-                const weekRangeHdr = getWeekRange(asOfDate)
-                const isFutureWeekHdr = wk > weekRangeHdr.end
-                const headerLocked = FUTURE_WEEKS_LOCKED && isFutureWeekHdr
-                const weekConfirmed = isWeekConfirmed(weekConfirmations, wk)
-                return (
-                  <th
-                    key={wk}
-                    className={`dp-week-col${weekConfirmed ? ' dp-week-col--confirmed' : ''}`.trim()}
-                    title={`${c.week} · ${wk}`}
-                  >
-                    <div className="dp-week-head">
-                      <span className="dp-week-head__date">{c.headerShort}</span>
-                      <label className="dp-week-head__confirm">
-                        <input
-                          type="checkbox"
-                          checked={weekConfirmed}
-                          disabled={headerLocked || inventoryReadOnly}
-                          onChange={(e) => onWeekHeaderConfirmChange(wk, e.target.checked)}
-                          aria-label={formatKoEnInline(L.deliveryPlanWeekShipConfirm)}
-                        />
-                        <span className="dp-week-head__confirm-text">
-                          <BilingualLabel label={L.deliveryPlanWeekShipConfirm} as="span" compact />
-                        </span>
-                      </label>
-                    </div>
-                  </th>
-                )
-              })}
-              <th className="dp-th-actions" scope="col" aria-label={formatKoEnInline(L.actionDelete)}>
-                <BilingualLabel label={L.actionDelete} as="span" />
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            {displayedPartRows.map((spec, rowIndex) => {
-              const { modelName, partNo, rowKey, kind, draftId } = spec
-              const cellDisabled =
-                (kind === 'draft' && (!modelName || !partNo)) ||
-                (kind === 'plan' && (!modelName || !partNo))
-              const cellDisabledOrReadOnly = cellDisabled || inventoryReadOnly
-              const masterFrozen = kind === 'master'
-              const canQuickRemoveDraft =
-                kind === 'draft' && (!String(modelName || '').trim() || !String(partNo || '').trim())
-              const showDeleteConfirm =
-                kind === 'master' ||
-                kind === 'plan' ||
-                (kind === 'draft' && !canQuickRemoveDraft)
-              const deleteDisabled =
-                kind === 'draft' && canQuickRemoveDraft ? false : !modelName || !partNo
-              const deleteDisabledOrReadOnly = deleteDisabled || inventoryReadOnly
-
-              return (
-                <tr
-                  key={rowKey}
-                  className={invalidRowKeys.has(rowKey) ? 'row--excel-invalid' : undefined}
-                >
-                  <td className="cell--center">
-                    <input
-                      type="checkbox"
-                      checked={selected.has(rowKey)}
-                      disabled={inventoryReadOnly}
-                      onChange={() => toggleSelect(rowKey)}
-                      aria-label="Select row"
-                    />
-                  </td>
-                  <td className="dp-td--sticky dp-col-model">
-                    {masterFrozen ? (
-                      <input
-                        className="dp-input dp-input--readonly"
-                        readOnly
-                        tabIndex={-1}
-                        value={modelName}
-                      />
-                    ) : (
-                      <input
-                        className="dp-input"
-                        value={modelName}
-                        readOnly={inventoryReadOnly}
-                        placeholder={formatKoEnInline(L.model)}
-                        data-excel-paste
-                        data-dp-row={rowIndex}
-                        data-dp-kind="model"
-                        data-dp-week-idx={0}
-                        onFocus={() => {
-                          pasteAnchorRef.current = { rowIndex, colKind: 'model', weekColIndex: 0 }
-                        }}
-                        onChange={(e) => {
-                          if (kind === 'draft') updateDraft(draftId, { modelName: e.target.value })
-                          else
-                            setDeliveryPlans((plans) =>
-                              plans.map((p) =>
-                                `${p.modelName}\t${p.partNo}` === `${modelName}\t${partNo}`
-                                  ? { ...p, modelName: e.target.value }
-                                  : p,
-                              ),
-                            )
-                        }}
-                      />
-                    )}
-                  </td>
-                  <td className="dp-td--sticky-end dp-col-part">
-                    {masterFrozen ? (
-                      <input
-                        className="dp-input dp-input--readonly"
-                        readOnly
-                        tabIndex={-1}
-                        value={partNo}
-                      />
-                    ) : kind === 'draft' ? (
-                      <input
-                        className="dp-input"
-                        value={partNo}
-                        readOnly={inventoryReadOnly}
-                        placeholder={formatKoEnInline(L.partNo)}
-                        data-excel-paste
-                        data-dp-row={rowIndex}
-                        data-dp-kind="part"
-                        data-dp-week-idx={0}
-                        onFocus={() => {
-                          pasteAnchorRef.current = { rowIndex, colKind: 'part', weekColIndex: 0 }
-                        }}
-                        onChange={(e) => updateDraft(draftId, { partNo: e.target.value })}
-                      />
-                    ) : (
-                      <input
-                        className="dp-input"
-                        value={partNo}
-                        readOnly={inventoryReadOnly}
-                        placeholder={formatKoEnInline(L.partNo)}
-                        data-excel-paste
-                        data-dp-row={rowIndex}
-                        data-dp-kind="part"
-                        data-dp-week-idx={0}
-                        onFocus={() => {
-                          pasteAnchorRef.current = { rowIndex, colKind: 'part', weekColIndex: 0 }
-                        }}
-                        onChange={(e) => {
-                          setDeliveryPlans((plans) =>
-                            plans.map((p) =>
-                              `${p.modelName}\t${p.partNo}` === `${modelName}\t${partNo}`
-                                ? { ...p, partNo: e.target.value }
-                                : p,
-                            ),
-                          )
-                        }}
-                      />
-                    )}
-                  </td>
-                  {columns.map((col, weekIdx) => {
-                    const wk = weekStartFromCol(col)
-                    const plan = planByKey.get(`${modelName}\t${partNo}\t${wk}`)
-                    const weekConfirmed = isWeekConfirmed(weekConfirmations, wk)
-                    return (
-                      <WeekCell
-                        key={wk}
-                        col={col}
-                        plan={plan}
-                        asOfDate={asOfDate}
-                        disabled={cellDisabledOrReadOnly}
-                        rowIndex={rowIndex}
-                        weekIdx={weekIdx}
-                        weekConfirmed={weekConfirmed}
-                        onQtyChange={onQtyChange(modelName, partNo)}
-                        onFocusAnchor={() => {
-                          pasteAnchorRef.current = {
-                            rowIndex,
-                            colKind: 'week',
-                            weekColIndex: weekIdx,
-                          }
-                        }}
-                      />
-                    )
-                  })}
-                  <td className="dp-td-actions">
-                    <button
-                      type="button"
-                      className="btn btn--ghost dp-btn-delete-row"
-                      disabled={deleteDisabledOrReadOnly}
-                      title={formatKoEnInline(L.actionDelete)}
-                      aria-label={formatKoEnInline(L.actionDelete)}
-                      onClick={() => {
-                        if (deleteDisabledOrReadOnly) return
-                        if (showDeleteConfirm) requestDeleteRow(spec)
-                        else removeDraft(draftId)
-                      }}
-                    >
-                      <BilingualLabel label={L.actionDelete} as="span" />
-                    </button>
-                  </td>
-                </tr>
-              )
-            })}
-          </tbody>
-        </table>
+      <div className="dp-table-wrap page__table dp-table-wrap--ag">
+        <div className="ag-theme-quartz tc-inv-ag-shell tc-inv-ag-shell--fill">
+          <AgGridReact
+            rowData={planGridRowData}
+            columnDefs={columnDefs}
+            defaultColDef={defaultColDef}
+            getRowId={getRowId}
+            context={gridContext}
+            components={{
+              DpWeekHeader,
+              DpDeleteRenderer,
+            }}
+            rowSelection={{
+              mode: 'multiRow',
+              checkboxes: true,
+              headerCheckbox: true,
+              enableClickSelection: true,
+            }}
+            selectionColumnDef={{ width: 40, maxWidth: 44, suppressHeaderMenuButton: true }}
+            suppressCellFocus={false}
+            enableCellTextSelection
+            getRowClass={getRowClass}
+            onGridReady={onGridReady}
+            onCellValueChanged={onPlanCellValueChanged}
+            onCellKeyDown={onPlanCellKeyDown}
+            onSelectionChanged={onSelectionChanged}
+            stopEditingWhenCellsLoseFocus
+            animateRows
+          />
+        </div>
       </div>
     </div>
   )

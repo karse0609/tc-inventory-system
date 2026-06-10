@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
+import { AgGridReact } from 'ag-grid-react'
 import { L, formatKoEn, formatKoEnInline } from '../../i18n/labels'
-import useGridNativePaste from '../../hooks/useGridNativePaste'
+import { matrixFromClipboardText, copyGridSelectionAsTsv } from '../../utils/agGridClipboard'
 import { downloadXlsxFromAoA } from '../../utils/excelFile'
 import { parseBoolCell, parseDateForInput, parseQtyCell } from '../../utils/excelGridClipboard'
 import { resolveReceiptDateForLedger } from '../../utils/inventoryAsOf'
@@ -20,6 +21,7 @@ import { MOBILE_SIMPLE_LAYOUT_MQ } from '../../utils/mobileLayout'
 import { inventoryRemoteSyncEnabled } from '../../utils/inventoryRemoteSync'
 import PageDataToolbar from '../grid/PageDataToolbar.jsx'
 import BilingualLabel from '../BilingualLabel'
+import '../grid/tc-inv-ag-grid.css'
 import '../logistics/ops.css'
 import './pages.css'
 import './InTransitPage.css'
@@ -161,6 +163,73 @@ function emptyRow() {
   }
 }
 
+/** @param {any[]} prev */
+function applyTransitPasteFromDisplay(prev, matrix, dispRow, dispCol, appliedSearch) {
+  const received = prev.filter((r) => isTransitRowReceived(r))
+  let active = prev.filter((r) => !isTransitRowReceived(r))
+  const displayed = active.filter((r) => rowMatchesApplied(r, appliedSearch))
+  const updates = new Map()
+  const newRows = []
+
+  for (let r = 0; r < matrix.length; r++) {
+    const rowIndex = dispRow + r
+    let target = displayed[rowIndex]
+    if (!target) {
+      target = emptyRow()
+      newRows.push(target)
+      active = [...active, target]
+      displayed.push(target)
+    }
+    const key = transitRowIdKey(target.id)
+    let acc = updates.get(key) || {}
+    for (let c = 0; c < matrix[r].length; c++) {
+      const ci = dispCol + c
+      if (ci >= TRANSIT_PASTE_FIELDS.length) break
+      const field = TRANSIT_PASTE_FIELDS[ci]
+      const patch = buildTransitPastePatch(field, matrix[r][c])
+      acc = { ...acc, ...patch }
+    }
+    updates.set(key, acc)
+  }
+
+  const mergedActive = active.map((row) => {
+    const k = transitRowIdKey(row.id)
+    const p = updates.get(k)
+    return p ? { ...row, ...p } : row
+  })
+
+  return [...mergedActive, ...received]
+}
+
+function TransitDeleteRenderer(props) {
+  const ctx = props.context || {}
+  return (
+    <button
+      type="button"
+      className="btn btn--ghost btn--toolbar transit-page__btn-del"
+      disabled={ctx.readOnly}
+      onClick={() => ctx.onDeleteRow?.(props.data?.id)}
+    >
+      <BilingualLabel label={L.transitRowDelete} as="span" />
+    </button>
+  )
+}
+
+function TransitReceiptPickRenderer(props) {
+  const ctx = props.context || {}
+  const key = transitRowIdKey(props.data?.id)
+  const checked = ctx.receiptCancelPickIds?.has?.(key) ?? false
+  return (
+    <input
+      type="checkbox"
+      disabled={ctx.readOnly}
+      checked={checked}
+      onChange={() => ctx.onTogglePick?.(props.data?.id)}
+      aria-label={formatKoEnInline(L.receiptCancelPickRow)}
+    />
+  )
+}
+
 export default function InTransitPage({
   inTransit: savedInTransit,
   onPersistInTransit,
@@ -189,7 +258,7 @@ export default function InTransitPage({
   const [searchContainer, setSearchContainer] = useState('')
   const [searchDelivery, setSearchDelivery] = useState('')
   const [appliedSearch, setAppliedSearch] = useState(() => ({ ...EMPTY_APPLIED }))
-  const transitTableRef = useRef(null)
+  const gridApiRef = useRef(null)
   const isMobileLayout = useTransitMobileLayout()
 
   const { draft, setDraft } = useUnsavedDraft({
@@ -420,7 +489,7 @@ export default function InTransitPage({
       if (typeof onRequestRemoteSync === 'function') onRequestRemoteSync()
       return sorted
     },
-    [onPersistInTransit, onRequestRemoteSync],
+    [onPersistInTransit, onRequestRemoteSync, setDraft],
   )
 
   function handleSave() {
@@ -460,13 +529,16 @@ export default function InTransitPage({
     setAppliedSearch({ ...EMPTY_APPLIED })
   }
 
-  function updateRow(id, patch) {
-    if (readOnly) return
-    const key = transitRowIdKey(id)
-    const next = { ...patch }
-    if ('modelName' in next) next.modelName = normalizeModel(next.modelName)
-    setDraft((rows) => rows.map((r) => (transitRowIdKey(r.id) === key ? { ...r, ...next } : r)))
-  }
+  const updateRow = useCallback(
+    (id, patch) => {
+      if (readOnly) return
+      const key = transitRowIdKey(id)
+      const next = { ...patch }
+      if ('modelName' in next) next.modelName = normalizeModel(next.modelName)
+      setDraft((rows) => rows.map((r) => (transitRowIdKey(r.id) === key ? { ...r, ...next } : r)))
+    },
+    [readOnly, setDraft],
+  )
 
   function handleAdd() {
     if (readOnly) return
@@ -478,18 +550,21 @@ export default function InTransitPage({
     })
   }
 
-  function requestDeleteRow(id) {
-    if (readOnly) return
-    if (!window.confirm(formatKoEnInline(L.inTransitDeleteConfirm))) return
-    const key = transitRowIdKey(id)
-    setDraft((rows) => rows.filter((r) => transitRowIdKey(r.id) !== key))
-    setReceiptCancelPickIds((s) => {
-      const n = new Set(s)
-      n.delete(key)
-      receiptCancelPickIdsRef.current = n
-      return n
-    })
-  }
+  const requestDeleteRow = useCallback(
+    (id) => {
+      if (readOnly) return
+      if (!window.confirm(formatKoEnInline(L.inTransitDeleteConfirm))) return
+      const key = transitRowIdKey(id)
+      setDraft((rows) => rows.filter((r) => transitRowIdKey(r.id) !== key))
+      setReceiptCancelPickIds((s) => {
+        const n = new Set(s)
+        n.delete(key)
+        receiptCancelPickIdsRef.current = n
+        return n
+      })
+    },
+    [readOnly, setDraft],
+  )
 
   const toggleReceiptCancelPick = useCallback((id) => {
     if (readOnly) return
@@ -599,63 +674,382 @@ export default function InTransitPage({
 
   const isHistory = viewMode === 'history'
 
-  const onTransitPasteMatrix = useCallback(
-    (matrix, cell) => {
-      if (readOnly) return
-      const dispRow = Number(cell.dataset.excelRow)
-      const dispCol = Number(cell.dataset.excelCol)
-      if (!Number.isFinite(dispRow) || !Number.isFinite(dispCol)) return
-      let m = matrix
-      if (m.length && String(m[0]?.[0] ?? '').toLowerCase().includes('container')) {
-        m = m.slice(1)
-      }
-      if (!m.length) return
-
-      setDraft((prev) => {
-        const received = prev.filter((r) => isTransitRowReceived(r))
-        let active = prev.filter((r) => !isTransitRowReceived(r))
-        const displayed = active.filter((r) => rowMatchesApplied(r, appliedSearch))
-        const updates = new Map()
-        const newRows = []
-
-        for (let r = 0; r < m.length; r++) {
-          const rowIndex = dispRow + r
-          let target = displayed[rowIndex]
-          if (!target) {
-            target = emptyRow()
-            newRows.push(target)
-            active = [...active, target]
-            displayed.push(target)
-          }
-          const key = transitRowIdKey(target.id)
-          let acc = updates.get(key) || {}
-          for (let c = 0; c < m[r].length; c++) {
-            const ci = dispCol + c
-            if (ci >= TRANSIT_PASTE_FIELDS.length) break
-            const field = TRANSIT_PASTE_FIELDS[ci]
-            const patch = buildTransitPastePatch(field, m[r][c])
-            acc = { ...acc, ...patch }
-          }
-          updates.set(key, acc)
-        }
-
-        const mergedActive = active.map((row) => {
-          const k = transitRowIdKey(row.id)
-          const p = updates.get(k)
-          return p ? { ...row, ...p } : row
-        })
-
-        return [...mergedActive, ...received]
-      })
-    },
-    [appliedSearch, readOnly],
+  const activeRowData = useMemo(
+    () => displayedActive.map((row, i) => ({ ...row, __dispIdx: i })),
+    [displayedActive],
   )
 
-  useGridNativePaste({
-    tableRef: transitTableRef,
-    enabled: !isMobileLayout && !isHistory && !readOnly,
-    onPasteMatrix: onTransitPasteMatrix,
-  })
+  const historyRowData = useMemo(
+    () =>
+      displayedHistory.map((row, i) => ({
+        ...row,
+        __dispIdx: i,
+        etaWhDisplay: formatEtaWhDisplay(row.etaWh),
+        receiptDateDisplay: row.receiptDate ?? '—',
+        receivedAtDisplay: formatProcessedAt(row.receivedAtIso),
+      })),
+    [displayedHistory],
+  )
+
+  const transitHistoryCopyColIds = useMemo(
+    () => [
+      'containerNo',
+      'modelName',
+      'partNo',
+      'qty',
+      'etdTcTech',
+      'etdPort',
+      'etaPort',
+      'etaWhDisplay',
+      'deliveryLocation',
+      'receiptDateDisplay',
+      'remark',
+      'receivedBy',
+      'receivedAtDisplay',
+    ],
+    [],
+  )
+
+  const gridContextActive = useMemo(
+    () => ({ readOnly, onDeleteRow: requestDeleteRow }),
+    [readOnly, requestDeleteRow],
+  )
+
+  const gridContextHistory = useMemo(
+    () => ({
+      readOnly,
+      receiptCancelPickIds,
+      onTogglePick: toggleReceiptCancelPick,
+    }),
+    [readOnly, receiptCancelPickIds, toggleReceiptCancelPick],
+  )
+
+  const activeColumnDefs = useMemo(
+    () => [
+      {
+        field: 'containerNo',
+        headerName: formatKoEnInline(L.containerNo),
+        editable: !readOnly,
+        minWidth: 108,
+        filter: 'agTextColumnFilter',
+        floatingFilter: true,
+      },
+      {
+        field: 'modelName',
+        headerName: formatKoEnInline(L.model),
+        editable: !readOnly,
+        minWidth: 100,
+        filter: 'agTextColumnFilter',
+        floatingFilter: true,
+      },
+      {
+        field: 'partNo',
+        headerName: formatKoEnInline(L.partNo),
+        editable: !readOnly,
+        minWidth: 100,
+        filter: 'agTextColumnFilter',
+        floatingFilter: true,
+      },
+      {
+        field: 'qty',
+        headerName: formatKoEnInline(L.qty),
+        editable: !readOnly,
+        width: 88,
+        filter: 'agNumberColumnFilter',
+        floatingFilter: true,
+        type: 'numericColumn',
+      },
+      {
+        field: 'etdTcTech',
+        headerName: formatKoEnInline(L.etdTcTech),
+        editable: !readOnly,
+        width: 132,
+        filter: 'agTextColumnFilter',
+        floatingFilter: true,
+      },
+      {
+        field: 'etdPort',
+        headerName: formatKoEnInline(L.etdPort),
+        editable: !readOnly,
+        width: 132,
+        filter: 'agTextColumnFilter',
+        floatingFilter: true,
+      },
+      {
+        field: 'etaPort',
+        headerName: formatKoEnInline(L.etaPort),
+        editable: !readOnly,
+        width: 132,
+        filter: 'agTextColumnFilter',
+        floatingFilter: true,
+      },
+      {
+        field: 'etaWh',
+        headerName: formatKoEnInline(L.etaWh),
+        editable: !readOnly,
+        width: 132,
+        filter: 'agTextColumnFilter',
+        floatingFilter: true,
+      },
+      {
+        field: 'deliveryLocation',
+        headerName: formatKoEnInline(L.deliveryLocation),
+        editable: !readOnly,
+        flex: 1,
+        minWidth: 120,
+        filter: 'agTextColumnFilter',
+        floatingFilter: true,
+        cellClass: (p) => deliveryLocationToneClass(p.value),
+      },
+      {
+        field: 'arrived',
+        headerName: formatKoEnInline(L.arrived),
+        editable: !readOnly,
+        width: 92,
+        cellRenderer: 'agCheckboxCellRenderer',
+        filter: false,
+      },
+      {
+        field: 'remark',
+        headerName: formatKoEnInline(L.remark),
+        editable: !readOnly,
+        minWidth: 120,
+        filter: 'agTextColumnFilter',
+        floatingFilter: true,
+      },
+      {
+        field: 'tcTechNo',
+        headerName: formatKoEnInline(L.tcTechNo),
+        editable: !readOnly,
+        width: 110,
+        filter: 'agTextColumnFilter',
+        floatingFilter: true,
+      },
+      {
+        colId: 'actions',
+        headerName: formatKoEnInline(L.transitActionCol),
+        width: 76,
+        pinned: 'right',
+        sortable: false,
+        filter: false,
+        floatingFilter: false,
+        suppressMovable: true,
+        cellRenderer: 'TransitDeleteRenderer',
+      },
+    ],
+    [readOnly],
+  )
+
+  const historyColumnDefs = useMemo(
+    () => [
+      {
+        field: 'containerNo',
+        headerName: formatKoEnInline(L.containerNo),
+        editable: false,
+        minWidth: 100,
+        filter: 'agTextColumnFilter',
+        floatingFilter: true,
+      },
+      {
+        field: 'modelName',
+        headerName: formatKoEnInline(L.model),
+        editable: false,
+        minWidth: 96,
+        filter: 'agTextColumnFilter',
+        floatingFilter: true,
+      },
+      {
+        field: 'partNo',
+        headerName: formatKoEnInline(L.partNo),
+        editable: false,
+        minWidth: 96,
+        filter: 'agTextColumnFilter',
+        floatingFilter: true,
+      },
+      {
+        field: 'qty',
+        headerName: formatKoEnInline(L.qty),
+        editable: false,
+        width: 80,
+        filter: 'agNumberColumnFilter',
+        floatingFilter: true,
+        type: 'numericColumn',
+      },
+      {
+        field: 'etdTcTech',
+        headerName: formatKoEnInline(L.etdTcTech),
+        editable: false,
+        width: 120,
+        filter: 'agTextColumnFilter',
+        floatingFilter: true,
+      },
+      {
+        field: 'etdPort',
+        headerName: formatKoEnInline(L.etdPort),
+        editable: false,
+        width: 120,
+        filter: 'agTextColumnFilter',
+        floatingFilter: true,
+      },
+      {
+        field: 'etaPort',
+        headerName: formatKoEnInline(L.etaPort),
+        editable: false,
+        width: 120,
+        filter: 'agTextColumnFilter',
+        floatingFilter: true,
+      },
+      {
+        field: 'etaWhDisplay',
+        headerName: formatKoEnInline(L.etaWh),
+        editable: false,
+        width: 120,
+        filter: 'agTextColumnFilter',
+        floatingFilter: true,
+      },
+      {
+        field: 'deliveryLocation',
+        headerName: formatKoEnInline(L.deliveryLocation),
+        editable: false,
+        flex: 1,
+        minWidth: 110,
+        filter: 'agTextColumnFilter',
+        floatingFilter: true,
+        cellClass: (p) => deliveryLocationToneClass(p.value),
+      },
+      {
+        colId: 'receiptCancelPick',
+        headerName: formatKoEnInline(L.receiptCancelColumn),
+        width: 56,
+        sortable: false,
+        filter: false,
+        suppressMovable: true,
+        cellRenderer: 'TransitReceiptPickRenderer',
+      },
+      {
+        field: 'receiptDateDisplay',
+        headerName: formatKoEnInline(L.receiptDateCol),
+        editable: false,
+        width: 112,
+        filter: 'agTextColumnFilter',
+        floatingFilter: true,
+      },
+      {
+        field: 'remark',
+        headerName: formatKoEnInline(L.remark),
+        editable: false,
+        minWidth: 100,
+        filter: 'agTextColumnFilter',
+        floatingFilter: true,
+      },
+      {
+        field: 'receivedBy',
+        headerName: formatKoEnInline(L.receivedByCol),
+        editable: false,
+        width: 100,
+        filter: 'agTextColumnFilter',
+        floatingFilter: true,
+      },
+      {
+        field: 'receivedAtDisplay',
+        headerName: formatKoEnInline(L.receivedAtCol),
+        editable: false,
+        width: 148,
+        filter: 'agTextColumnFilter',
+        floatingFilter: true,
+      },
+    ],
+    [],
+  )
+
+  const defaultColDef = useMemo(
+    () => ({
+      sortable: true,
+      resizable: true,
+      singleClickEdit: true,
+    }),
+    [],
+  )
+
+  const getRowId = useCallback((p) => transitRowIdKey(p.data?.id), [])
+
+  const getRowClass = useCallback(
+    (p) => (transitContainerBands[p.data?.__dispIdx] ? 'transit-page__row--band' : undefined),
+    [transitContainerBands],
+  )
+
+  const onGridReady = useCallback((e) => {
+    gridApiRef.current = e.api
+  }, [])
+
+  const onCellValueChanged = useCallback(
+    (e) => {
+      if (readOnly || isHistory) return
+      const f = e.colDef?.field
+      const id = e.data?.id
+      if (!f || !id || f === '__dispIdx') return
+      let v = e.newValue
+      if (f === 'qty') v = Math.max(0, Number(v) || 0)
+      else if (f === 'arrived') v = !!v
+      else if (f === 'containerNo' || f === 'partNo' || f === 'remark' || f === 'tcTechNo') v = String(v ?? '')
+      else if (f === 'modelName') v = normalizeModel(v)
+      else if (f === 'etdTcTech' || f === 'etdPort' || f === 'etaPort' || f === 'etaWh') {
+        const s = String(v ?? '').trim()
+        v = s ? parseDateForInput(s) || s : ''
+      } else if (f === 'deliveryLocation') v = String(v ?? '')
+      updateRow(id, { [f]: v })
+    },
+    [readOnly, isHistory, updateRow],
+  )
+
+  const applyTransitClipboardPaste = useCallback(
+    (api, text) => {
+      if (readOnly || isHistory) return
+      let matrix = matrixFromClipboardText(text)
+      if (matrix.length && String(matrix[0]?.[0] ?? '').toLowerCase().includes('container')) {
+        matrix = matrix.slice(1)
+      }
+      if (!matrix.length) return
+      const cell = api.getFocusedCell()
+      if (!cell) return
+      const node = api.getDisplayedRowAtIndex(cell.rowIndex)
+      if (!node?.data?.id) return
+      const colId = cell.column.getColId()
+      const pasteStartCol = TRANSIT_PASTE_FIELDS.includes(colId) ? TRANSIT_PASTE_FIELDS.indexOf(colId) : 0
+      const dispRow = displayedActive.findIndex((r) => r.id === node.data.id)
+      if (dispRow < 0) return
+      setDraft((prev) => applyTransitPasteFromDisplay(prev, matrix, dispRow, pasteStartCol, appliedSearch))
+      setExcelMsg(formatKoEn(L.excelUploadApplied))
+      setTimeout(() => setExcelMsg(''), 2500)
+    },
+    [readOnly, isHistory, displayedActive, appliedSearch, setDraft],
+  )
+
+  const onCellKeyDown = useCallback(
+    (e) => {
+      const ev = e.event
+      if (!(ev.ctrlKey || ev.metaKey)) return
+      const k = String(ev.key || '').toLowerCase()
+      if (k === 'c') {
+        ev.preventDefault()
+        const colIds = isHistory ? transitHistoryCopyColIds : TRANSIT_PASTE_FIELDS
+        const tsv = copyGridSelectionAsTsv(e.api, colIds)
+        if (tsv) void navigator.clipboard.writeText(tsv).catch(() => {})
+        return
+      }
+      if (k === 'v' && !readOnly && !isHistory) {
+        ev.preventDefault()
+        void navigator.clipboard.readText().then((t) => applyTransitClipboardPaste(e.api, t))
+      }
+    },
+    [readOnly, isHistory, transitHistoryCopyColIds, applyTransitClipboardPaste],
+  )
+
+  useLayoutEffect(() => {
+    const api = gridApiRef.current
+    if (!api || !isHistory) return
+    api.refreshCells({ columns: ['receiptCancelPick'], force: true })
+  }, [receiptCancelPickIds, isHistory])
 
   const transitTabBar = (
     <div className="transit-page__tabs transit-mobile__tabs" role="tablist" aria-label="In-transit views">
@@ -849,346 +1243,41 @@ export default function InTransitPage({
         )}
       </header>
 
-      <div className="transit-page__table-wrap page__table">
-        {!isHistory ? (
-          <table ref={transitTableRef} className="transit-page__table">
-            <colgroup>
-              <col className="transit-page__col--container" />
-              <col className="transit-page__col--model" />
-              <col className="transit-page__col--part" />
-              <col className="transit-page__col--qty" />
-              <col className="transit-page__col--date" />
-              <col className="transit-page__col--date" />
-              <col className="transit-page__col--date" />
-              <col className="transit-page__col--date-eta-wh" />
-              <col className="transit-page__col--delivery" />
-              <col className="transit-page__col--arrived" />
-              <col className="transit-page__col--remark" />
-              <col className="transit-page__col--tctech" />
-              <col className="transit-page__col--actions" />
-            </colgroup>
-            <thead>
-              <tr>
-                <th>
-                  <BilingualLabel label={L.containerNo} />
-                </th>
-                <th>
-                  <BilingualLabel label={L.model} />
-                </th>
-                <th>
-                  <BilingualLabel label={L.partNo} />
-                </th>
-                <th>
-                  <BilingualLabel label={L.qty} />
-                </th>
-                <th>
-                  <BilingualLabel label={L.etdTcTech} />
-                </th>
-                <th>
-                  <BilingualLabel label={L.etdPort} />
-                </th>
-                <th>
-                  <BilingualLabel label={L.etaPort} />
-                </th>
-                <th>
-                  <BilingualLabel label={L.etaWh} />
-                </th>
-                <th>
-                  <BilingualLabel label={L.deliveryLocation} />
-                </th>
-                <th>
-                  <BilingualLabel label={L.arrived} />
-                </th>
-                <th>
-                  <BilingualLabel label={L.remark} />
-                </th>
-                <th>
-                  <BilingualLabel label={L.tcTechNo} />
-                </th>
-                <th>
-                  <BilingualLabel label={L.transitActionCol} />
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {displayedRows.map((row, rowIdx) => (
-                <tr
-                  key={row.id}
-                  className={transitContainerBands[rowIdx] ? 'transit-page__row--band' : ''}
-                >
-                  <td>
-                    <input
-                      className="cell-input"
-                      readOnly={readOnly}
-                      data-excel-paste
-                      data-excel-row={rowIdx}
-                      data-excel-col={0}
-                      value={row.containerNo}
-                      onChange={(e) => updateRow(row.id, { containerNo: e.target.value })}
-                    />
-                  </td>
-                  <td>
-                    <input
-                      className="cell-input"
-                      readOnly={readOnly}
-                      data-excel-paste
-                      data-excel-row={rowIdx}
-                      data-excel-col={1}
-                      value={row.modelName}
-                      onChange={(e) => updateRow(row.id, { modelName: e.target.value })}
-                    />
-                  </td>
-                  <td>
-                    <input
-                      className="cell-input"
-                      readOnly={readOnly}
-                      data-excel-paste
-                      data-excel-row={rowIdx}
-                      data-excel-col={2}
-                      value={row.partNo}
-                      onChange={(e) => updateRow(row.id, { partNo: e.target.value })}
-                    />
-                  </td>
-                  <td>
-                    <input
-                      className="cell-input cell-input--num"
-                      readOnly={readOnly}
-                      data-excel-paste
-                      data-excel-row={rowIdx}
-                      data-excel-col={3}
-                      type="number"
-                      value={row.qty}
-                      onChange={(e) => updateRow(row.id, { qty: Number(e.target.value) || 0 })}
-                    />
-                  </td>
-                  <td>
-                    <input
-                      className="cell-input cell-input--date"
-                      readOnly={readOnly}
-                      data-excel-paste
-                      data-excel-row={rowIdx}
-                      data-excel-col={4}
-                      type="date"
-                      value={row.etdTcTech || ''}
-                      onChange={(e) => updateRow(row.id, { etdTcTech: e.target.value })}
-                    />
-                  </td>
-                  <td>
-                    <input
-                      className="cell-input cell-input--date"
-                      readOnly={readOnly}
-                      data-excel-paste
-                      data-excel-row={rowIdx}
-                      data-excel-col={5}
-                      type="date"
-                      value={row.etdPort || ''}
-                      onChange={(e) => updateRow(row.id, { etdPort: e.target.value })}
-                    />
-                  </td>
-                  <td>
-                    <input
-                      className="cell-input cell-input--date"
-                      readOnly={readOnly}
-                      data-excel-paste
-                      data-excel-row={rowIdx}
-                      data-excel-col={6}
-                      type="date"
-                      value={row.etaPort || ''}
-                      onChange={(e) => updateRow(row.id, { etaPort: e.target.value })}
-                    />
-                  </td>
-                  <td>
-                    <input
-                      className="cell-input cell-input--date cell-input--date-eta-wh"
-                      readOnly={readOnly}
-                      data-excel-paste
-                      data-excel-row={rowIdx}
-                      data-excel-col={7}
-                      type="date"
-                      lang="en-CA"
-                      value={row.etaWh || ''}
-                      onChange={(e) => updateRow(row.id, { etaWh: e.target.value })}
-                    />
-                  </td>
-                  <td>
-                    <input
-                      className={`cell-input ${deliveryLocationToneClass(row.deliveryLocation)}`.trim()}
-                      readOnly={readOnly}
-                      data-excel-paste
-                      data-excel-row={rowIdx}
-                      data-excel-col={8}
-                      value={row.deliveryLocation ?? ''}
-                      onChange={(e) =>
-                        updateRow(row.id, { deliveryLocation: e.target.value })
-                      }
-                    />
-                  </td>
-                  <td className="cell--center">
-                    <input
-                      type="checkbox"
-                      disabled={readOnly}
-                      data-excel-paste
-                      data-excel-row={rowIdx}
-                      data-excel-col={9}
-                      checked={!!row.arrived}
-                      onChange={(e) => updateRow(row.id, { arrived: e.target.checked })}
-                      title={formatKoEnInline(L.transitArrivedSaveHint)}
-                    />
-                  </td>
-                  <td className="transit-page__td--remark">
-                    <input
-                      className="cell-input transit-page__cell-input--remark"
-                      readOnly={readOnly}
-                      data-excel-paste
-                      data-excel-row={rowIdx}
-                      data-excel-col={10}
-                      value={row.remark ?? ''}
-                      onChange={(e) => updateRow(row.id, { remark: e.target.value })}
-                    />
-                  </td>
-                  <td>
-                    <input
-                      className="cell-input transit-page__cell-input--tctech"
-                      readOnly={readOnly}
-                      data-excel-paste
-                      data-excel-row={rowIdx}
-                      data-excel-col={11}
-                      value={row.tcTechNo ?? ''}
-                      onChange={(e) => updateRow(row.id, { tcTechNo: e.target.value })}
-                    />
-                  </td>
-                  <td>
-                    <button
-                      type="button"
-                      className="btn btn--ghost transit-page__btn-del"
-                      disabled={readOnly}
-                      onClick={() => requestDeleteRow(row.id)}
-                    >
-                      <BilingualLabel label={L.transitRowDelete} as="span" />
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+      <div className="transit-page__table-wrap page__table transit-page__ag-wrap">
+        {isHistory && displayedHistory.length === 0 ? (
+          <p className="transit-page__empty" style={{ padding: '1rem' }}>
+            <BilingualLabel label={L.transitHistoryEmpty} as="span" />
+          </p>
         ) : (
-          <table ref={transitTableRef} className="transit-page__table transit-page__table--history">
-            <colgroup>
-              <col className="transit-page__col--container" />
-              <col className="transit-page__col--model" />
-              <col className="transit-page__col--part" />
-              <col className="transit-page__col--qty" />
-              <col className="transit-page__col--date" />
-              <col className="transit-page__col--date" />
-              <col className="transit-page__col--date" />
-              <col className="transit-page__col--date-eta-wh" />
-              <col className="transit-page__col--delivery" />
-              <col className="transit-page__col--arrived" />
-              <col className="transit-page__col--date" />
-              <col className="transit-page__col--remark" />
-              <col className="transit-page__col--meta" />
-              <col className="transit-page__col--meta-wide" />
-            </colgroup>
-            <thead>
-              <tr>
-                <th>
-                  <BilingualLabel label={L.containerNo} />
-                </th>
-                <th>
-                  <BilingualLabel label={L.model} />
-                </th>
-                <th>
-                  <BilingualLabel label={L.partNo} />
-                </th>
-                <th>
-                  <BilingualLabel label={L.qty} />
-                </th>
-                <th>
-                  <BilingualLabel label={L.etdTcTech} />
-                </th>
-                <th>
-                  <BilingualLabel label={L.etdPort} />
-                </th>
-                <th>
-                  <BilingualLabel label={L.etaPort} />
-                </th>
-                <th>
-                  <BilingualLabel label={L.etaWh} />
-                </th>
-                <th>
-                  <BilingualLabel label={L.deliveryLocation} />
-                </th>
-                <th className="cell--center">
-                  <BilingualLabel label={L.receiptCancelColumn} />
-                </th>
-                <th>
-                  <BilingualLabel label={L.receiptDateCol} />
-                </th>
-                <th>
-                  <BilingualLabel label={L.remark} />
-                </th>
-                <th>
-                  <BilingualLabel label={L.receivedByCol} />
-                </th>
-                <th>
-                  <BilingualLabel label={L.receivedAtCol} />
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {displayedRows.length === 0 ? (
-                <tr>
-                  <td colSpan={14} className="transit-page__empty">
-                    <BilingualLabel label={L.transitHistoryEmpty} as="span" />
-                  </td>
-                </tr>
-              ) : (
-                displayedRows.map((row, rowIdx) => (
-                  <tr
-                    key={row.id}
-                    className={transitContainerBands[rowIdx] ? 'transit-page__row--band' : undefined}
-                  >
-                    <td className="transit-page__cell-readonly">{row.containerNo ?? ''}</td>
-                    <td className="transit-page__cell-readonly">{row.modelName ?? ''}</td>
-                    <td className="transit-page__cell-readonly">
-                      <code>{row.partNo ?? ''}</code>
-                    </td>
-                    <td className="transit-page__cell-readonly cell--num">
-                      {row.qty ?? ''}
-                    </td>
-                    <td className="transit-page__cell-readonly">{row.etdTcTech ?? ''}</td>
-                    <td className="transit-page__cell-readonly">{row.etdPort ?? ''}</td>
-                    <td className="transit-page__cell-readonly">{row.etaPort ?? ''}</td>
-                    <td className="transit-page__cell-readonly">{formatEtaWhDisplay(row.etaWh)}</td>
-                    <td
-                      className={`transit-page__cell-readonly ${deliveryLocationToneClass(
-                        row.deliveryLocation,
-                      )}`.trim()}
-                    >
-                      {row.deliveryLocation ?? ''}
-                    </td>
-                    <td className="cell--center">
-                      <input
-                        type="checkbox"
-                        disabled={readOnly}
-                        checked={receiptCancelPickIds.has(transitRowIdKey(row.id))}
-                        onChange={() => toggleReceiptCancelPick(row.id)}
-                        aria-label={formatKoEnInline(L.receiptCancelPickRow)}
-                      />
-                    </td>
-                    <td className="transit-page__cell-readonly">{row.receiptDate ?? '—'}</td>
-                    <td className="transit-page__cell-readonly transit-page__td--remark">
-                      {row.remark ?? ''}
-                    </td>
-                    <td className="transit-page__cell-readonly">{row.receivedBy ?? '—'}</td>
-                    <td className="transit-page__cell-readonly transit-page__cell--mono">
-                      {formatProcessedAt(row.receivedAtIso)}
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
+          <div className="ag-theme-quartz tc-inv-ag-shell tc-inv-ag-shell--fill">
+            <AgGridReact
+              key={viewMode}
+              rowData={isHistory ? historyRowData : activeRowData}
+              columnDefs={isHistory ? historyColumnDefs : activeColumnDefs}
+              defaultColDef={defaultColDef}
+              getRowId={getRowId}
+              context={isHistory ? gridContextHistory : gridContextActive}
+              components={{
+                TransitDeleteRenderer,
+                TransitReceiptPickRenderer,
+              }}
+              rowSelection={{
+                mode: 'multiRow',
+                checkboxes: true,
+                headerCheckbox: true,
+                enableClickSelection: true,
+              }}
+              selectionColumnDef={{ width: 40, maxWidth: 44, suppressHeaderMenuButton: true }}
+              suppressCellFocus={false}
+              enableCellTextSelection
+              getRowClass={getRowClass}
+              onGridReady={onGridReady}
+              onCellValueChanged={onCellValueChanged}
+              onCellKeyDown={onCellKeyDown}
+              stopEditingWhenCellsLoseFocus
+              animateRows
+            />
+          </div>
         )}
       </div>
       </>

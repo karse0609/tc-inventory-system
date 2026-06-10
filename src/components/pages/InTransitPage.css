@@ -65,6 +65,32 @@
   background: var(--bg, #fff);
 }
 
+.transit-page__ag-wrap {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.transit-page__ag-wrap .ag-row.transit-page__row--band .ag-cell {
+  background: rgba(37, 99, 235, 0.045);
+}
+
+.transit-page__ag-wrap .ag-row.transit-page__row--band:hover .ag-cell {
+  background: rgba(37, 99, 235, 0.11);
+}
+
+@media (prefers-color-scheme: dark) {
+  .transit-page__ag-wrap .ag-row.transit-page__row--band .ag-cell {
+    background: rgba(96, 165, 250, 0.08);
+  }
+
+  .transit-page__ag-wrap .ag-row.transit-page__row--band:hover .ag-cell {
+    background: rgba(96, 165, 250, 0.12);
+  }
+}
+
 .transit-page__table {
   table-layout: fixed;
   width: 100%;
