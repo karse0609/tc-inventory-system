@@ -1,7 +1,7 @@
 {
   "tcInvExportVersion": 1,
-  "deployedRevision": 7,
-  "exportedAt": "2026-06-09T04:12:58.881Z",
+  "deployedRevision": 8,
+  "exportedAt": "2026-06-10T00:21:07.009Z",
   "app": "tc-inventory-system",
   "payload": {
     "tc-inv-master-items": [
@@ -12,7 +12,7 @@
         "description": "Drive Chasiss",
         "currentStock": 75,
         "unitPrice": 650,
-        "weeklyDemand": 24,
+        "weeklyDemand": 26,
         "safetyStockWeeks": 4,
         "leadTime": 35,
         "status": "Active"
@@ -24,7 +24,7 @@
         "description": "Drive Chasiss",
         "currentStock": 75,
         "unitPrice": 55,
-        "weeklyDemand": 20,
+        "weeklyDemand": 22,
         "safetyStockWeeks": 4,
         "leadTime": 35,
         "status": "Active"
@@ -36,7 +36,7 @@
         "description": "Drive Chasiss",
         "currentStock": 88,
         "unitPrice": 120,
-        "weeklyDemand": 15,
+        "weeklyDemand": 12,
         "safetyStockWeeks": 4,
         "leadTime": 35,
         "status": "Active"
@@ -108,7 +108,7 @@
         "description": "Steer Axle",
         "currentStock": 43,
         "unitPrice": 0,
-        "weeklyDemand": 10,
+        "weeklyDemand": 8,
         "safetyStockWeeks": 4,
         "leadTime": 35,
         "status": "Active"
@@ -120,7 +120,7 @@
         "description": "Rear Axle",
         "currentStock": 28,
         "unitPrice": 0,
-        "weeklyDemand": 10,
+        "weeklyDemand": 8,
         "safetyStockWeeks": 4,
         "leadTime": 35,
         "status": "Active"
@@ -132,7 +132,7 @@
         "description": "Drive Chasiss",
         "currentStock": 52,
         "unitPrice": 0,
-        "weeklyDemand": 10,
+        "weeklyDemand": 8,
         "safetyStockWeeks": 4,
         "leadTime": 35,
         "status": "Active"
