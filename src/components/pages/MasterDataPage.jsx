@@ -1,5 +1,5 @@
-import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
-import { AgGridReact } from 'ag-grid-react'
+import { useCallback, useMemo, useRef, useState } from 'react'
+import useGridNativePaste from '../../hooks/useGridNativePaste'
 import { getEnabledProducts } from '../../config/products'
 import { MIN_MANAGEMENT_WEEKS } from '../../config/inventoryPolicy'
 import { operationsMeta } from '../../data/logisticsSampleData'
@@ -13,10 +13,8 @@ import { useMobileSimpleLayout } from '../../utils/mobileLayout'
 import { normalizeModel } from '../../utils/modelName'
 import { newId } from '../../utils/newId'
 import { inventoryRemoteSyncEnabled } from '../../utils/inventoryRemoteSync'
-import { matrixFromClipboardText, copyGridSelectionAsTsv } from '../../utils/agGridClipboard'
 import PageDataToolbar from '../grid/PageDataToolbar.jsx'
 import BilingualLabel from '../BilingualLabel'
-import '../grid/tc-inv-ag-grid.css'
 import '../logistics/ops.css'
 import './pages.css'
 
@@ -110,19 +108,6 @@ function formatCoverageWeeks(weeks) {
   return `${weeks.toFixed(1)}`
 }
 
-function MasterDeleteRenderer(props) {
-  return (
-    <button
-      type="button"
-      className="btn btn--ghost btn--toolbar"
-      disabled={props.context.readOnly}
-      onClick={() => props.context.onDelete(props.data.id)}
-    >
-      <BilingualLabel label={L.transitRowDelete} as="span" />
-    </button>
-  )
-}
-
 export default function MasterDataPage({
   masterItems: savedMasterItems,
   onPersistMasterItems,
@@ -150,7 +135,7 @@ export default function MasterDataPage({
   const [searchPart, setSearchPart] = useState('')
   const [searchDesc, setSearchDesc] = useState('')
   const [appliedSearch, setAppliedSearch] = useState(() => ({ ...EMPTY_SEARCH }))
-  const gridApiRef = useRef(null)
+  const masterTableRef = useRef(null)
 
   const asOfDate = opsMeta?.asOfDate ?? operationsMeta.asOfDate
 
@@ -175,15 +160,6 @@ export default function MasterDataPage({
     return m
   }, [masterItems, deliveryPlans, inTransit, asOfDate])
 
-  const rowData = useMemo(
-    () =>
-      displayedRows.map((row) => ({
-        ...row,
-        coverageDisplay: formatCoverageWeeks(itemStatusById.get(row.id)?.coverageWeeks),
-      })),
-    [displayedRows, itemStatusById],
-  )
-
   function flashSaved() {
     setSaveHint(
       formatKoEn(inventoryRemoteSyncEnabled() ? L.savedAfterEditWithRemote : L.savedToBrowserStorage),
@@ -197,15 +173,12 @@ export default function MasterDataPage({
     flashSaved()
   }
 
-  const updateRow = useCallback(
-    (id, patch) => {
-      if (readOnly) return
-      const next = { ...patch }
-      if ('modelName' in next) next.modelName = normalizeModel(next.modelName)
-      setMasterItems((rows) => rows.map((r) => (r.id === id ? { ...r, ...next } : r)))
-    },
-    [readOnly, setMasterItems],
-  )
+  function updateRow(id, patch) {
+    if (readOnly) return
+    const next = { ...patch }
+    if ('modelName' in next) next.modelName = normalizeModel(next.modelName)
+    setMasterItems((rows) => rows.map((r) => (r.id === id ? { ...r, ...next } : r)))
+  }
 
   function handleAdd() {
     if (readOnly) return
@@ -226,18 +199,15 @@ export default function MasterDataPage({
     ])
   }
 
-  const handleDeleteCb = useCallback(
-    (id) => {
-      if (readOnly) return
-      setMasterItems((rows) => rows.filter((r) => r.id !== id))
-      setSelected((s) => {
-        const n = new Set(s)
-        n.delete(id)
-        return n
-      })
-    },
-    [readOnly, setMasterItems],
-  )
+  function handleDelete(id) {
+    if (readOnly) return
+    setMasterItems((rows) => rows.filter((r) => r.id !== id))
+    setSelected((s) => {
+      const n = new Set(s)
+      n.delete(id)
+      return n
+    })
+  }
 
   function applySearchFromForm() {
     setAppliedSearch({
@@ -253,6 +223,51 @@ export default function MasterDataPage({
     setSearchDesc('')
     setAppliedSearch({ ...EMPTY_SEARCH })
   }
+
+  const toggleSelect = useCallback((id) => {
+    setSelected((s) => {
+      const n = new Set(s)
+      if (n.has(id)) n.delete(id)
+      else n.add(id)
+      return n
+    })
+  }, [])
+
+  const toggleSelectAll = useCallback(() => {
+    setSelected((s) => {
+      if (s.size === displayedRows.length && displayedRows.length > 0) return new Set()
+      return new Set(displayedRows.map((r) => r.id))
+    })
+  }, [displayedRows])
+
+  const onMasterPasteMatrix = useCallback(
+    (matrix, cell) => {
+      if (readOnly) return
+      const dispRow = Number(cell.dataset.excelRow)
+      const dispCol = Number(cell.dataset.excelCol)
+      if (!Number.isFinite(dispRow) || !Number.isFinite(dispCol)) return
+      const m = matrixSkipHeaderRow(matrix)
+      if (!m.length) return
+      setExcelMsg('')
+      setMasterItems((prev) => {
+        const out = applyMasterPasteFromDisplay(prev, m, dispRow, dispCol, appliedSearch)
+        queueMicrotask(() => {
+          setInvalidIds(out.bad)
+          setExcelMsg(
+            out.errs.length ? `!${out.errs.join('\n')}` : formatKoEn(L.excelUploadApplied),
+          )
+        })
+        return out.next
+      })
+    },
+    [appliedSearch, readOnly],
+  )
+
+  useGridNativePaste({
+    tableRef: masterTableRef,
+    enabled: !isMobile && !readOnly,
+    onPasteMatrix: onMasterPasteMatrix,
+  })
 
   const applyMasterMatrix = useCallback((matrix, startRowIdx, startColIdx = 0) => {
     if (readOnly) return
@@ -323,7 +338,7 @@ export default function MasterDataPage({
 
     setInvalidIds(bad)
     setExcelMsg(errs.length ? `!${errs.join('\n')}` : formatKoEn(L.excelUploadApplied))
-  }, [readOnly, setMasterItems])
+  }, [readOnly])
 
   async function handleMasterUpload(ev) {
     if (readOnly) return
@@ -372,227 +387,8 @@ export default function MasterDataPage({
     setTimeout(() => setExcelMsg(''), 2500)
   }
 
-  const gridContext = useMemo(
-    () => ({ readOnly, onDelete: handleDeleteCb }),
-    [readOnly, handleDeleteCb],
-  )
-
-  const modelPickValues = useMemo(() => products.map((p) => p.modelName), [products])
-
-  const columnDefs = useMemo(
-    () => [
-      {
-        field: 'modelName',
-        headerName: formatKoEnInline(L.model),
-        editable: !readOnly,
-        minWidth: 120,
-        filter: 'agTextColumnFilter',
-        floatingFilter: true,
-        cellEditor: 'agRichSelectCellEditor',
-        cellEditorParams: { values: modelPickValues, allowTyping: true, filterList: true },
-      },
-      {
-        field: 'partNo',
-        headerName: formatKoEnInline(L.partNo),
-        editable: !readOnly,
-        minWidth: 110,
-        filter: 'agTextColumnFilter',
-        floatingFilter: true,
-      },
-      {
-        field: 'description',
-        headerName: formatKoEnInline(L.description),
-        editable: !readOnly,
-        flex: 1,
-        minWidth: 160,
-        filter: 'agTextColumnFilter',
-        floatingFilter: true,
-      },
-      {
-        field: 'currentStock',
-        headerName: formatKoEnInline(L.currentStock),
-        editable: !readOnly,
-        width: 120,
-        filter: 'agNumberColumnFilter',
-        floatingFilter: true,
-        type: 'numericColumn',
-      },
-      {
-        field: 'coverageDisplay',
-        headerName: formatKoEnInline(L.coverageWeeks),
-        editable: false,
-        width: 110,
-        filter: 'agTextColumnFilter',
-        floatingFilter: true,
-        tooltipField: 'coverageDisplay',
-      },
-      {
-        field: 'weeklyDemand',
-        headerName: formatKoEnInline(L.weeklyDemand),
-        editable: !readOnly,
-        width: 120,
-        filter: 'agNumberColumnFilter',
-        floatingFilter: true,
-        type: 'numericColumn',
-      },
-      {
-        field: 'safetyStockWeeks',
-        headerName: formatKoEnInline(L.safetyStockWeeks),
-        editable: !readOnly,
-        width: 110,
-        filter: 'agNumberColumnFilter',
-        floatingFilter: true,
-        type: 'numericColumn',
-      },
-      {
-        field: 'leadTime',
-        headerName: formatKoEnInline(L.leadTimeDays),
-        editable: !readOnly,
-        width: 100,
-        filter: 'agNumberColumnFilter',
-        floatingFilter: true,
-        type: 'numericColumn',
-      },
-      {
-        field: 'status',
-        headerName: formatKoEnInline(L.status),
-        editable: !readOnly,
-        width: 120,
-        filter: 'agTextColumnFilter',
-        floatingFilter: true,
-        cellEditor: 'agSelectCellEditor',
-        cellEditorParams: { values: ['Active', 'Inactive'] },
-      },
-      {
-        colId: 'delete',
-        headerName: '',
-        width: 88,
-        pinned: 'right',
-        sortable: false,
-        filter: false,
-        floatingFilter: false,
-        suppressMovable: true,
-        cellRenderer: 'MasterDeleteRenderer',
-      },
-    ],
-    [readOnly, modelPickValues],
-  )
-
-  const defaultColDef = useMemo(
-    () => ({
-      sortable: true,
-      resizable: true,
-      suppressHeaderMenuButton: false,
-      singleClickEdit: true,
-    }),
-    [],
-  )
-
-  const onCellValueChanged = useCallback(
-    (e) => {
-      if (readOnly) return
-      const f = e.colDef?.field
-      if (!f || f === 'coverageDisplay') return
-      const id = e.data?.id
-      if (!id) return
-      let v = e.newValue
-      if (f === 'currentStock' || f === 'weeklyDemand') {
-        v = Math.max(0, Number(v) || 0)
-      } else if (f === 'safetyStockWeeks' || f === 'leadTime') {
-        v = Math.max(0, Math.round(Number(v) || 0))
-      } else if (f === 'status') {
-        v = v === 'Inactive' ? 'Inactive' : 'Active'
-      } else if (f === 'modelName') {
-        v = normalizeModel(v)
-      } else if (f === 'partNo' || f === 'description') {
-        v = String(v ?? '')
-      }
-      updateRow(id, { [f]: v })
-    },
-    [readOnly, updateRow],
-  )
-
-  const applyClipboardPaste = useCallback(
-    (api, text) => {
-      if (readOnly) return
-      const matrix = matrixSkipHeaderRow(matrixFromClipboardText(text))
-      if (!matrix.length) return
-      const cell = api.getFocusedCell()
-      if (!cell) return
-      const node = api.getDisplayedRowAtIndex(cell.rowIndex)
-      if (!node?.data?.id) return
-      const colId = cell.column.getColId()
-      const pasteStartCol = MASTER_COLS.includes(colId) ? MASTER_COLS.indexOf(colId) : 0
-      const dispRow = displayedRows.findIndex((r) => r.id === node.data.id)
-      if (dispRow < 0) return
-      setExcelMsg('')
-      setMasterItems((prev) => {
-        const out = applyMasterPasteFromDisplay(prev, matrix, dispRow, pasteStartCol, appliedSearch)
-        queueMicrotask(() => {
-          setInvalidIds(out.bad)
-          setExcelMsg(
-            out.errs.length ? `!${out.errs.join('\n')}` : formatKoEn(L.excelUploadApplied),
-          )
-        })
-        return out.next
-      })
-    },
-    [readOnly, appliedSearch, displayedRows, setMasterItems],
-  )
-
-  const onCellKeyDown = useCallback(
-    (e) => {
-      if (readOnly) return
-      const ev = e.event
-      if (!(ev.ctrlKey || ev.metaKey)) return
-      const k = String(ev.key || '').toLowerCase()
-      if (k === 'c') {
-        ev.preventDefault()
-        const tsv = copyGridSelectionAsTsv(e.api, MASTER_COLS)
-        if (tsv) void navigator.clipboard.writeText(tsv).catch(() => {})
-        return
-      }
-      if (k === 'v') {
-        ev.preventDefault()
-        void navigator.clipboard.readText().then((t) => applyClipboardPaste(e.api, t))
-      }
-    },
-    [readOnly, applyClipboardPaste],
-  )
-
-  const onSelectionChanged = useCallback((e) => {
-    const ids = new Set(e.api.getSelectedRows().map((r) => r.id))
-    setSelected(ids)
-  }, [])
-
-  const getRowId = useCallback((p) => String(p.data.id), [])
-
-  const getRowStyle = useCallback(
-    (p) => (invalidIds.has(p.data?.id) ? { backgroundColor: 'rgba(254, 226, 226, 0.45)' } : undefined),
-    [invalidIds],
-  )
-
-  const onGridReady = useCallback((e) => {
-    gridApiRef.current = e.api
-  }, [])
-
-  useLayoutEffect(() => {
-    const api = gridApiRef.current
-    if (!api) return
-    api.forEachNode((node) => {
-      const on = node.data && selected.has(node.data.id)
-      node.setSelected(!!on, false, true)
-    })
-  }, [selected, rowData])
-
-  useEffect(() => {
-    const api = gridApiRef.current
-    if (!api) return
-    api.refreshCells({ columns: ['coverageDisplay'], force: true })
-  }, [itemStatusById])
-
   return (
-    <div className="page page--wide page--ag-master">
+    <div className="page page--wide">
       <header className="page__header">
         <h1>
           <BilingualLabel label={L.warehouseInventoryScreen} as="span" />
@@ -616,9 +412,9 @@ export default function MasterDataPage({
           message={excelMsg}
           extra={
             readOnly ? null : (
-              <button type="button" className="btn btn--ghost btn--toolbar" onClick={handleAdd}>
-                <BilingualLabel label={L.warehouseAddItem} as="span" />
-              </button>
+            <button type="button" className="btn btn--ghost btn--toolbar" onClick={handleAdd}>
+              <BilingualLabel label={L.warehouseAddItem} as="span" />
+            </button>
             )
           }
           searchSlot={
@@ -682,41 +478,196 @@ export default function MasterDataPage({
         )}
       </header>
 
-      {!isMobile ? (
-        <div className="ag-theme-quartz tc-inv-ag-shell tc-inv-ag-shell--fill">
-          <AgGridReact
-            rowData={rowData}
-            columnDefs={columnDefs}
-            defaultColDef={defaultColDef}
-            getRowId={getRowId}
-            context={gridContext}
-            components={{ MasterDeleteRenderer: MasterDeleteRenderer }}
-            rowSelection={{
-              mode: 'multiRow',
-              checkboxes: true,
-              headerCheckbox: true,
-              enableClickSelection: true,
-            }}
-            selectionColumnDef={{ width: 44, maxWidth: 48, suppressHeaderMenuButton: true }}
-            suppressCellFocus={false}
-            enableCellTextSelection
-            getRowStyle={getRowStyle}
-            onGridReady={onGridReady}
-            onCellValueChanged={onCellValueChanged}
-            onCellKeyDown={onCellKeyDown}
-            onSelectionChanged={onSelectionChanged}
-            stopEditingWhenCellsLoseFocus
-            animateRows
-          />
-        </div>
-      ) : (
-        <p className="page__hint">
-          {formatKoEn({
-            ko: '창고 재고 그리드는 넓은 화면에서 이용할 수 있습니다.',
-            en: 'Open the warehouse grid on a wider screen for the full spreadsheet view.',
-          })}
-        </p>
-      )}
+      <div className="table-wrap page__table">
+        <table ref={masterTableRef} className="ops-table master-table">
+          <thead>
+            <tr>
+              <th className="cell--center" style={{ width: '2rem' }}>
+                <input
+                  type="checkbox"
+                  aria-label="Select all"
+                  disabled={readOnly}
+                  checked={
+                    displayedRows.length > 0 && selected.size === displayedRows.length
+                  }
+                  onChange={toggleSelectAll}
+                />
+              </th>
+              <th>
+                <BilingualLabel label={L.model} as="span" />
+              </th>
+              <th>
+                <BilingualLabel label={L.partNo} as="span" />
+              </th>
+              <th>
+                <BilingualLabel label={L.description} as="span" />
+              </th>
+              <th>
+                <BilingualLabel label={L.currentStock} as="span" />
+              </th>
+              <th>
+                <BilingualLabel label={L.coverageWeeks} as="span" />
+              </th>
+              <th>
+                <BilingualLabel label={L.weeklyDemand} as="span" />
+              </th>
+              <th>
+                <BilingualLabel label={L.safetyStockWeeks} as="span" />
+              </th>
+              <th>
+                <BilingualLabel label={L.leadTimeDays} as="span" />
+              </th>
+              <th>
+                <BilingualLabel label={L.status} as="span" />
+              </th>
+              <th />
+            </tr>
+          </thead>
+          <tbody>
+            {displayedRows.map((row, rowIdx) => {
+              const st = itemStatusById.get(row.id)
+              const cov = st?.coverageWeeks
+              return (
+                <tr
+                  key={row.id}
+                  className={invalidIds.has(row.id) ? 'row--excel-invalid' : undefined}
+                >
+                  <td className="cell--center">
+                    <input
+                      type="checkbox"
+                      disabled={readOnly}
+                      checked={selected.has(row.id)}
+                      onChange={() => toggleSelect(row.id)}
+                      aria-label={`Select ${row.partNo}`}
+                    />
+                  </td>
+                  <td>
+                    <input
+                      className="cell-input"
+                      list="model-options"
+                      value={row.modelName}
+                      readOnly={readOnly}
+                      data-excel-paste
+                      data-excel-row={rowIdx}
+                      data-excel-col={0}
+                      onChange={(e) => updateRow(row.id, { modelName: e.target.value })}
+                    />
+                  </td>
+                  <td>
+                    <input
+                      className="cell-input"
+                      value={row.partNo}
+                      readOnly={readOnly}
+                      data-excel-paste
+                      data-excel-row={rowIdx}
+                      data-excel-col={1}
+                      onChange={(e) => updateRow(row.id, { partNo: e.target.value })}
+                    />
+                  </td>
+                  <td>
+                    <input
+                      className="cell-input master-table__desc"
+                      value={row.description}
+                      readOnly={readOnly}
+                      data-excel-paste
+                      data-excel-row={rowIdx}
+                      data-excel-col={2}
+                      onChange={(e) => updateRow(row.id, { description: e.target.value })}
+                    />
+                  </td>
+                  <td>
+                    <input
+                      className="cell-input cell-input--num"
+                      type="number"
+                      value={row.currentStock}
+                      readOnly={readOnly}
+                      data-excel-paste
+                      data-excel-row={rowIdx}
+                      data-excel-col={3}
+                      onChange={(e) =>
+                        updateRow(row.id, { currentStock: Number(e.target.value) || 0 })
+                      }
+                    />
+                  </td>
+                  <td className="cell--num cell--muted" title={formatKoEn(L.flowCoverageHeroHint)}>
+                    {formatCoverageWeeks(cov)}
+                  </td>
+                  <td>
+                    <input
+                      className="cell-input cell-input--num"
+                      type="number"
+                      value={row.weeklyDemand}
+                      readOnly={readOnly}
+                      data-excel-paste
+                      data-excel-row={rowIdx}
+                      data-excel-col={4}
+                      onChange={(e) =>
+                        updateRow(row.id, { weeklyDemand: Number(e.target.value) || 0 })
+                      }
+                    />
+                  </td>
+                  <td>
+                    <input
+                      className="cell-input cell-input--num"
+                      type="number"
+                      min={0}
+                      value={row.safetyStockWeeks ?? MIN_MANAGEMENT_WEEKS}
+                      readOnly={readOnly}
+                      data-excel-paste
+                      data-excel-row={rowIdx}
+                      data-excel-col={5}
+                      onChange={(e) =>
+                        updateRow(row.id, {
+                          safetyStockWeeks: Math.max(0, Number(e.target.value) || 0),
+                        })
+                      }
+                    />
+                  </td>
+                  <td>
+                    <input
+                      className="cell-input cell-input--num"
+                      type="number"
+                      min={0}
+                      value={row.leadTime ?? 0}
+                      readOnly={readOnly}
+                      data-excel-paste
+                      data-excel-row={rowIdx}
+                      data-excel-col={6}
+                      onChange={(e) =>
+                        updateRow(row.id, { leadTime: Math.max(0, Number(e.target.value) || 0) })
+                      }
+                    />
+                  </td>
+                  <td>
+                    <select
+                      className="cell-input"
+                      value={row.status}
+                      disabled={readOnly}
+                      data-excel-paste
+                      data-excel-row={rowIdx}
+                      data-excel-col={7}
+                      onChange={(e) => updateRow(row.id, { status: e.target.value })}
+                    >
+                      <option value="Active">Active</option>
+                      <option value="Inactive">Inactive</option>
+                    </select>
+                  </td>
+                  <td>
+                    <button
+                      type="button"
+                      className="btn btn--ghost btn--toolbar"
+                      disabled={readOnly}
+                      onClick={() => handleDelete(row.id)}
+                    >
+                      <BilingualLabel label={L.transitRowDelete} as="span" />
+                    </button>
+                  </td>
+                </tr>
+              )
+            })}
+          </tbody>
+        </table>
+      </div>
 
       <datalist id="model-options">
         {products.map((p) => (

@@ -14,8 +14,6 @@
     "merge:deployed-snapshot": "vite-node scripts/merge-admin-export-to-deployed.mjs"
   },
   "dependencies": {
-    "ag-grid-community": "^35.3.1",
-    "ag-grid-react": "^35.3.1",
     "react": "^19.2.6",
     "react-dom": "^19.2.6",
     "xlsx": "^0.18.5"
