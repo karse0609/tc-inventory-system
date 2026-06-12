@@ -1,7 +1,7 @@
 {
   "tcInvExportVersion": 1,
-  "deployedRevision": 10,
-  "exportedAt": "2026-06-11T00:50:19.172Z",
+  "deployedRevision": 11,
+  "exportedAt": "2026-06-12T01:31:18.166Z",
   "app": "tc-inventory-system",
   "payload": {
     "tc-inv-master-items": [
@@ -10,7 +10,7 @@
         "modelName": "Z45 OSC",
         "partNo": "1272701",
         "description": "Drive Chasiss",
-        "currentStock": 57,
+        "currentStock": 49,
         "unitPrice": 650,
         "weeklyDemand": 26,
         "safetyStockWeeks": 4,
@@ -22,7 +22,7 @@
         "modelName": "Z45 DC",
         "partNo": "229306",
         "description": "Drive Chasiss",
-        "currentStock": 65,
+        "currentStock": 61,
         "unitPrice": 55,
         "weeklyDemand": 22,
         "safetyStockWeeks": 4,
@@ -34,7 +34,7 @@
         "modelName": "Z40",
         "partNo": "110545",
         "description": "Drive Chasiss",
-        "currentStock": 90,
+        "currentStock": 88,
         "unitPrice": 120,
         "weeklyDemand": 12,
         "safetyStockWeeks": 4,
@@ -130,7 +130,7 @@
         "modelName": "Z80",
         "partNo": "237329",
         "description": "Drive Chasiss",
-        "currentStock": 59,
+        "currentStock": 52,
         "unitPrice": 0,
         "weeklyDemand": 8,
         "safetyStockWeeks": 4,
@@ -1250,9 +1250,9 @@
           "modelName": "Z45 DC",
           "partNo": "229306",
           "weekStartDate": "2026-06-08",
-          "qty": 22,
-          "planQty": 22,
-          "confirmedQty": 22,
+          "qty": 26,
+          "planQty": 26,
+          "confirmedQty": 26,
           "locked": false
         },
         {
@@ -1500,9 +1500,9 @@
           "modelName": "Z40",
           "partNo": "110545",
           "weekStartDate": "2026-06-08",
-          "qty": 8,
-          "planQty": 8,
-          "confirmedQty": 8,
+          "qty": 10,
+          "planQty": 10,
+          "confirmedQty": 10,
           "locked": false
         },
         {
@@ -3570,9 +3570,9 @@
           "modelName": "Z80",
           "partNo": "237329",
           "weekStartDate": "2026-06-08",
-          "qty": 5,
-          "planQty": 5,
-          "confirmedQty": 5,
+          "qty": 12,
+          "planQty": 12,
+          "confirmedQty": 12,
           "locked": false
         },
         {
@@ -3826,16 +3826,6 @@
           "locked": false
         },
         {
-          "id": "plan-470acbae-bdc6-4e72-959c-0f31d9967375",
-          "modelName": "Z45 OSC",
-          "partNo": "1272701",
-          "weekStartDate": "2026-06-08",
-          "qty": 26,
-          "planQty": 26,
-          "confirmedQty": 26,
-          "locked": false
-        },
-        {
           "id": "plan-8b7f2114-1a71-4734-9cc9-561ed263d770",
           "modelName": "Z45 OSC",
           "partNo": "1272701",
@@ -4053,6 +4043,16 @@
           "qty": 1,
           "planQty": 1,
           "confirmedQty": 1,
+          "locked": false
+        },
+        {
+          "id": "plan-69379385-1e13-4e2a-ba54-86eea8ec4ac2",
+          "modelName": "Z45 OSC",
+          "partNo": "1272701",
+          "weekStartDate": "2026-06-08",
+          "qty": 34,
+          "planQty": 34,
+          "confirmedQty": 34,
           "locked": false
         }
       ],
