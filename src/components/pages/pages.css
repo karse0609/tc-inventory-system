@@ -2,6 +2,7 @@
   max-width: 1200px;
   margin: 0 auto;
   padding: 1.25rem 1.5rem 3rem;
+  color: var(--text);
 }
 
 .page--wide {
@@ -106,6 +107,12 @@
 tr.row--excel-invalid td {
   outline: 2px solid rgba(220, 38, 38, 0.45);
   background: rgba(254, 226, 226, 0.25);
+}
+
+@media (prefers-color-scheme: dark) {
+  tr.row--excel-invalid td {
+    background: rgba(127, 29, 29, 0.28);
+  }
 }
 
 td.cell--excel-invalid {
@@ -231,7 +238,7 @@ td.cell--excel-invalid {
   border: 1px solid var(--border);
   border-radius: 6px;
   font-size: 0.8rem;
-  background: var(--bg);
+  background: var(--surface);
   color: var(--text-h);
 }
 
@@ -277,7 +284,8 @@ td.cell--excel-invalid {
   align-items: center;
   padding: 0.65rem 1.25rem;
   border-bottom: 1px solid var(--border);
-  background: var(--bg-elevated, var(--bg));
+  background: var(--bg-elevated);
+  color: var(--text);
   position: sticky;
   top: 0;
   z-index: 20;

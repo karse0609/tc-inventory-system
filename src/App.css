@@ -9,6 +9,12 @@
   background: #eef1f5;
 }
 
+@media (prefers-color-scheme: dark) {
+  .app--mobile-shell {
+    background: var(--bg);
+  }
+}
+
 .app--remote-syncing {
   display: flex;
   align-items: center;
@@ -21,26 +27,28 @@
   max-width: 22rem;
   padding: 1.75rem 1.25rem;
   border-radius: 12px;
-  border: 1px solid var(--border, #2a3348);
-  background: var(--surface, #121a2e);
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text-h);
 }
 
 .remote-sync-splash__title {
   margin: 0 0 0.35rem;
   font-weight: 700;
   font-size: 1rem;
+  color: var(--text-h);
 }
 
 .remote-sync-splash__sub {
   margin: 0 0 1rem;
   font-size: 0.82rem;
-  color: var(--muted, #8b96ad);
+  color: var(--muted);
 }
 
 .remote-sync-splash__hint {
   margin: 0 0 0.75rem;
   font-size: 0.8rem;
-  color: var(--muted, #8b96ad);
+  color: var(--muted);
 }
 
 .remote-sync-splash__error {

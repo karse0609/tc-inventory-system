@@ -28,8 +28,8 @@ import BilingualLabel from './BilingualLabel'
 import DashboardCoreKpis from './logistics/DashboardCoreKpis'
 import DashboardRoleGuidance from './logistics/DashboardRoleGuidance'
 import InventoryStatusPanel from './logistics/InventoryStatusPanel'
-import './Dashboard.css'
 import './logistics/ops.css'
+import './Dashboard.css'
 
 function formatInt(n) {
   return new Intl.NumberFormat('ko-KR', { maximumFractionDigits: 0 }).format(

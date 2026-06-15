@@ -140,11 +140,12 @@
 .today-status__card {
   padding: 0.75rem;
   border-radius: 10px;
-  background: var(--bg);
+  background: var(--surface);
   border: 1px solid var(--border);
   display: flex;
   flex-direction: column;
   gap: 0.2rem;
+  color: var(--text);
 }
 
 .today-status__card--primary {

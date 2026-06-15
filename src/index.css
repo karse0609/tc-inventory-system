@@ -1,8 +1,10 @@
 :root {
-  --text: #64748b;
-  --text-h: #0f172a;
-  --muted: #94a3b8;
+  /* 본문·제목: 라이트 배경용 진한 글자 */
+  --text: #374151;
+  --text-h: #111827;
+  --muted: #64748b;
   --bg: #f1f5f9;
+  --bg-elevated: #ffffff;
   --surface: #ffffff;
   --border: #e2e8f0;
   --brand: #1d4ed8;
@@ -22,19 +24,65 @@
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
+  color-scheme: light dark;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --text: #94a3b8;
-    --text-h: #f1f5f9;
-    --muted: #64748b;
+    /* 어두운 배경용 밝은 글자 */
+    --text: #e2e8f0;
+    --text-h: #ffffff;
+    --muted: #cbd5e1;
     --bg: #0f172a;
+    --bg-elevated: #1e293b;
     --surface: #1e293b;
     --border: #334155;
     --brand: #3b82f6;
     --brand-soft: rgba(59, 130, 246, 0.15);
   }
+}
+
+/**
+ * 밝은 카드/패널 위 전용: 진한 본문색이 하위 `var(--text-h)` 등에 상속됩니다.
+ */
+.light-card {
+  --text-h: #111827;
+  --text: #374151;
+  --muted: #64748b;
+  color: var(--text);
+}
+
+/**
+ * 어두운 카드/배너 위 전용: 밝은 본문색이 하위에 상속됩니다.
+ */
+.dark-card {
+  --text-h: #ffffff;
+  --text: #f1f5f9;
+  --muted: #cbd5e1;
+  color: var(--text);
+}
+
+.dark-card .bilingual__en,
+.dark-card .bilingual__en-line {
+  color: var(--muted);
+}
+
+.light-card .bilingual__en,
+.light-card .bilingual__en-line {
+  color: var(--muted);
+}
+
+/* 병기 라벨 기본 대비 (카드 유틸보다 먼저 정의; 더 구체적인 선택자가 덮어씀) */
+.bilingual--stacked .bilingual__ko-line {
+  color: var(--text-h);
+}
+
+.bilingual--stacked .bilingual__en-line {
+  color: var(--muted);
+}
+
+.bilingual__en {
+  color: var(--muted);
 }
 
 *,
@@ -51,6 +99,8 @@ body {
   margin: 0;
   overflow-x: hidden;
   max-width: 100vw;
+  color: var(--text);
+  background: var(--bg);
 }
 
 #root {

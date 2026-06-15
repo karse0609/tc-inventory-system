@@ -13,6 +13,10 @@
   padding: 1.75rem 1.5rem;
 }
 
+.login-page__card.card {
+  color: var(--text);
+}
+
 .login-page__title-block {
   margin: 0 0 0.35rem;
   text-align: center;
@@ -26,7 +30,7 @@
   font-weight: 700;
   line-height: 1.35;
   letter-spacing: -0.02em;
-  color: #0c1a2e;
+  color: var(--text-h);
 }
 
 .login-page__title-en {
@@ -36,17 +40,7 @@
   font-weight: 500;
   line-height: 1.45;
   letter-spacing: 0.01em;
-  color: #64748b;
-}
-
-@media (prefers-color-scheme: dark) {
-  .login-page__title-ko {
-    color: var(--text-h);
-  }
-
-  .login-page__title-en {
-    color: #94a3b8;
-  }
+  color: var(--muted);
 }
 
 .login-page__subtitle {

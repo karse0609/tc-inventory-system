@@ -35,7 +35,10 @@
   padding: 0.85rem 1.1rem;
   border-radius: 12px;
   background: linear-gradient(90deg, var(--brand) 0%, #1e3a8a 100%);
-  color: #fff;
+  --text-h: #ffffff;
+  --text: #f8fafc;
+  --muted: #e2e8f0;
+  color: var(--text);
 }
 
 .dashboard__pilot-main {
@@ -47,20 +50,21 @@
 
 .dashboard__pilot-label,
 .dashboard__pilot-label .bilingual__en {
-  color: rgba(255, 255, 255, 0.9);
+  color: var(--muted);
   font-size: 0.9rem;
 }
 
 .dashboard__pilot-model {
   font-size: 1.35rem;
   letter-spacing: 0.04em;
+  color: var(--text-h);
 }
 
 .dashboard__pilot-note,
 .dashboard__pilot-note .bilingual__en {
   margin: 0;
   font-size: 0.8rem;
-  color: rgba(255, 255, 255, 0.85);
+  color: var(--muted);
 }
 
 .dashboard__as-of {
@@ -142,6 +146,11 @@
   display: flex;
   flex-direction: column;
   gap: 0.4rem;
+}
+
+/* 메인 Dashboard(물류): 본문 기본색 — 카드·표는 각각 토큰으로 보정 */
+.dashboard.dashboard--ops {
+  color: var(--text);
 }
 
 .dashboard__header {
@@ -279,7 +288,10 @@
   padding: 0.4rem 0.75rem;
   border-radius: 8px;
   background: var(--brand);
-  color: #fff;
+  --text-h: #ffffff;
+  --text: #f8fafc;
+  --muted: #e2e8f0;
+  color: var(--text-h);
   font-size: 0.75rem;
   font-weight: 700;
   letter-spacing: 0.06em;
@@ -290,6 +302,7 @@
   border: 1px solid var(--border);
   border-radius: 12px;
   padding: 1.25rem;
+  color: var(--text);
 }
 
 .card h2 {
@@ -616,13 +629,17 @@ tbody tr:hover {
   border-radius: 6px;
   border: 1px solid rgba(148, 163, 184, 0.4);
   background: rgba(248, 250, 252, 0.92);
+  --text-h: #111827;
+  --text: #374151;
+  --muted: #64748b;
+  color: var(--text);
 }
 
 .dashboard__guide-bar-title {
   margin: 0;
   font-size: 0.72rem;
   font-weight: 600;
-  color: var(--muted);
+  color: var(--text-h);
   line-height: 1.25;
 }
 
@@ -672,9 +689,12 @@ tbody tr:hover {
   border-radius: 6px;
   border: 1px solid rgba(148, 163, 184, 0.3);
   background: rgba(241, 245, 249, 0.55);
+  --text-h: #111827;
+  --text: #374151;
+  --muted: #64748b;
+  color: var(--text);
   font-size: 0.74rem;
   line-height: 1.38;
-  color: var(--muted);
 }
 
 .dashboard__user-guide-heading {
@@ -693,6 +713,7 @@ tbody tr:hover {
 
 .dashboard__user-guide-lead {
   margin: 0;
+  color: var(--text);
 }
 
 .dashboard__user-guide-terms {
@@ -707,6 +728,42 @@ tbody tr:hover {
   margin-top: 0.08rem;
   font-size: 0.68rem;
   opacity: 0.9;
+}
+
+@media (prefers-color-scheme: dark) {
+  .dashboard__guide-bar {
+    background: rgba(30, 41, 59, 0.92);
+    border-color: var(--border);
+    --text-h: #ffffff;
+    --text: #f1f5f9;
+    --muted: #cbd5e1;
+  }
+
+  .dashboard__guide-toggle {
+    background: rgba(15, 23, 42, 0.55);
+    border-color: var(--border);
+    color: var(--text-h);
+  }
+
+  .dashboard__user-guide {
+    background: rgba(15, 23, 42, 0.45);
+    border-color: var(--border);
+    --text-h: #ffffff;
+    --text: #f1f5f9;
+    --muted: #cbd5e1;
+  }
+
+  .dashboard__guide-panel-heading,
+  .dashboard__user-guide-panel-heading,
+  .dashboard__user-guide-subheading,
+  .dashboard__user-guide-heading {
+    color: var(--text-h);
+  }
+
+  .dashboard__user-guide-lead,
+  .dashboard__user-guide-terms {
+    color: var(--text);
+  }
 }
 
 @media (max-width: 640px) {
@@ -742,6 +799,11 @@ tbody tr:hover {
   display: flex;
   flex-direction: column;
   gap: 0.15rem;
+  /* 밝은 틴트 카드: OS 다크 모드에서도 :root 밝은 글자가 섞이지 않도록 로컬 토큰 */
+  --text-h: #111827;
+  --text: #374151;
+  --muted: #64748b;
+  color: var(--text);
 }
 
 .dash-kpi__label {
@@ -760,6 +822,7 @@ tbody tr:hover {
 .dash-kpi__label .bilingual--stacked .bilingual__en-line {
   font-size: 0.62rem;
   font-weight: 500;
+  color: var(--muted);
 }
 
 .dash-kpi__value--eta-dual {
@@ -846,7 +909,72 @@ tbody tr:hover {
   background: rgba(220, 38, 38, 0.06);
 }
 
-/* 대시보드 공통 데이터 테이블 — 품번별 재고 · 이번주 도착 예정 */
+/* KPI: 라이트 틴트 카드 → 라이트 모드에서 진한 글자 보장, 다크 모드에서는 표면색에 맞춤 */
+@media (prefers-color-scheme: dark) {
+  .dash-kpi__card {
+    --text-h: #f8fafc;
+    --text: #e2e8f0;
+    --muted: #94a3b8;
+    color: var(--text);
+    background: rgba(30, 41, 59, 0.96);
+    border-color: rgba(148, 163, 184, 0.28);
+  }
+
+  .dash-kpi__label,
+  .dash-kpi__meta,
+  .dash-kpi__meta--muted {
+    color: var(--muted);
+  }
+
+  .dash-kpi__label .bilingual--stacked .bilingual__ko-line {
+    color: var(--text-h);
+  }
+
+  .dash-kpi__label .bilingual--stacked .bilingual__en-line {
+    color: var(--muted);
+  }
+
+  .dash-kpi__value,
+  .dash-kpi__eta-line {
+    color: var(--text-h);
+  }
+
+  .dash-kpi__eta-line--cntr,
+  .dash-kpi__eta-unit {
+    color: var(--muted);
+  }
+
+  .dash-kpi__card--cov-stable {
+    border-color: rgba(52, 211, 153, 0.35);
+    background: rgba(22, 163, 74, 0.12);
+  }
+
+  .dash-kpi__card--cov-warning {
+    border-color: rgba(251, 191, 36, 0.4);
+    background: rgba(217, 119, 6, 0.14);
+  }
+
+  .dash-kpi__card--cov-critical {
+    border-color: rgba(248, 113, 113, 0.45);
+    background: rgba(220, 38, 38, 0.14);
+  }
+
+  .dash-kpi__card--cov-overstock {
+    border-color: rgba(96, 165, 250, 0.42);
+    background: rgba(30, 58, 138, 0.35);
+  }
+
+  .dash-kpi__card--cov-neutral {
+    border-color: rgba(148, 163, 184, 0.28);
+    background: rgba(30, 41, 59, 0.96);
+  }
+
+  .dash-kpi__card--alert {
+    border-color: rgba(248, 113, 113, 0.45);
+    background: rgba(220, 38, 38, 0.14);
+  }
+}
+
 .dashboard .dash-board-table {
   table-layout: fixed;
   width: 100%;
@@ -1277,4 +1405,34 @@ tbody tr:hover {
 /* PWA·모바일: 대시보드 조회 전용(간단 레이아웃) */
 .dashboard--mobile-readonly .dashboard__header h1 {
   font-size: 1.12rem;
+}
+
+/*
+ * 메인 Dashboard(물류): 이 파일이 ops.css보다 뒤에 import됨.
+ * ops의 .ops-table thead th(background: var(--bg))와 #9ca3af 접미가
+ * 카드/표면(var(--surface))과 어긋나 가독성이 떨어지는 경우를 정리합니다.
+ */
+.dashboard.dashboard--ops .inv-status-panel--compact .inv-item-table.ops-table thead th {
+  background: var(--surface);
+  color: var(--muted);
+}
+
+.dashboard.dashboard--ops .inv-th-unit-inline__suffix {
+  color: var(--muted);
+}
+
+.dashboard.dashboard--ops .inv-status-panel--compact .inv-item-table tbody td {
+  color: var(--text);
+}
+
+.dashboard.dashboard--ops .inv-status-panel--compact .empty-block {
+  color: var(--muted);
+}
+
+.dashboard.dashboard--ops .dashboard__guide-panel {
+  color: var(--text);
+}
+
+.dashboard.dashboard--ops .dashboard__guide-panel .dashboard__guide-panel-heading {
+  color: var(--text-h);
 }

@@ -20,7 +20,7 @@
   margin: 0 0 0.28rem;
   font-size: 0.72rem;
   line-height: 1.32;
-  color: var(--text-h, #f1f5f9);
+  color: var(--text-h);
   font-weight: 600;
 }
 
@@ -29,11 +29,11 @@
   margin-top: 0.12rem;
   font-size: 0.66rem;
   font-weight: 500;
-  color: var(--muted, #94a3b8);
+  color: var(--muted);
 }
 
 .pwa-install-hint__sub strong {
-  color: var(--text-h, #e2e8f0);
+  color: var(--text-h);
   font-weight: 700;
 }
 
@@ -60,7 +60,7 @@
   border: none;
   border-radius: 6px;
   background: transparent;
-  color: var(--muted, #94a3b8);
+  color: var(--muted);
   font-size: 1.25rem;
   line-height: 1;
   cursor: pointer;
@@ -68,7 +68,7 @@
 
 .pwa-install-hint__close:hover {
   background: rgba(148, 163, 184, 0.12);
-  color: var(--text-h, #f1f5f9);
+  color: var(--text-h);
 }
 
 @media (min-width: 701px) {
