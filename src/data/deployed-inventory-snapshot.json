@@ -1,7 +1,7 @@
 {
   "tcInvExportVersion": 1,
-  "deployedRevision": 12,
-  "exportedAt": "2026-06-15T00:21:44.647Z",
+  "deployedRevision": 13,
+  "exportedAt": "2026-06-16T00:41:49.976Z",
   "app": "tc-inventory-system",
   "payload": {
     "tc-inv-master-items": [
@@ -46,9 +46,9 @@
         "modelName": "GS1930E",
         "partNo": "1303742",
         "description": "Drive Chasiss",
-        "currentStock": 252,
+        "currentStock": 276,
         "unitPrice": 0,
-        "weeklyDemand": 79,
+        "weeklyDemand": 81,
         "safetyStockWeeks": 4,
         "leadTime": 35,
         "status": "Active"
@@ -58,7 +58,7 @@
         "modelName": "GS4655",
         "partNo": "1287153",
         "description": "Main Deck",
-        "currentStock": 15,
+        "currentStock": 27,
         "unitPrice": 0,
         "weeklyDemand": 4,
         "safetyStockWeeks": 4,
@@ -70,7 +70,7 @@
         "modelName": "GS4655",
         "partNo": "1289380",
         "description": "Extension Deck",
-        "currentStock": 15,
+        "currentStock": 27,
         "unitPrice": 0,
         "weeklyDemand": 4,
         "safetyStockWeeks": 4,
@@ -82,7 +82,7 @@
         "modelName": "GS4655",
         "partNo": "1292085",
         "description": "Drive Chasiss",
-        "currentStock": 18,
+        "currentStock": 24,
         "unitPrice": 0,
         "weeklyDemand": 4,
         "safetyStockWeeks": 4,
@@ -142,7 +142,7 @@
         "modelName": "S85XC",
         "partNo": "1268562",
         "description": "Drive Chasiss",
-        "currentStock": 87,
+        "currentStock": 111,
         "unitPrice": 0,
         "weeklyDemand": 24,
         "safetyStockWeeks": 4,
@@ -232,8 +232,7 @@
           "weekStartDate": "2026-05-25",
           "qty": 58,
           "planQty": 58,
-          "shipped": false,
-          "confirmedQty": 0,
+          "confirmedQty": 58,
           "locked": false
         },
         {
@@ -243,7 +242,6 @@
           "weekStartDate": "2026-05-04",
           "qty": 76,
           "planQty": 76,
-          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -254,7 +252,6 @@
           "weekStartDate": "2026-05-11",
           "qty": 76,
           "planQty": 76,
-          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -265,7 +262,6 @@
           "weekStartDate": "2026-05-18",
           "qty": 76,
           "planQty": 76,
-          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -276,8 +272,7 @@
           "weekStartDate": "2026-06-01",
           "qty": 76,
           "planQty": 76,
-          "shipped": false,
-          "confirmedQty": 0,
+          "confirmedQty": 76,
           "locked": false
         },
         {
@@ -287,8 +282,7 @@
           "weekStartDate": "2026-06-08",
           "qty": 76,
           "planQty": 76,
-          "shipped": false,
-          "confirmedQty": 0,
+          "confirmedQty": 76,
           "locked": false
         },
         {
@@ -298,7 +292,6 @@
           "weekStartDate": "2026-06-15",
           "qty": 76,
           "planQty": 76,
-          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -309,7 +302,6 @@
           "weekStartDate": "2026-06-22",
           "qty": 76,
           "planQty": 76,
-          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -320,7 +312,6 @@
           "weekStartDate": "2026-06-29",
           "qty": 76,
           "planQty": 76,
-          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -331,7 +322,6 @@
           "weekStartDate": "2026-07-06",
           "qty": 76,
           "planQty": 76,
-          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -342,7 +332,6 @@
           "weekStartDate": "2026-07-13",
           "qty": 76,
           "planQty": 76,
-          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -351,9 +340,8 @@
           "modelName": "GS1930E",
           "partNo": "1303742",
           "weekStartDate": "2026-07-20",
-          "qty": 90,
-          "planQty": 90,
-          "shipped": false,
+          "qty": 95,
+          "planQty": 95,
           "confirmedQty": 0,
           "locked": false
         },
@@ -364,7 +352,6 @@
           "weekStartDate": "2026-07-27",
           "qty": 76,
           "planQty": 76,
-          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -373,9 +360,8 @@
           "modelName": "GS1930E",
           "partNo": "1303742",
           "weekStartDate": "2026-08-03",
-          "qty": 90,
-          "planQty": 90,
-          "shipped": false,
+          "qty": 95,
+          "planQty": 95,
           "confirmedQty": 0,
           "locked": false
         },
@@ -386,7 +372,6 @@
           "weekStartDate": "2026-08-10",
           "qty": 76,
           "planQty": 76,
-          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -395,9 +380,8 @@
           "modelName": "GS1930E",
           "partNo": "1303742",
           "weekStartDate": "2026-08-17",
-          "qty": 90,
-          "planQty": 90,
-          "shipped": false,
+          "qty": 95,
+          "planQty": 95,
           "confirmedQty": 0,
           "locked": false
         },
@@ -408,7 +392,6 @@
           "weekStartDate": "2026-08-24",
           "qty": 76,
           "planQty": 76,
-          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -419,7 +402,6 @@
           "weekStartDate": "2026-08-31",
           "qty": 76,
           "planQty": 76,
-          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -430,7 +412,6 @@
           "weekStartDate": "2026-09-07",
           "qty": 57,
           "planQty": 57,
-          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -439,9 +420,8 @@
           "modelName": "GS1930E",
           "partNo": "1303742",
           "weekStartDate": "2026-09-14",
-          "qty": 90,
-          "planQty": 90,
-          "shipped": false,
+          "qty": 95,
+          "planQty": 95,
           "confirmedQty": 0,
           "locked": false
         },
@@ -450,9 +430,8 @@
           "modelName": "GS1930E",
           "partNo": "1303742",
           "weekStartDate": "2026-09-21",
-          "qty": 90,
-          "planQty": 90,
-          "shipped": false,
+          "qty": 95,
+          "planQty": 95,
           "confirmedQty": 0,
           "locked": false
         },
@@ -463,7 +442,6 @@
           "weekStartDate": "2026-09-28",
           "qty": 76,
           "planQty": 76,
-          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -474,7 +452,6 @@
           "weekStartDate": "2026-10-05",
           "qty": 76,
           "planQty": 76,
-          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -485,7 +462,6 @@
           "weekStartDate": "2026-10-12",
           "qty": 76,
           "planQty": 76,
-          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -496,7 +472,6 @@
           "weekStartDate": "2026-10-19",
           "qty": 76,
           "planQty": 76,
-          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -507,7 +482,6 @@
           "weekStartDate": "2026-10-26",
           "qty": 76,
           "planQty": 76,
-          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -518,7 +492,6 @@
           "weekStartDate": "2026-05-18",
           "qty": 3,
           "planQty": 3,
-          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -529,8 +502,7 @@
           "weekStartDate": "2026-05-25",
           "qty": 2,
           "planQty": 2,
-          "shipped": false,
-          "confirmedQty": 0,
+          "confirmedQty": 2,
           "locked": false
         },
         {
@@ -540,8 +512,7 @@
           "weekStartDate": "2026-06-01",
           "qty": 4,
           "planQty": 4,
-          "shipped": false,
-          "confirmedQty": 0,
+          "confirmedQty": 4,
           "locked": false
         },
         {
@@ -551,8 +522,7 @@
           "weekStartDate": "2026-06-08",
           "qty": 2,
           "planQty": 2,
-          "shipped": false,
-          "confirmedQty": 0,
+          "confirmedQty": 2,
           "locked": false
         },
         {
@@ -562,7 +532,6 @@
           "weekStartDate": "2026-06-15",
           "qty": 4,
           "planQty": 4,
-          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -573,7 +542,6 @@
           "weekStartDate": "2026-06-22",
           "qty": 4,
           "planQty": 4,
-          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -584,7 +552,6 @@
           "weekStartDate": "2026-06-29",
           "qty": 4,
           "planQty": 4,
-          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -595,7 +562,6 @@
           "weekStartDate": "2026-07-06",
           "qty": 4,
           "planQty": 4,
-          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -606,7 +572,6 @@
           "weekStartDate": "2026-07-13",
           "qty": 4,
           "planQty": 4,
-          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -617,7 +582,6 @@
           "weekStartDate": "2026-07-20",
           "qty": 4,
           "planQty": 4,
-          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -628,7 +592,6 @@
           "weekStartDate": "2026-07-27",
           "qty": 4,
           "planQty": 4,
-          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -639,7 +602,6 @@
           "weekStartDate": "2026-08-03",
           "qty": 4,
           "planQty": 4,
-          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -650,7 +612,6 @@
           "weekStartDate": "2026-08-10",
           "qty": 4,
           "planQty": 4,
-          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -661,7 +622,6 @@
           "weekStartDate": "2026-08-17",
           "qty": 4,
           "planQty": 4,
-          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -672,7 +632,6 @@
           "weekStartDate": "2026-08-24",
           "qty": 4,
           "planQty": 4,
-          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -683,7 +642,6 @@
           "weekStartDate": "2026-08-31",
           "qty": 4,
           "planQty": 4,
-          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -692,9 +650,8 @@
           "modelName": "GS4655",
           "partNo": "1287153",
           "weekStartDate": "2026-09-07",
-          "qty": 4,
-          "planQty": 4,
-          "shipped": false,
+          "qty": 8,
+          "planQty": 8,
           "confirmedQty": 0,
           "locked": false
         },
@@ -703,9 +660,8 @@
           "modelName": "GS4655",
           "partNo": "1287153",
           "weekStartDate": "2026-09-14",
-          "qty": 4,
-          "planQty": 4,
-          "shipped": false,
+          "qty": 8,
+          "planQty": 8,
           "confirmedQty": 0,
           "locked": false
         },
@@ -714,9 +670,8 @@
           "modelName": "GS4655",
           "partNo": "1287153",
           "weekStartDate": "2026-09-21",
-          "qty": 4,
-          "planQty": 4,
-          "shipped": false,
+          "qty": 8,
+          "planQty": 8,
           "confirmedQty": 0,
           "locked": false
         },
@@ -725,9 +680,8 @@
           "modelName": "GS4655",
           "partNo": "1287153",
           "weekStartDate": "2026-09-28",
-          "qty": 4,
-          "planQty": 4,
-          "shipped": false,
+          "qty": 8,
+          "planQty": 8,
           "confirmedQty": 0,
           "locked": false
         },
@@ -736,9 +690,8 @@
           "modelName": "GS4655",
           "partNo": "1287153",
           "weekStartDate": "2026-10-05",
-          "qty": 4,
-          "planQty": 4,
-          "shipped": false,
+          "qty": 8,
+          "planQty": 8,
           "confirmedQty": 0,
           "locked": false
         },
@@ -747,9 +700,8 @@
           "modelName": "GS4655",
           "partNo": "1287153",
           "weekStartDate": "2026-10-12",
-          "qty": 4,
-          "planQty": 4,
-          "shipped": false,
+          "qty": 8,
+          "planQty": 8,
           "confirmedQty": 0,
           "locked": false
         },
@@ -758,9 +710,8 @@
           "modelName": "GS4655",
           "partNo": "1287153",
           "weekStartDate": "2026-10-19",
-          "qty": 4,
-          "planQty": 4,
-          "shipped": false,
+          "qty": 8,
+          "planQty": 8,
           "confirmedQty": 0,
           "locked": false
         },
@@ -769,9 +720,8 @@
           "modelName": "GS4655",
           "partNo": "1287153",
           "weekStartDate": "2026-10-26",
-          "qty": 4,
-          "planQty": 4,
-          "shipped": false,
+          "qty": 8,
+          "planQty": 8,
           "confirmedQty": 0,
           "locked": false
         },
@@ -782,7 +732,6 @@
           "weekStartDate": "2026-05-11",
           "qty": 11,
           "planQty": 11,
-          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -793,7 +742,6 @@
           "weekStartDate": "2026-05-18",
           "qty": 3,
           "planQty": 3,
-          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -804,8 +752,7 @@
           "weekStartDate": "2026-05-25",
           "qty": 2,
           "planQty": 2,
-          "shipped": false,
-          "confirmedQty": 0,
+          "confirmedQty": 2,
           "locked": false
         },
         {
@@ -815,8 +762,7 @@
           "weekStartDate": "2026-06-01",
           "qty": 4,
           "planQty": 4,
-          "shipped": false,
-          "confirmedQty": 0,
+          "confirmedQty": 4,
           "locked": false
         },
         {
@@ -826,8 +772,7 @@
           "weekStartDate": "2026-06-08",
           "qty": 2,
           "planQty": 2,
-          "shipped": false,
-          "confirmedQty": 0,
+          "confirmedQty": 2,
           "locked": false
         },
         {
@@ -837,7 +782,6 @@
           "weekStartDate": "2026-06-15",
           "qty": 4,
           "planQty": 4,
-          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -848,7 +792,6 @@
           "weekStartDate": "2026-06-22",
           "qty": 4,
           "planQty": 4,
-          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -859,7 +802,6 @@
           "weekStartDate": "2026-06-29",
           "qty": 4,
           "planQty": 4,
-          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -870,7 +812,6 @@
           "weekStartDate": "2026-07-06",
           "qty": 4,
           "planQty": 4,
-          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -881,7 +822,6 @@
           "weekStartDate": "2026-07-13",
           "qty": 4,
           "planQty": 4,
-          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -892,7 +832,6 @@
           "weekStartDate": "2026-07-20",
           "qty": 4,
           "planQty": 4,
-          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -903,7 +842,6 @@
           "weekStartDate": "2026-07-27",
           "qty": 4,
           "planQty": 4,
-          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -914,7 +852,6 @@
           "weekStartDate": "2026-08-03",
           "qty": 4,
           "planQty": 4,
-          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -925,7 +862,6 @@
           "weekStartDate": "2026-08-10",
           "qty": 4,
           "planQty": 4,
-          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -936,7 +872,6 @@
           "weekStartDate": "2026-08-17",
           "qty": 4,
           "planQty": 4,
-          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -947,7 +882,6 @@
           "weekStartDate": "2026-08-24",
           "qty": 4,
           "planQty": 4,
-          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -958,7 +892,6 @@
           "weekStartDate": "2026-08-31",
           "qty": 4,
           "planQty": 4,
-          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -967,9 +900,8 @@
           "modelName": "GS4655",
           "partNo": "1289380",
           "weekStartDate": "2026-09-07",
-          "qty": 4,
-          "planQty": 4,
-          "shipped": false,
+          "qty": 8,
+          "planQty": 8,
           "confirmedQty": 0,
           "locked": false
         },
@@ -978,9 +910,8 @@
           "modelName": "GS4655",
           "partNo": "1289380",
           "weekStartDate": "2026-09-14",
-          "qty": 4,
-          "planQty": 4,
-          "shipped": false,
+          "qty": 8,
+          "planQty": 8,
           "confirmedQty": 0,
           "locked": false
         },
@@ -989,9 +920,8 @@
           "modelName": "GS4655",
           "partNo": "1289380",
           "weekStartDate": "2026-09-21",
-          "qty": 4,
-          "planQty": 4,
-          "shipped": false,
+          "qty": 8,
+          "planQty": 8,
           "confirmedQty": 0,
           "locked": false
         },
@@ -1000,9 +930,8 @@
           "modelName": "GS4655",
           "partNo": "1289380",
           "weekStartDate": "2026-09-28",
-          "qty": 4,
-          "planQty": 4,
-          "shipped": false,
+          "qty": 8,
+          "planQty": 8,
           "confirmedQty": 0,
           "locked": false
         },
@@ -1011,9 +940,8 @@
           "modelName": "GS4655",
           "partNo": "1289380",
           "weekStartDate": "2026-10-05",
-          "qty": 4,
-          "planQty": 4,
-          "shipped": false,
+          "qty": 8,
+          "planQty": 8,
           "confirmedQty": 0,
           "locked": false
         },
@@ -1022,9 +950,8 @@
           "modelName": "GS4655",
           "partNo": "1289380",
           "weekStartDate": "2026-10-12",
-          "qty": 4,
-          "planQty": 4,
-          "shipped": false,
+          "qty": 8,
+          "planQty": 8,
           "confirmedQty": 0,
           "locked": false
         },
@@ -1033,9 +960,8 @@
           "modelName": "GS4655",
           "partNo": "1289380",
           "weekStartDate": "2026-10-19",
-          "qty": 4,
-          "planQty": 4,
-          "shipped": false,
+          "qty": 8,
+          "planQty": 8,
           "confirmedQty": 0,
           "locked": false
         },
@@ -1044,9 +970,8 @@
           "modelName": "GS4655",
           "partNo": "1289380",
           "weekStartDate": "2026-10-26",
-          "qty": 4,
-          "planQty": 4,
-          "shipped": false,
+          "qty": 8,
+          "planQty": 8,
           "confirmedQty": 0,
           "locked": false
         },
@@ -1057,7 +982,6 @@
           "weekStartDate": "2026-05-11",
           "qty": 11,
           "planQty": 11,
-          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -1068,7 +992,6 @@
           "weekStartDate": "2026-05-18",
           "qty": 4,
           "planQty": 4,
-          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -1079,8 +1002,7 @@
           "weekStartDate": "2026-05-25",
           "qty": 1,
           "planQty": 1,
-          "shipped": false,
-          "confirmedQty": 0,
+          "confirmedQty": 1,
           "locked": false
         },
         {
@@ -1090,7 +1012,6 @@
           "weekStartDate": "2026-06-15",
           "qty": 4,
           "planQty": 4,
-          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -1101,7 +1022,6 @@
           "weekStartDate": "2026-06-22",
           "qty": 4,
           "planQty": 4,
-          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -1112,7 +1032,6 @@
           "weekStartDate": "2026-06-29",
           "qty": 4,
           "planQty": 4,
-          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -1123,7 +1042,6 @@
           "weekStartDate": "2026-07-06",
           "qty": 4,
           "planQty": 4,
-          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -1134,7 +1052,6 @@
           "weekStartDate": "2026-07-13",
           "qty": 4,
           "planQty": 4,
-          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -1145,7 +1062,6 @@
           "weekStartDate": "2026-07-20",
           "qty": 4,
           "planQty": 4,
-          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -1156,7 +1072,6 @@
           "weekStartDate": "2026-07-27",
           "qty": 4,
           "planQty": 4,
-          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -1167,7 +1082,6 @@
           "weekStartDate": "2026-08-03",
           "qty": 4,
           "planQty": 4,
-          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -1178,7 +1092,6 @@
           "weekStartDate": "2026-08-10",
           "qty": 4,
           "planQty": 4,
-          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -1189,7 +1102,6 @@
           "weekStartDate": "2026-08-17",
           "qty": 4,
           "planQty": 4,
-          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -1200,7 +1112,6 @@
           "weekStartDate": "2026-08-24",
           "qty": 4,
           "planQty": 4,
-          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -1211,7 +1122,6 @@
           "weekStartDate": "2026-08-31",
           "qty": 4,
           "planQty": 4,
-          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -1220,9 +1130,8 @@
           "modelName": "GS4655",
           "partNo": "1292085",
           "weekStartDate": "2026-09-07",
-          "qty": 4,
-          "planQty": 4,
-          "shipped": false,
+          "qty": 8,
+          "planQty": 8,
           "confirmedQty": 0,
           "locked": false
         },
@@ -1231,9 +1140,8 @@
           "modelName": "GS4655",
           "partNo": "1292085",
           "weekStartDate": "2026-09-14",
-          "qty": 4,
-          "planQty": 4,
-          "shipped": false,
+          "qty": 8,
+          "planQty": 8,
           "confirmedQty": 0,
           "locked": false
         },
@@ -1242,9 +1150,8 @@
           "modelName": "GS4655",
           "partNo": "1292085",
           "weekStartDate": "2026-09-21",
-          "qty": 4,
-          "planQty": 4,
-          "shipped": false,
+          "qty": 8,
+          "planQty": 8,
           "confirmedQty": 0,
           "locked": false
         },
@@ -1253,9 +1160,8 @@
           "modelName": "GS4655",
           "partNo": "1292085",
           "weekStartDate": "2026-09-28",
-          "qty": 4,
-          "planQty": 4,
-          "shipped": false,
+          "qty": 8,
+          "planQty": 8,
           "confirmedQty": 0,
           "locked": false
         },
@@ -1264,9 +1170,8 @@
           "modelName": "GS4655",
           "partNo": "1292085",
           "weekStartDate": "2026-10-05",
-          "qty": 4,
-          "planQty": 4,
-          "shipped": false,
+          "qty": 8,
+          "planQty": 8,
           "confirmedQty": 0,
           "locked": false
         },
@@ -1275,9 +1180,8 @@
           "modelName": "GS4655",
           "partNo": "1292085",
           "weekStartDate": "2026-10-12",
-          "qty": 4,
-          "planQty": 4,
-          "shipped": false,
+          "qty": 8,
+          "planQty": 8,
           "confirmedQty": 0,
           "locked": false
         },
@@ -1286,9 +1190,8 @@
           "modelName": "GS4655",
           "partNo": "1292085",
           "weekStartDate": "2026-10-19",
-          "qty": 4,
-          "planQty": 4,
-          "shipped": false,
+          "qty": 8,
+          "planQty": 8,
           "confirmedQty": 0,
           "locked": false
         },
@@ -1297,9 +1200,8 @@
           "modelName": "GS4655",
           "partNo": "1292085",
           "weekStartDate": "2026-10-26",
-          "qty": 4,
-          "planQty": 4,
-          "shipped": false,
+          "qty": 8,
+          "planQty": 8,
           "confirmedQty": 0,
           "locked": false
         },
@@ -1310,7 +1212,6 @@
           "weekStartDate": "2026-05-11",
           "qty": 28,
           "planQty": 28,
-          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -1321,7 +1222,6 @@
           "weekStartDate": "2026-05-18",
           "qty": 18,
           "planQty": 18,
-          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -1332,8 +1232,7 @@
           "weekStartDate": "2026-05-25",
           "qty": 16,
           "planQty": 16,
-          "shipped": false,
-          "confirmedQty": 0,
+          "confirmedQty": 16,
           "locked": false
         },
         {
@@ -1343,8 +1242,7 @@
           "weekStartDate": "2026-06-01",
           "qty": 22,
           "planQty": 22,
-          "shipped": false,
-          "confirmedQty": 0,
+          "confirmedQty": 22,
           "locked": false
         },
         {
@@ -1354,8 +1252,7 @@
           "weekStartDate": "2026-06-08",
           "qty": 26,
           "planQty": 26,
-          "shipped": false,
-          "confirmedQty": 0,
+          "confirmedQty": 26,
           "locked": false
         },
         {
@@ -1363,9 +1260,8 @@
           "modelName": "Z45 DC",
           "partNo": "229306",
           "weekStartDate": "2026-06-15",
-          "qty": 20,
-          "planQty": 20,
-          "shipped": false,
+          "qty": 22,
+          "planQty": 22,
           "confirmedQty": 0,
           "locked": false
         },
@@ -1374,9 +1270,8 @@
           "modelName": "Z45 DC",
           "partNo": "229306",
           "weekStartDate": "2026-06-22",
-          "qty": 20,
-          "planQty": 20,
-          "shipped": false,
+          "qty": 22,
+          "planQty": 22,
           "confirmedQty": 0,
           "locked": false
         },
@@ -1385,9 +1280,8 @@
           "modelName": "Z45 DC",
           "partNo": "229306",
           "weekStartDate": "2026-06-29",
-          "qty": 20,
-          "planQty": 20,
-          "shipped": false,
+          "qty": 22,
+          "planQty": 22,
           "confirmedQty": 0,
           "locked": false
         },
@@ -1396,9 +1290,8 @@
           "modelName": "Z45 DC",
           "partNo": "229306",
           "weekStartDate": "2026-07-06",
-          "qty": 20,
-          "planQty": 20,
-          "shipped": false,
+          "qty": 22,
+          "planQty": 22,
           "confirmedQty": 0,
           "locked": false
         },
@@ -1407,9 +1300,8 @@
           "modelName": "Z45 DC",
           "partNo": "229306",
           "weekStartDate": "2026-07-13",
-          "qty": 20,
-          "planQty": 20,
-          "shipped": false,
+          "qty": 22,
+          "planQty": 22,
           "confirmedQty": 0,
           "locked": false
         },
@@ -1418,9 +1310,8 @@
           "modelName": "Z45 DC",
           "partNo": "229306",
           "weekStartDate": "2026-07-20",
-          "qty": 20,
-          "planQty": 20,
-          "shipped": false,
+          "qty": 22,
+          "planQty": 22,
           "confirmedQty": 0,
           "locked": false
         },
@@ -1429,9 +1320,8 @@
           "modelName": "Z45 DC",
           "partNo": "229306",
           "weekStartDate": "2026-07-27",
-          "qty": 20,
-          "planQty": 20,
-          "shipped": false,
+          "qty": 22,
+          "planQty": 22,
           "confirmedQty": 0,
           "locked": false
         },
@@ -1440,9 +1330,8 @@
           "modelName": "Z45 DC",
           "partNo": "229306",
           "weekStartDate": "2026-08-03",
-          "qty": 16,
-          "planQty": 16,
-          "shipped": false,
+          "qty": 22,
+          "planQty": 22,
           "confirmedQty": 0,
           "locked": false
         },
@@ -1451,9 +1340,8 @@
           "modelName": "Z45 DC",
           "partNo": "229306",
           "weekStartDate": "2026-08-10",
-          "qty": 16,
-          "planQty": 16,
-          "shipped": false,
+          "qty": 22,
+          "planQty": 22,
           "confirmedQty": 0,
           "locked": false
         },
@@ -1462,9 +1350,8 @@
           "modelName": "Z45 DC",
           "partNo": "229306",
           "weekStartDate": "2026-08-17",
-          "qty": 16,
-          "planQty": 16,
-          "shipped": false,
+          "qty": 22,
+          "planQty": 22,
           "confirmedQty": 0,
           "locked": false
         },
@@ -1473,9 +1360,8 @@
           "modelName": "Z45 DC",
           "partNo": "229306",
           "weekStartDate": "2026-08-24",
-          "qty": 16,
-          "planQty": 16,
-          "shipped": false,
+          "qty": 22,
+          "planQty": 22,
           "confirmedQty": 0,
           "locked": false
         },
@@ -1484,9 +1370,8 @@
           "modelName": "Z45 DC",
           "partNo": "229306",
           "weekStartDate": "2026-08-31",
-          "qty": 16,
-          "planQty": 16,
-          "shipped": false,
+          "qty": 22,
+          "planQty": 22,
           "confirmedQty": 0,
           "locked": false
         },
@@ -1495,9 +1380,8 @@
           "modelName": "Z45 DC",
           "partNo": "229306",
           "weekStartDate": "2026-09-07",
-          "qty": 9,
-          "planQty": 9,
-          "shipped": false,
+          "qty": 12,
+          "planQty": 12,
           "confirmedQty": 0,
           "locked": false
         },
@@ -1506,9 +1390,8 @@
           "modelName": "Z45 DC",
           "partNo": "229306",
           "weekStartDate": "2026-09-14",
-          "qty": 11,
-          "planQty": 11,
-          "shipped": false,
+          "qty": 14,
+          "planQty": 14,
           "confirmedQty": 0,
           "locked": false
         },
@@ -1517,9 +1400,8 @@
           "modelName": "Z45 DC",
           "partNo": "229306",
           "weekStartDate": "2026-09-21",
-          "qty": 11,
-          "planQty": 11,
-          "shipped": false,
+          "qty": 14,
+          "planQty": 14,
           "confirmedQty": 0,
           "locked": false
         },
@@ -1528,9 +1410,8 @@
           "modelName": "Z45 DC",
           "partNo": "229306",
           "weekStartDate": "2026-09-28",
-          "qty": 11,
-          "planQty": 11,
-          "shipped": false,
+          "qty": 14,
+          "planQty": 14,
           "confirmedQty": 0,
           "locked": false
         },
@@ -1541,7 +1422,6 @@
           "weekStartDate": "2026-10-05",
           "qty": 11,
           "planQty": 11,
-          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -1552,7 +1432,6 @@
           "weekStartDate": "2026-10-12",
           "qty": 11,
           "planQty": 11,
-          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -1563,7 +1442,6 @@
           "weekStartDate": "2026-10-19",
           "qty": 11,
           "planQty": 11,
-          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -1574,7 +1452,6 @@
           "weekStartDate": "2026-10-26",
           "qty": 11,
           "planQty": 11,
-          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -1585,7 +1462,6 @@
           "weekStartDate": "2026-05-11",
           "qty": 8,
           "planQty": 8,
-          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -1596,7 +1472,6 @@
           "weekStartDate": "2026-05-18",
           "qty": 6,
           "planQty": 6,
-          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -1607,8 +1482,7 @@
           "weekStartDate": "2026-05-25",
           "qty": 8,
           "planQty": 8,
-          "shipped": false,
-          "confirmedQty": 0,
+          "confirmedQty": 8,
           "locked": false
         },
         {
@@ -1618,8 +1492,7 @@
           "weekStartDate": "2026-06-01",
           "qty": 8,
           "planQty": 8,
-          "shipped": false,
-          "confirmedQty": 0,
+          "confirmedQty": 8,
           "locked": false
         },
         {
@@ -1629,8 +1502,7 @@
           "weekStartDate": "2026-06-08",
           "qty": 10,
           "planQty": 10,
-          "shipped": false,
-          "confirmedQty": 0,
+          "confirmedQty": 10,
           "locked": false
         },
         {
@@ -1638,9 +1510,8 @@
           "modelName": "Z40",
           "partNo": "110545",
           "weekStartDate": "2026-06-15",
-          "qty": 15,
-          "planQty": 15,
-          "shipped": false,
+          "qty": 10,
+          "planQty": 10,
           "confirmedQty": 0,
           "locked": false
         },
@@ -1649,9 +1520,8 @@
           "modelName": "Z40",
           "partNo": "110545",
           "weekStartDate": "2026-06-22",
-          "qty": 15,
-          "planQty": 15,
-          "shipped": false,
+          "qty": 10,
+          "planQty": 10,
           "confirmedQty": 0,
           "locked": false
         },
@@ -1660,9 +1530,8 @@
           "modelName": "Z40",
           "partNo": "110545",
           "weekStartDate": "2026-06-29",
-          "qty": 15,
-          "planQty": 15,
-          "shipped": false,
+          "qty": 12,
+          "planQty": 12,
           "confirmedQty": 0,
           "locked": false
         },
@@ -1671,9 +1540,8 @@
           "modelName": "Z40",
           "partNo": "110545",
           "weekStartDate": "2026-07-06",
-          "qty": 15,
-          "planQty": 15,
-          "shipped": false,
+          "qty": 12,
+          "planQty": 12,
           "confirmedQty": 0,
           "locked": false
         },
@@ -1682,9 +1550,8 @@
           "modelName": "Z40",
           "partNo": "110545",
           "weekStartDate": "2026-07-13",
-          "qty": 15,
-          "planQty": 15,
-          "shipped": false,
+          "qty": 12,
+          "planQty": 12,
           "confirmedQty": 0,
           "locked": false
         },
@@ -1693,9 +1560,8 @@
           "modelName": "Z40",
           "partNo": "110545",
           "weekStartDate": "2026-07-20",
-          "qty": 15,
-          "planQty": 15,
-          "shipped": false,
+          "qty": 12,
+          "planQty": 12,
           "confirmedQty": 0,
           "locked": false
         },
@@ -1704,9 +1570,8 @@
           "modelName": "Z40",
           "partNo": "110545",
           "weekStartDate": "2026-07-27",
-          "qty": 15,
-          "planQty": 15,
-          "shipped": false,
+          "qty": 12,
+          "planQty": 12,
           "confirmedQty": 0,
           "locked": false
         },
@@ -1715,9 +1580,8 @@
           "modelName": "Z40",
           "partNo": "110545",
           "weekStartDate": "2026-08-03",
-          "qty": 13,
-          "planQty": 13,
-          "shipped": false,
+          "qty": 12,
+          "planQty": 12,
           "confirmedQty": 0,
           "locked": false
         },
@@ -1726,9 +1590,8 @@
           "modelName": "Z40",
           "partNo": "110545",
           "weekStartDate": "2026-08-10",
-          "qty": 13,
-          "planQty": 13,
-          "shipped": false,
+          "qty": 12,
+          "planQty": 12,
           "confirmedQty": 0,
           "locked": false
         },
@@ -1737,9 +1600,8 @@
           "modelName": "Z40",
           "partNo": "110545",
           "weekStartDate": "2026-08-17",
-          "qty": 13,
-          "planQty": 13,
-          "shipped": false,
+          "qty": 12,
+          "planQty": 12,
           "confirmedQty": 0,
           "locked": false
         },
@@ -1748,9 +1610,8 @@
           "modelName": "Z40",
           "partNo": "110545",
           "weekStartDate": "2026-08-24",
-          "qty": 13,
-          "planQty": 13,
-          "shipped": false,
+          "qty": 12,
+          "planQty": 12,
           "confirmedQty": 0,
           "locked": false
         },
@@ -1759,9 +1620,8 @@
           "modelName": "Z40",
           "partNo": "110545",
           "weekStartDate": "2026-08-31",
-          "qty": 13,
-          "planQty": 13,
-          "shipped": false,
+          "qty": 12,
+          "planQty": 12,
           "confirmedQty": 0,
           "locked": false
         },
@@ -1770,9 +1630,8 @@
           "modelName": "Z40",
           "partNo": "110545",
           "weekStartDate": "2026-09-07",
-          "qty": 7,
-          "planQty": 7,
-          "shipped": false,
+          "qty": 9,
+          "planQty": 9,
           "confirmedQty": 0,
           "locked": false
         },
@@ -1781,9 +1640,8 @@
           "modelName": "Z40",
           "partNo": "110545",
           "weekStartDate": "2026-09-14",
-          "qty": 10,
-          "planQty": 10,
-          "shipped": false,
+          "qty": 13,
+          "planQty": 13,
           "confirmedQty": 0,
           "locked": false
         },
@@ -1792,9 +1650,8 @@
           "modelName": "Z40",
           "partNo": "110545",
           "weekStartDate": "2026-09-21",
-          "qty": 10,
-          "planQty": 10,
-          "shipped": false,
+          "qty": 13,
+          "planQty": 13,
           "confirmedQty": 0,
           "locked": false
         },
@@ -1803,9 +1660,8 @@
           "modelName": "Z40",
           "partNo": "110545",
           "weekStartDate": "2026-09-28",
-          "qty": 10,
-          "planQty": 10,
-          "shipped": false,
+          "qty": 13,
+          "planQty": 13,
           "confirmedQty": 0,
           "locked": false
         },
@@ -1816,7 +1672,6 @@
           "weekStartDate": "2026-10-05",
           "qty": 10,
           "planQty": 10,
-          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -1827,7 +1682,6 @@
           "weekStartDate": "2026-10-12",
           "qty": 10,
           "planQty": 10,
-          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -1838,7 +1692,6 @@
           "weekStartDate": "2026-10-19",
           "qty": 10,
           "planQty": 10,
-          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -1849,7 +1702,6 @@
           "weekStartDate": "2026-10-26",
           "qty": 10,
           "planQty": 10,
-          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -1860,7 +1712,6 @@
           "weekStartDate": "2026-05-11",
           "qty": 11,
           "planQty": 11,
-          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -1871,7 +1722,6 @@
           "weekStartDate": "2026-05-11",
           "qty": 4,
           "planQty": 4,
-          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -1882,7 +1732,6 @@
           "weekStartDate": "2026-05-18",
           "qty": 4,
           "planQty": 4,
-          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -1893,8 +1742,7 @@
           "weekStartDate": "2026-06-08",
           "qty": 4,
           "planQty": 4,
-          "shipped": false,
-          "confirmedQty": 0,
+          "confirmedQty": 4,
           "locked": false
         },
         {
@@ -1904,7 +1752,6 @@
           "weekStartDate": "2026-06-15",
           "qty": 3,
           "planQty": 3,
-          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -1915,7 +1762,6 @@
           "weekStartDate": "2026-06-22",
           "qty": 3,
           "planQty": 3,
-          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -1926,7 +1772,6 @@
           "weekStartDate": "2026-06-29",
           "qty": 2,
           "planQty": 2,
-          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -1937,7 +1782,6 @@
           "weekStartDate": "2026-07-06",
           "qty": 1,
           "planQty": 1,
-          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -1948,7 +1792,6 @@
           "weekStartDate": "2026-07-13",
           "qty": 2,
           "planQty": 2,
-          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -1959,7 +1802,6 @@
           "weekStartDate": "2026-07-20",
           "qty": 2,
           "planQty": 2,
-          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -1970,7 +1812,6 @@
           "weekStartDate": "2026-07-27",
           "qty": 2,
           "planQty": 2,
-          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -1981,7 +1822,6 @@
           "weekStartDate": "2026-08-03",
           "qty": 4,
           "planQty": 4,
-          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -1992,7 +1832,6 @@
           "weekStartDate": "2026-08-10",
           "qty": 2,
           "planQty": 2,
-          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -2003,7 +1842,6 @@
           "weekStartDate": "2026-08-17",
           "qty": 2,
           "planQty": 2,
-          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -2014,7 +1852,6 @@
           "weekStartDate": "2026-08-24",
           "qty": 2,
           "planQty": 2,
-          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -2025,7 +1862,6 @@
           "weekStartDate": "2026-05-11",
           "qty": 6,
           "planQty": 6,
-          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -2036,8 +1872,7 @@
           "weekStartDate": "2026-05-25",
           "qty": 4,
           "planQty": 4,
-          "shipped": false,
-          "confirmedQty": 0,
+          "confirmedQty": 4,
           "locked": false
         },
         {
@@ -2047,8 +1882,7 @@
           "weekStartDate": "2026-06-01",
           "qty": 4,
           "planQty": 4,
-          "shipped": false,
-          "confirmedQty": 0,
+          "confirmedQty": 4,
           "locked": false
         },
         {
@@ -2058,8 +1892,7 @@
           "weekStartDate": "2026-06-08",
           "qty": 1,
           "planQty": 1,
-          "shipped": false,
-          "confirmedQty": 0,
+          "confirmedQty": 1,
           "locked": false
         },
         {
@@ -2069,7 +1902,6 @@
           "weekStartDate": "2026-06-15",
           "qty": 3,
           "planQty": 3,
-          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -2080,7 +1912,6 @@
           "weekStartDate": "2026-06-22",
           "qty": 3,
           "planQty": 3,
-          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -2091,7 +1922,6 @@
           "weekStartDate": "2026-06-29",
           "qty": 2,
           "planQty": 2,
-          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -2102,7 +1932,6 @@
           "weekStartDate": "2026-07-06",
           "qty": 1,
           "planQty": 1,
-          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -2113,7 +1942,6 @@
           "weekStartDate": "2026-07-13",
           "qty": 2,
           "planQty": 2,
-          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -2124,7 +1952,6 @@
           "weekStartDate": "2026-07-20",
           "qty": 2,
           "planQty": 2,
-          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -2135,7 +1962,6 @@
           "weekStartDate": "2026-07-27",
           "qty": 2,
           "planQty": 2,
-          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -2146,7 +1972,6 @@
           "weekStartDate": "2026-08-03",
           "qty": 4,
           "planQty": 4,
-          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -2157,7 +1982,6 @@
           "weekStartDate": "2026-08-10",
           "qty": 2,
           "planQty": 2,
-          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -2168,7 +1992,6 @@
           "weekStartDate": "2026-08-17",
           "qty": 2,
           "planQty": 2,
-          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -2179,7 +2002,6 @@
           "weekStartDate": "2026-08-24",
           "qty": 2,
           "planQty": 2,
-          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -2190,7 +2012,6 @@
           "weekStartDate": "2026-05-11",
           "qty": 5,
           "planQty": 5,
-          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -2201,8 +2022,7 @@
           "weekStartDate": "2026-05-25",
           "qty": 4,
           "planQty": 4,
-          "shipped": false,
-          "confirmedQty": 0,
+          "confirmedQty": 4,
           "locked": false
         },
         {
@@ -2212,8 +2032,7 @@
           "weekStartDate": "2026-06-08",
           "qty": 4,
           "planQty": 4,
-          "shipped": false,
-          "confirmedQty": 0,
+          "confirmedQty": 4,
           "locked": false
         },
         {
@@ -2223,7 +2042,6 @@
           "weekStartDate": "2026-06-15",
           "qty": 3,
           "planQty": 3,
-          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -2234,7 +2052,6 @@
           "weekStartDate": "2026-06-22",
           "qty": 3,
           "planQty": 3,
-          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -2245,7 +2062,6 @@
           "weekStartDate": "2026-06-29",
           "qty": 2,
           "planQty": 2,
-          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -2256,7 +2072,6 @@
           "weekStartDate": "2026-07-06",
           "qty": 1,
           "planQty": 1,
-          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -2267,7 +2082,6 @@
           "weekStartDate": "2026-07-13",
           "qty": 2,
           "planQty": 2,
-          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -2278,7 +2092,6 @@
           "weekStartDate": "2026-07-20",
           "qty": 2,
           "planQty": 2,
-          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -2289,7 +2102,6 @@
           "weekStartDate": "2026-07-27",
           "qty": 2,
           "planQty": 2,
-          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -2300,7 +2112,6 @@
           "weekStartDate": "2026-08-03",
           "qty": 4,
           "planQty": 4,
-          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -2311,7 +2122,6 @@
           "weekStartDate": "2026-08-10",
           "qty": 2,
           "planQty": 2,
-          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -2322,7 +2132,6 @@
           "weekStartDate": "2026-08-17",
           "qty": 2,
           "planQty": 2,
-          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -2333,7 +2142,6 @@
           "weekStartDate": "2026-08-24",
           "qty": 2,
           "planQty": 2,
-          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -2344,7 +2152,6 @@
           "weekStartDate": "2026-05-11",
           "qty": 5,
           "planQty": 5,
-          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -2355,8 +2162,7 @@
           "weekStartDate": "2026-05-25",
           "qty": 4,
           "planQty": 4,
-          "shipped": false,
-          "confirmedQty": 0,
+          "confirmedQty": 4,
           "locked": false
         },
         {
@@ -2366,8 +2172,7 @@
           "weekStartDate": "2026-06-08",
           "qty": 4,
           "planQty": 4,
-          "shipped": false,
-          "confirmedQty": 0,
+          "confirmedQty": 4,
           "locked": false
         },
         {
@@ -2377,7 +2182,6 @@
           "weekStartDate": "2026-06-15",
           "qty": 3,
           "planQty": 3,
-          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -2388,7 +2192,6 @@
           "weekStartDate": "2026-06-22",
           "qty": 3,
           "planQty": 3,
-          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -2399,7 +2202,6 @@
           "weekStartDate": "2026-06-29",
           "qty": 2,
           "planQty": 2,
-          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -2410,7 +2212,6 @@
           "weekStartDate": "2026-07-06",
           "qty": 1,
           "planQty": 1,
-          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -2421,7 +2222,6 @@
           "weekStartDate": "2026-07-13",
           "qty": 2,
           "planQty": 2,
-          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -2432,7 +2232,6 @@
           "weekStartDate": "2026-07-20",
           "qty": 2,
           "planQty": 2,
-          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -2443,7 +2242,6 @@
           "weekStartDate": "2026-07-27",
           "qty": 2,
           "planQty": 2,
-          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -2454,7 +2252,6 @@
           "weekStartDate": "2026-08-03",
           "qty": 4,
           "planQty": 4,
-          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -2465,7 +2262,6 @@
           "weekStartDate": "2026-08-10",
           "qty": 2,
           "planQty": 2,
-          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -2476,7 +2272,6 @@
           "weekStartDate": "2026-08-17",
           "qty": 2,
           "planQty": 2,
-          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -2487,7 +2282,6 @@
           "weekStartDate": "2026-08-24",
           "qty": 2,
           "planQty": 2,
-          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -2498,7 +2292,6 @@
           "weekStartDate": "2026-05-11",
           "qty": 5,
           "planQty": 5,
-          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -2509,8 +2302,7 @@
           "weekStartDate": "2026-05-25",
           "qty": 2,
           "planQty": 2,
-          "shipped": false,
-          "confirmedQty": 0,
+          "confirmedQty": 2,
           "locked": false
         },
         {
@@ -2520,8 +2312,7 @@
           "weekStartDate": "2026-06-01",
           "qty": 3,
           "planQty": 3,
-          "shipped": false,
-          "confirmedQty": 0,
+          "confirmedQty": 3,
           "locked": false
         },
         {
@@ -2531,8 +2322,7 @@
           "weekStartDate": "2026-06-08",
           "qty": 2,
           "planQty": 2,
-          "shipped": false,
-          "confirmedQty": 0,
+          "confirmedQty": 2,
           "locked": false
         },
         {
@@ -2542,7 +2332,6 @@
           "weekStartDate": "2026-06-15",
           "qty": 3,
           "planQty": 3,
-          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -2553,7 +2342,6 @@
           "weekStartDate": "2026-06-22",
           "qty": 3,
           "planQty": 3,
-          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -2564,7 +2352,6 @@
           "weekStartDate": "2026-06-29",
           "qty": 2,
           "planQty": 2,
-          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -2575,7 +2362,6 @@
           "weekStartDate": "2026-07-06",
           "qty": 1,
           "planQty": 1,
-          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -2586,7 +2372,6 @@
           "weekStartDate": "2026-07-13",
           "qty": 2,
           "planQty": 2,
-          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -2597,7 +2382,6 @@
           "weekStartDate": "2026-07-20",
           "qty": 2,
           "planQty": 2,
-          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -2608,7 +2392,6 @@
           "weekStartDate": "2026-07-27",
           "qty": 2,
           "planQty": 2,
-          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -2619,7 +2402,6 @@
           "weekStartDate": "2026-08-03",
           "qty": 4,
           "planQty": 4,
-          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -2630,7 +2412,6 @@
           "weekStartDate": "2026-08-10",
           "qty": 2,
           "planQty": 2,
-          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -2641,7 +2422,6 @@
           "weekStartDate": "2026-08-17",
           "qty": 2,
           "planQty": 2,
-          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -2652,7 +2432,6 @@
           "weekStartDate": "2026-08-24",
           "qty": 2,
           "planQty": 2,
-          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -2663,7 +2442,6 @@
           "weekStartDate": "2026-05-11",
           "qty": 4,
           "planQty": 4,
-          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -2674,8 +2452,7 @@
           "weekStartDate": "2026-05-25",
           "qty": 4,
           "planQty": 4,
-          "shipped": false,
-          "confirmedQty": 0,
+          "confirmedQty": 4,
           "locked": false
         },
         {
@@ -2685,7 +2462,6 @@
           "weekStartDate": "2026-06-15",
           "qty": 1,
           "planQty": 1,
-          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -2696,7 +2472,6 @@
           "weekStartDate": "2026-06-22",
           "qty": 1,
           "planQty": 1,
-          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -2707,7 +2482,6 @@
           "weekStartDate": "2026-06-29",
           "qty": 2,
           "planQty": 2,
-          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -2718,7 +2492,6 @@
           "weekStartDate": "2026-07-06",
           "qty": 3,
           "planQty": 3,
-          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -2729,7 +2502,6 @@
           "weekStartDate": "2026-07-13",
           "qty": 3,
           "planQty": 3,
-          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -2740,7 +2512,6 @@
           "weekStartDate": "2026-07-20",
           "qty": 2,
           "planQty": 2,
-          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -2751,7 +2522,6 @@
           "weekStartDate": "2026-07-27",
           "qty": 2,
           "planQty": 2,
-          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -2760,9 +2530,8 @@
           "modelName": "S80J",
           "partNo": "1276600",
           "weekStartDate": "2026-08-10",
-          "qty": 2,
-          "planQty": 2,
-          "shipped": false,
+          "qty": 1,
+          "planQty": 1,
           "confirmedQty": 0,
           "locked": false
         },
@@ -2773,7 +2542,6 @@
           "weekStartDate": "2026-05-11",
           "qty": 32,
           "planQty": 32,
-          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -2784,7 +2552,6 @@
           "weekStartDate": "2026-05-18",
           "qty": 25,
           "planQty": 25,
-          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -2795,8 +2562,7 @@
           "weekStartDate": "2026-05-25",
           "qty": 28,
           "planQty": 28,
-          "shipped": false,
-          "confirmedQty": 0,
+          "confirmedQty": 28,
           "locked": false
         },
         {
@@ -2806,8 +2572,7 @@
           "weekStartDate": "2026-06-01",
           "qty": 25,
           "planQty": 25,
-          "shipped": false,
-          "confirmedQty": 0,
+          "confirmedQty": 25,
           "locked": false
         },
         {
@@ -2817,8 +2582,7 @@
           "weekStartDate": "2026-06-08",
           "qty": 32,
           "planQty": 32,
-          "shipped": false,
-          "confirmedQty": 0,
+          "confirmedQty": 32,
           "locked": false
         },
         {
@@ -2828,7 +2592,6 @@
           "weekStartDate": "2026-06-15",
           "qty": 27,
           "planQty": 27,
-          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -2839,7 +2602,6 @@
           "weekStartDate": "2026-06-22",
           "qty": 27,
           "planQty": 27,
-          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -2850,7 +2612,6 @@
           "weekStartDate": "2026-06-29",
           "qty": 27,
           "planQty": 27,
-          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -2861,7 +2622,6 @@
           "weekStartDate": "2026-07-06",
           "qty": 27,
           "planQty": 27,
-          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -2870,9 +2630,8 @@
           "modelName": "S45XC",
           "partNo": "1290073",
           "weekStartDate": "2026-07-13",
-          "qty": 33,
-          "planQty": 33,
-          "shipped": false,
+          "qty": 30,
+          "planQty": 30,
           "confirmedQty": 0,
           "locked": false
         },
@@ -2883,7 +2642,6 @@
           "weekStartDate": "2026-07-20",
           "qty": 27,
           "planQty": 27,
-          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -2894,7 +2652,6 @@
           "weekStartDate": "2026-07-27",
           "qty": 27,
           "planQty": 27,
-          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -2905,7 +2662,6 @@
           "weekStartDate": "2026-08-03",
           "qty": 27,
           "planQty": 27,
-          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -2914,9 +2670,8 @@
           "modelName": "S45XC",
           "partNo": "1290073",
           "weekStartDate": "2026-08-10",
-          "qty": 33,
-          "planQty": 33,
-          "shipped": false,
+          "qty": 30,
+          "planQty": 30,
           "confirmedQty": 0,
           "locked": false
         },
@@ -2927,7 +2682,6 @@
           "weekStartDate": "2026-08-17",
           "qty": 27,
           "planQty": 27,
-          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -2938,7 +2692,6 @@
           "weekStartDate": "2026-08-24",
           "qty": 27,
           "planQty": 27,
-          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -2949,7 +2702,6 @@
           "weekStartDate": "2026-08-31",
           "qty": 27,
           "planQty": 27,
-          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -2958,9 +2710,8 @@
           "modelName": "S45XC",
           "partNo": "1290073",
           "weekStartDate": "2026-09-07",
-          "qty": 19,
-          "planQty": 19,
-          "shipped": false,
+          "qty": 20,
+          "planQty": 20,
           "confirmedQty": 0,
           "locked": false
         },
@@ -2969,9 +2720,8 @@
           "modelName": "S45XC",
           "partNo": "1290073",
           "weekStartDate": "2026-09-14",
-          "qty": 31,
-          "planQty": 31,
-          "shipped": false,
+          "qty": 30,
+          "planQty": 30,
           "confirmedQty": 0,
           "locked": false
         },
@@ -2980,9 +2730,8 @@
           "modelName": "S45XC",
           "partNo": "1290073",
           "weekStartDate": "2026-09-21",
-          "qty": 25,
-          "planQty": 25,
-          "shipped": false,
+          "qty": 27,
+          "planQty": 27,
           "confirmedQty": 0,
           "locked": false
         },
@@ -2991,9 +2740,8 @@
           "modelName": "S45XC",
           "partNo": "1290073",
           "weekStartDate": "2026-09-28",
-          "qty": 25,
-          "planQty": 25,
-          "shipped": false,
+          "qty": 27,
+          "planQty": 27,
           "confirmedQty": 0,
           "locked": false
         },
@@ -3002,9 +2750,8 @@
           "modelName": "S45XC",
           "partNo": "1290073",
           "weekStartDate": "2026-10-05",
-          "qty": 21,
-          "planQty": 21,
-          "shipped": false,
+          "qty": 25,
+          "planQty": 25,
           "confirmedQty": 0,
           "locked": false
         },
@@ -3013,9 +2760,8 @@
           "modelName": "S45XC",
           "partNo": "1290073",
           "weekStartDate": "2026-10-12",
-          "qty": 21,
-          "planQty": 21,
-          "shipped": false,
+          "qty": 25,
+          "planQty": 25,
           "confirmedQty": 0,
           "locked": false
         },
@@ -3024,9 +2770,8 @@
           "modelName": "S45XC",
           "partNo": "1290073",
           "weekStartDate": "2026-10-19",
-          "qty": 21,
-          "planQty": 21,
-          "shipped": false,
+          "qty": 25,
+          "planQty": 25,
           "confirmedQty": 0,
           "locked": false
         },
@@ -3035,9 +2780,8 @@
           "modelName": "S45XC",
           "partNo": "1290073",
           "weekStartDate": "2026-10-26",
-          "qty": 21,
-          "planQty": 21,
-          "shipped": false,
+          "qty": 25,
+          "planQty": 25,
           "confirmedQty": 0,
           "locked": false
         },
@@ -3048,7 +2792,6 @@
           "weekStartDate": "2026-05-11",
           "qty": 12,
           "planQty": 12,
-          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -3059,7 +2802,6 @@
           "weekStartDate": "2026-05-18",
           "qty": 6,
           "planQty": 6,
-          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -3070,8 +2812,7 @@
           "weekStartDate": "2026-05-25",
           "qty": 10,
           "planQty": 10,
-          "shipped": false,
-          "confirmedQty": 0,
+          "confirmedQty": 10,
           "locked": false
         },
         {
@@ -3081,8 +2822,7 @@
           "weekStartDate": "2026-06-08",
           "qty": 2,
           "planQty": 2,
-          "shipped": false,
-          "confirmedQty": 0,
+          "confirmedQty": 2,
           "locked": false
         },
         {
@@ -3090,9 +2830,8 @@
           "modelName": "Z80",
           "partNo": "230980",
           "weekStartDate": "2026-06-15",
-          "qty": 9,
-          "planQty": 9,
-          "shipped": false,
+          "qty": 12,
+          "planQty": 12,
           "confirmedQty": 0,
           "locked": false
         },
@@ -3101,9 +2840,8 @@
           "modelName": "Z80",
           "partNo": "230980",
           "weekStartDate": "2026-06-22",
-          "qty": 9,
-          "planQty": 9,
-          "shipped": false,
+          "qty": 8,
+          "planQty": 8,
           "confirmedQty": 0,
           "locked": false
         },
@@ -3112,9 +2850,8 @@
           "modelName": "Z80",
           "partNo": "230980",
           "weekStartDate": "2026-06-29",
-          "qty": 9,
-          "planQty": 9,
-          "shipped": false,
+          "qty": 8,
+          "planQty": 8,
           "confirmedQty": 0,
           "locked": false
         },
@@ -3123,9 +2860,8 @@
           "modelName": "Z80",
           "partNo": "230980",
           "weekStartDate": "2026-07-06",
-          "qty": 9,
-          "planQty": 9,
-          "shipped": false,
+          "qty": 8,
+          "planQty": 8,
           "confirmedQty": 0,
           "locked": false
         },
@@ -3134,9 +2870,8 @@
           "modelName": "Z80",
           "partNo": "230980",
           "weekStartDate": "2026-07-13",
-          "qty": 10,
-          "planQty": 10,
-          "shipped": false,
+          "qty": 9,
+          "planQty": 9,
           "confirmedQty": 0,
           "locked": false
         },
@@ -3145,9 +2880,8 @@
           "modelName": "Z80",
           "partNo": "230980",
           "weekStartDate": "2026-07-20",
-          "qty": 9,
-          "planQty": 9,
-          "shipped": false,
+          "qty": 8,
+          "planQty": 8,
           "confirmedQty": 0,
           "locked": false
         },
@@ -3156,9 +2890,8 @@
           "modelName": "Z80",
           "partNo": "230980",
           "weekStartDate": "2026-07-27",
-          "qty": 9,
-          "planQty": 9,
-          "shipped": false,
+          "qty": 8,
+          "planQty": 8,
           "confirmedQty": 0,
           "locked": false
         },
@@ -3167,9 +2900,8 @@
           "modelName": "Z80",
           "partNo": "230980",
           "weekStartDate": "2026-08-03",
-          "qty": 9,
-          "planQty": 9,
-          "shipped": false,
+          "qty": 8,
+          "planQty": 8,
           "confirmedQty": 0,
           "locked": false
         },
@@ -3178,9 +2910,8 @@
           "modelName": "Z80",
           "partNo": "230980",
           "weekStartDate": "2026-08-10",
-          "qty": 11,
-          "planQty": 11,
-          "shipped": false,
+          "qty": 9,
+          "planQty": 9,
           "confirmedQty": 0,
           "locked": false
         },
@@ -3189,9 +2920,8 @@
           "modelName": "Z80",
           "partNo": "230980",
           "weekStartDate": "2026-08-17",
-          "qty": 9,
-          "planQty": 9,
-          "shipped": false,
+          "qty": 8,
+          "planQty": 8,
           "confirmedQty": 0,
           "locked": false
         },
@@ -3200,9 +2930,8 @@
           "modelName": "Z80",
           "partNo": "230980",
           "weekStartDate": "2026-08-24",
-          "qty": 9,
-          "planQty": 9,
-          "shipped": false,
+          "qty": 8,
+          "planQty": 8,
           "confirmedQty": 0,
           "locked": false
         },
@@ -3211,9 +2940,8 @@
           "modelName": "Z80",
           "partNo": "230980",
           "weekStartDate": "2026-08-31",
-          "qty": 10,
-          "planQty": 10,
-          "shipped": false,
+          "qty": 11,
+          "planQty": 11,
           "confirmedQty": 0,
           "locked": false
         },
@@ -3222,9 +2950,8 @@
           "modelName": "Z80",
           "partNo": "230980",
           "weekStartDate": "2026-09-07",
-          "qty": 8,
-          "planQty": 8,
-          "shipped": false,
+          "qty": 9,
+          "planQty": 9,
           "confirmedQty": 0,
           "locked": false
         },
@@ -3233,9 +2960,8 @@
           "modelName": "Z80",
           "partNo": "230980",
           "weekStartDate": "2026-09-14",
-          "qty": 13,
-          "planQty": 13,
-          "shipped": false,
+          "qty": 14,
+          "planQty": 14,
           "confirmedQty": 0,
           "locked": false
         },
@@ -3244,9 +2970,8 @@
           "modelName": "Z80",
           "partNo": "230980",
           "weekStartDate": "2026-09-21",
-          "qty": 10,
-          "planQty": 10,
-          "shipped": false,
+          "qty": 11,
+          "planQty": 11,
           "confirmedQty": 0,
           "locked": false
         },
@@ -3257,7 +2982,6 @@
           "weekStartDate": "2026-09-28",
           "qty": 10,
           "planQty": 10,
-          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -3268,7 +2992,6 @@
           "weekStartDate": "2026-10-05",
           "qty": 10,
           "planQty": 10,
-          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -3279,7 +3002,6 @@
           "weekStartDate": "2026-10-12",
           "qty": 10,
           "planQty": 10,
-          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -3290,7 +3012,6 @@
           "weekStartDate": "2026-10-19",
           "qty": 10,
           "planQty": 10,
-          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -3301,7 +3022,6 @@
           "weekStartDate": "2026-10-26",
           "qty": 10,
           "planQty": 10,
-          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -3312,7 +3032,6 @@
           "weekStartDate": "2026-05-11",
           "qty": 10,
           "planQty": 10,
-          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -3323,7 +3042,6 @@
           "weekStartDate": "2026-05-18",
           "qty": 6,
           "planQty": 6,
-          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -3334,8 +3052,7 @@
           "weekStartDate": "2026-05-25",
           "qty": 10,
           "planQty": 10,
-          "shipped": false,
-          "confirmedQty": 0,
+          "confirmedQty": 10,
           "locked": false
         },
         {
@@ -3345,8 +3062,7 @@
           "weekStartDate": "2026-06-01",
           "qty": 8,
           "planQty": 8,
-          "shipped": false,
-          "confirmedQty": 0,
+          "confirmedQty": 8,
           "locked": false
         },
         {
@@ -3356,8 +3072,7 @@
           "weekStartDate": "2026-06-08",
           "qty": 2,
           "planQty": 2,
-          "shipped": false,
-          "confirmedQty": 0,
+          "confirmedQty": 2,
           "locked": false
         },
         {
@@ -3365,9 +3080,8 @@
           "modelName": "Z80",
           "partNo": "230989",
           "weekStartDate": "2026-06-15",
-          "qty": 8,
-          "planQty": 8,
-          "shipped": false,
+          "qty": 6,
+          "planQty": 6,
           "confirmedQty": 0,
           "locked": false
         },
@@ -3376,9 +3090,8 @@
           "modelName": "Z80",
           "partNo": "230989",
           "weekStartDate": "2026-06-22",
-          "qty": 8,
-          "planQty": 8,
-          "shipped": false,
+          "qty": 7,
+          "planQty": 7,
           "confirmedQty": 0,
           "locked": false
         },
@@ -3387,9 +3100,8 @@
           "modelName": "Z80",
           "partNo": "230989",
           "weekStartDate": "2026-06-29",
-          "qty": 8,
-          "planQty": 8,
-          "shipped": false,
+          "qty": 7,
+          "planQty": 7,
           "confirmedQty": 0,
           "locked": false
         },
@@ -3398,9 +3110,8 @@
           "modelName": "Z80",
           "partNo": "230989",
           "weekStartDate": "2026-07-06",
-          "qty": 8,
-          "planQty": 8,
-          "shipped": false,
+          "qty": 7,
+          "planQty": 7,
           "confirmedQty": 0,
           "locked": false
         },
@@ -3409,9 +3120,8 @@
           "modelName": "Z80",
           "partNo": "230989",
           "weekStartDate": "2026-07-13",
-          "qty": 9,
-          "planQty": 9,
-          "shipped": false,
+          "qty": 8,
+          "planQty": 8,
           "confirmedQty": 0,
           "locked": false
         },
@@ -3420,9 +3130,8 @@
           "modelName": "Z80",
           "partNo": "230989",
           "weekStartDate": "2026-07-20",
-          "qty": 8,
-          "planQty": 8,
-          "shipped": false,
+          "qty": 7,
+          "planQty": 7,
           "confirmedQty": 0,
           "locked": false
         },
@@ -3431,9 +3140,8 @@
           "modelName": "Z80",
           "partNo": "230989",
           "weekStartDate": "2026-07-27",
-          "qty": 8,
-          "planQty": 8,
-          "shipped": false,
+          "qty": 7,
+          "planQty": 7,
           "confirmedQty": 0,
           "locked": false
         },
@@ -3442,9 +3150,8 @@
           "modelName": "Z80",
           "partNo": "230989",
           "weekStartDate": "2026-08-03",
-          "qty": 8,
-          "planQty": 8,
-          "shipped": false,
+          "qty": 7,
+          "planQty": 7,
           "confirmedQty": 0,
           "locked": false
         },
@@ -3453,9 +3160,8 @@
           "modelName": "Z80",
           "partNo": "230989",
           "weekStartDate": "2026-08-10",
-          "qty": 10,
-          "planQty": 10,
-          "shipped": false,
+          "qty": 8,
+          "planQty": 8,
           "confirmedQty": 0,
           "locked": false
         },
@@ -3464,9 +3170,8 @@
           "modelName": "Z80",
           "partNo": "230989",
           "weekStartDate": "2026-08-17",
-          "qty": 8,
-          "planQty": 8,
-          "shipped": false,
+          "qty": 7,
+          "planQty": 7,
           "confirmedQty": 0,
           "locked": false
         },
@@ -3475,9 +3180,8 @@
           "modelName": "Z80",
           "partNo": "230989",
           "weekStartDate": "2026-08-24",
-          "qty": 8,
-          "planQty": 8,
-          "shipped": false,
+          "qty": 7,
+          "planQty": 7,
           "confirmedQty": 0,
           "locked": false
         },
@@ -3486,9 +3190,8 @@
           "modelName": "Z80",
           "partNo": "230989",
           "weekStartDate": "2026-08-31",
-          "qty": 9,
-          "planQty": 9,
-          "shipped": false,
+          "qty": 10,
+          "planQty": 10,
           "confirmedQty": 0,
           "locked": false
         },
@@ -3497,9 +3200,8 @@
           "modelName": "Z80",
           "partNo": "230989",
           "weekStartDate": "2026-09-07",
-          "qty": 6,
-          "planQty": 6,
-          "shipped": false,
+          "qty": 8,
+          "planQty": 8,
           "confirmedQty": 0,
           "locked": false
         },
@@ -3508,9 +3210,8 @@
           "modelName": "Z80",
           "partNo": "230989",
           "weekStartDate": "2026-09-14",
-          "qty": 11,
-          "planQty": 11,
-          "shipped": false,
+          "qty": 12,
+          "planQty": 12,
           "confirmedQty": 0,
           "locked": false
         },
@@ -3519,9 +3220,8 @@
           "modelName": "Z80",
           "partNo": "230989",
           "weekStartDate": "2026-09-21",
-          "qty": 9,
-          "planQty": 9,
-          "shipped": false,
+          "qty": 10,
+          "planQty": 10,
           "confirmedQty": 0,
           "locked": false
         },
@@ -3532,7 +3232,6 @@
           "weekStartDate": "2026-09-28",
           "qty": 9,
           "planQty": 9,
-          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -3543,7 +3242,6 @@
           "weekStartDate": "2026-10-05",
           "qty": 9,
           "planQty": 9,
-          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -3554,7 +3252,6 @@
           "weekStartDate": "2026-10-12",
           "qty": 9,
           "planQty": 9,
-          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -3565,7 +3262,6 @@
           "weekStartDate": "2026-10-19",
           "qty": 9,
           "planQty": 9,
-          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -3576,7 +3272,6 @@
           "weekStartDate": "2026-10-26",
           "qty": 9,
           "planQty": 9,
-          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -3587,7 +3282,6 @@
           "weekStartDate": "2026-05-11",
           "qty": 24,
           "planQty": 24,
-          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -3598,7 +3292,6 @@
           "weekStartDate": "2026-05-18",
           "qty": 24,
           "planQty": 24,
-          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -3609,8 +3302,7 @@
           "weekStartDate": "2026-05-25",
           "qty": 21,
           "planQty": 21,
-          "shipped": false,
-          "confirmedQty": 0,
+          "confirmedQty": 21,
           "locked": false
         },
         {
@@ -3620,8 +3312,7 @@
           "weekStartDate": "2026-06-01",
           "qty": 17,
           "planQty": 17,
-          "shipped": false,
-          "confirmedQty": 0,
+          "confirmedQty": 17,
           "locked": false
         },
         {
@@ -3631,8 +3322,7 @@
           "weekStartDate": "2026-06-08",
           "qty": 28,
           "planQty": 28,
-          "shipped": false,
-          "confirmedQty": 0,
+          "confirmedQty": 28,
           "locked": false
         },
         {
@@ -3642,7 +3332,6 @@
           "weekStartDate": "2026-06-15",
           "qty": 23,
           "planQty": 23,
-          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -3653,7 +3342,6 @@
           "weekStartDate": "2026-06-22",
           "qty": 23,
           "planQty": 23,
-          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -3664,7 +3352,6 @@
           "weekStartDate": "2026-06-29",
           "qty": 23,
           "planQty": 23,
-          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -3675,7 +3362,6 @@
           "weekStartDate": "2026-07-06",
           "qty": 23,
           "planQty": 23,
-          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -3684,9 +3370,8 @@
           "modelName": "S85XC",
           "partNo": "1268562",
           "weekStartDate": "2026-07-13",
-          "qty": 27,
-          "planQty": 27,
-          "shipped": false,
+          "qty": 26,
+          "planQty": 26,
           "confirmedQty": 0,
           "locked": false
         },
@@ -3697,7 +3382,6 @@
           "weekStartDate": "2026-07-20",
           "qty": 23,
           "planQty": 23,
-          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -3708,7 +3392,6 @@
           "weekStartDate": "2026-07-27",
           "qty": 23,
           "planQty": 23,
-          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -3719,7 +3402,6 @@
           "weekStartDate": "2026-08-03",
           "qty": 23,
           "planQty": 23,
-          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -3728,9 +3410,8 @@
           "modelName": "S85XC",
           "partNo": "1268562",
           "weekStartDate": "2026-08-10",
-          "qty": 27,
-          "planQty": 27,
-          "shipped": false,
+          "qty": 26,
+          "planQty": 26,
           "confirmedQty": 0,
           "locked": false
         },
@@ -3739,9 +3420,8 @@
           "modelName": "S85XC",
           "partNo": "1268562",
           "weekStartDate": "2026-08-17",
-          "qty": 22,
-          "planQty": 22,
-          "shipped": false,
+          "qty": 23,
+          "planQty": 23,
           "confirmedQty": 0,
           "locked": false
         },
@@ -3750,9 +3430,8 @@
           "modelName": "S85XC",
           "partNo": "1268562",
           "weekStartDate": "2026-08-24",
-          "qty": 22,
-          "planQty": 22,
-          "shipped": false,
+          "qty": 23,
+          "planQty": 23,
           "confirmedQty": 0,
           "locked": false
         },
@@ -3761,9 +3440,8 @@
           "modelName": "S85XC",
           "partNo": "1268562",
           "weekStartDate": "2026-08-31",
-          "qty": 22,
-          "planQty": 22,
-          "shipped": false,
+          "qty": 23,
+          "planQty": 23,
           "confirmedQty": 0,
           "locked": false
         },
@@ -3772,9 +3450,8 @@
           "modelName": "S85XC",
           "partNo": "1268562",
           "weekStartDate": "2026-09-07",
-          "qty": 14,
-          "planQty": 14,
-          "shipped": false,
+          "qty": 17,
+          "planQty": 17,
           "confirmedQty": 0,
           "locked": false
         },
@@ -3783,9 +3460,8 @@
           "modelName": "S85XC",
           "partNo": "1268562",
           "weekStartDate": "2026-09-14",
-          "qty": 24,
-          "planQty": 24,
-          "shipped": false,
+          "qty": 26,
+          "planQty": 26,
           "confirmedQty": 0,
           "locked": false
         },
@@ -3794,9 +3470,8 @@
           "modelName": "S85XC",
           "partNo": "1268562",
           "weekStartDate": "2026-09-21",
-          "qty": 19,
-          "planQty": 19,
-          "shipped": false,
+          "qty": 22,
+          "planQty": 22,
           "confirmedQty": 0,
           "locked": false
         },
@@ -3805,9 +3480,8 @@
           "modelName": "S85XC",
           "partNo": "1268562",
           "weekStartDate": "2026-09-28",
-          "qty": 19,
-          "planQty": 19,
-          "shipped": false,
+          "qty": 22,
+          "planQty": 22,
           "confirmedQty": 0,
           "locked": false
         },
@@ -3816,9 +3490,8 @@
           "modelName": "S85XC",
           "partNo": "1268562",
           "weekStartDate": "2026-10-05",
-          "qty": 15,
-          "planQty": 15,
-          "shipped": false,
+          "qty": 22,
+          "planQty": 22,
           "confirmedQty": 0,
           "locked": false
         },
@@ -3827,9 +3500,8 @@
           "modelName": "S85XC",
           "partNo": "1268562",
           "weekStartDate": "2026-10-12",
-          "qty": 15,
-          "planQty": 15,
-          "shipped": false,
+          "qty": 22,
+          "planQty": 22,
           "confirmedQty": 0,
           "locked": false
         },
@@ -3838,9 +3510,8 @@
           "modelName": "S85XC",
           "partNo": "1268562",
           "weekStartDate": "2026-10-19",
-          "qty": 15,
-          "planQty": 15,
-          "shipped": false,
+          "qty": 22,
+          "planQty": 22,
           "confirmedQty": 0,
           "locked": false
         },
@@ -3849,9 +3520,8 @@
           "modelName": "S85XC",
           "partNo": "1268562",
           "weekStartDate": "2026-10-26",
-          "qty": 15,
-          "planQty": 15,
-          "shipped": false,
+          "qty": 22,
+          "planQty": 22,
           "confirmedQty": 0,
           "locked": false
         },
@@ -3862,7 +3532,6 @@
           "weekStartDate": "2026-05-11",
           "qty": 10,
           "planQty": 10,
-          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -3873,7 +3542,6 @@
           "weekStartDate": "2026-05-18",
           "qty": 5,
           "planQty": 5,
-          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -3884,8 +3552,7 @@
           "weekStartDate": "2026-05-25",
           "qty": 8,
           "planQty": 8,
-          "shipped": false,
-          "confirmedQty": 0,
+          "confirmedQty": 8,
           "locked": false
         },
         {
@@ -3895,8 +3562,7 @@
           "weekStartDate": "2026-06-01",
           "qty": 4,
           "planQty": 4,
-          "shipped": false,
-          "confirmedQty": 0,
+          "confirmedQty": 4,
           "locked": false
         },
         {
@@ -3906,8 +3572,7 @@
           "weekStartDate": "2026-06-08",
           "qty": 12,
           "planQty": 12,
-          "shipped": false,
-          "confirmedQty": 0,
+          "confirmedQty": 12,
           "locked": false
         },
         {
@@ -3915,9 +3580,8 @@
           "modelName": "Z80",
           "partNo": "237329",
           "weekStartDate": "2026-06-15",
-          "qty": 9,
-          "planQty": 9,
-          "shipped": false,
+          "qty": 6,
+          "planQty": 6,
           "confirmedQty": 0,
           "locked": false
         },
@@ -3926,9 +3590,8 @@
           "modelName": "Z80",
           "partNo": "237329",
           "weekStartDate": "2026-06-22",
-          "qty": 9,
-          "planQty": 9,
-          "shipped": false,
+          "qty": 8,
+          "planQty": 8,
           "confirmedQty": 0,
           "locked": false
         },
@@ -3937,9 +3600,8 @@
           "modelName": "Z80",
           "partNo": "237329",
           "weekStartDate": "2026-06-29",
-          "qty": 9,
-          "planQty": 9,
-          "shipped": false,
+          "qty": 8,
+          "planQty": 8,
           "confirmedQty": 0,
           "locked": false
         },
@@ -3948,9 +3610,8 @@
           "modelName": "Z80",
           "partNo": "237329",
           "weekStartDate": "2026-07-06",
-          "qty": 9,
-          "planQty": 9,
-          "shipped": false,
+          "qty": 8,
+          "planQty": 8,
           "confirmedQty": 0,
           "locked": false
         },
@@ -3959,9 +3620,8 @@
           "modelName": "Z80",
           "partNo": "237329",
           "weekStartDate": "2026-07-13",
-          "qty": 10,
-          "planQty": 10,
-          "shipped": false,
+          "qty": 9,
+          "planQty": 9,
           "confirmedQty": 0,
           "locked": false
         },
@@ -3970,9 +3630,8 @@
           "modelName": "Z80",
           "partNo": "237329",
           "weekStartDate": "2026-07-20",
-          "qty": 9,
-          "planQty": 9,
-          "shipped": false,
+          "qty": 8,
+          "planQty": 8,
           "confirmedQty": 0,
           "locked": false
         },
@@ -3981,9 +3640,8 @@
           "modelName": "Z80",
           "partNo": "237329",
           "weekStartDate": "2026-07-27",
-          "qty": 9,
-          "planQty": 9,
-          "shipped": false,
+          "qty": 8,
+          "planQty": 8,
           "confirmedQty": 0,
           "locked": false
         },
@@ -3992,9 +3650,8 @@
           "modelName": "Z80",
           "partNo": "237329",
           "weekStartDate": "2026-08-03",
-          "qty": 9,
-          "planQty": 9,
-          "shipped": false,
+          "qty": 8,
+          "planQty": 8,
           "confirmedQty": 0,
           "locked": false
         },
@@ -4003,9 +3660,8 @@
           "modelName": "Z80",
           "partNo": "237329",
           "weekStartDate": "2026-08-10",
-          "qty": 11,
-          "planQty": 11,
-          "shipped": false,
+          "qty": 9,
+          "planQty": 9,
           "confirmedQty": 0,
           "locked": false
         },
@@ -4014,9 +3670,8 @@
           "modelName": "Z80",
           "partNo": "237329",
           "weekStartDate": "2026-08-17",
-          "qty": 9,
-          "planQty": 9,
-          "shipped": false,
+          "qty": 8,
+          "planQty": 8,
           "confirmedQty": 0,
           "locked": false
         },
@@ -4025,9 +3680,8 @@
           "modelName": "Z80",
           "partNo": "237329",
           "weekStartDate": "2026-08-24",
-          "qty": 9,
-          "planQty": 9,
-          "shipped": false,
+          "qty": 8,
+          "planQty": 8,
           "confirmedQty": 0,
           "locked": false
         },
@@ -4036,9 +3690,8 @@
           "modelName": "Z80",
           "partNo": "237329",
           "weekStartDate": "2026-08-31",
-          "qty": 9,
-          "planQty": 9,
-          "shipped": false,
+          "qty": 11,
+          "planQty": 11,
           "confirmedQty": 0,
           "locked": false
         },
@@ -4047,9 +3700,8 @@
           "modelName": "Z80",
           "partNo": "237329",
           "weekStartDate": "2026-09-07",
-          "qty": 7,
-          "planQty": 7,
-          "shipped": false,
+          "qty": 9,
+          "planQty": 9,
           "confirmedQty": 0,
           "locked": false
         },
@@ -4058,9 +3710,8 @@
           "modelName": "Z80",
           "partNo": "237329",
           "weekStartDate": "2026-09-14",
-          "qty": 11,
-          "planQty": 11,
-          "shipped": false,
+          "qty": 14,
+          "planQty": 14,
           "confirmedQty": 0,
           "locked": false
         },
@@ -4069,9 +3720,8 @@
           "modelName": "Z80",
           "partNo": "237329",
           "weekStartDate": "2026-09-21",
-          "qty": 9,
-          "planQty": 9,
-          "shipped": false,
+          "qty": 11,
+          "planQty": 11,
           "confirmedQty": 0,
           "locked": false
         },
@@ -4080,9 +3730,8 @@
           "modelName": "Z80",
           "partNo": "237329",
           "weekStartDate": "2026-09-28",
-          "qty": 9,
-          "planQty": 9,
-          "shipped": false,
+          "qty": 10,
+          "planQty": 10,
           "confirmedQty": 0,
           "locked": false
         },
@@ -4091,9 +3740,8 @@
           "modelName": "Z80",
           "partNo": "237329",
           "weekStartDate": "2026-10-05",
-          "qty": 9,
-          "planQty": 9,
-          "shipped": false,
+          "qty": 10,
+          "planQty": 10,
           "confirmedQty": 0,
           "locked": false
         },
@@ -4102,9 +3750,8 @@
           "modelName": "Z80",
           "partNo": "237329",
           "weekStartDate": "2026-10-12",
-          "qty": 9,
-          "planQty": 9,
-          "shipped": false,
+          "qty": 10,
+          "planQty": 10,
           "confirmedQty": 0,
           "locked": false
         },
@@ -4113,9 +3760,8 @@
           "modelName": "Z80",
           "partNo": "237329",
           "weekStartDate": "2026-10-19",
-          "qty": 9,
-          "planQty": 9,
-          "shipped": false,
+          "qty": 10,
+          "planQty": 10,
           "confirmedQty": 0,
           "locked": false
         },
@@ -4124,9 +3770,8 @@
           "modelName": "Z80",
           "partNo": "237329",
           "weekStartDate": "2026-10-26",
-          "qty": 9,
-          "planQty": 9,
-          "shipped": false,
+          "qty": 10,
+          "planQty": 10,
           "confirmedQty": 0,
           "locked": false
         },
@@ -4137,8 +3782,7 @@
           "weekStartDate": "2026-05-25",
           "qty": 4,
           "planQty": 4,
-          "shipped": false,
-          "confirmedQty": 0,
+          "confirmedQty": 4,
           "locked": false
         },
         {
@@ -4148,7 +3792,6 @@
           "weekStartDate": "2026-05-11",
           "qty": 32,
           "planQty": 32,
-          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -4159,7 +3802,6 @@
           "weekStartDate": "2026-05-18",
           "qty": 24,
           "planQty": 24,
-          "shipped": false,
           "confirmedQty": 0,
           "locked": false
         },
@@ -4170,8 +3812,7 @@
           "weekStartDate": "2026-05-25",
           "qty": 18,
           "planQty": 18,
-          "shipped": false,
-          "confirmedQty": 0,
+          "confirmedQty": 18,
           "locked": false
         },
         {
@@ -4181,8 +3822,7 @@
           "weekStartDate": "2026-06-01",
           "qty": 24,
           "planQty": 24,
-          "shipped": false,
-          "confirmedQty": 0,
+          "confirmedQty": 24,
           "locked": false
         },
         {
@@ -4190,9 +3830,8 @@
           "modelName": "Z45 OSC",
           "partNo": "1272701",
           "weekStartDate": "2026-06-15",
-          "qty": 25,
-          "planQty": 25,
-          "shipped": false,
+          "qty": 26,
+          "planQty": 26,
           "confirmedQty": 0,
           "locked": false
         },
@@ -4201,9 +3840,8 @@
           "modelName": "Z45 OSC",
           "partNo": "1272701",
           "weekStartDate": "2026-06-22",
-          "qty": 25,
-          "planQty": 25,
-          "shipped": false,
+          "qty": 26,
+          "planQty": 26,
           "confirmedQty": 0,
           "locked": false
         },
@@ -4212,9 +3850,8 @@
           "modelName": "Z45 OSC",
           "partNo": "1272701",
           "weekStartDate": "2026-06-29",
-          "qty": 25,
-          "planQty": 25,
-          "shipped": false,
+          "qty": 26,
+          "planQty": 26,
           "confirmedQty": 0,
           "locked": false
         },
@@ -4223,9 +3860,8 @@
           "modelName": "Z45 OSC",
           "partNo": "1272701",
           "weekStartDate": "2026-07-06",
-          "qty": 25,
-          "planQty": 25,
-          "shipped": false,
+          "qty": 26,
+          "planQty": 26,
           "confirmedQty": 0,
           "locked": false
         },
@@ -4234,9 +3870,8 @@
           "modelName": "Z45 OSC",
           "partNo": "1272701",
           "weekStartDate": "2026-07-13",
-          "qty": 25,
-          "planQty": 25,
-          "shipped": false,
+          "qty": 26,
+          "planQty": 26,
           "confirmedQty": 0,
           "locked": false
         },
@@ -4245,9 +3880,8 @@
           "modelName": "Z45 OSC",
           "partNo": "1272701",
           "weekStartDate": "2026-07-20",
-          "qty": 25,
-          "planQty": 25,
-          "shipped": false,
+          "qty": 26,
+          "planQty": 26,
           "confirmedQty": 0,
           "locked": false
         },
@@ -4256,9 +3890,8 @@
           "modelName": "Z45 OSC",
           "partNo": "1272701",
           "weekStartDate": "2026-07-27",
-          "qty": 25,
-          "planQty": 25,
-          "shipped": false,
+          "qty": 26,
+          "planQty": 26,
           "confirmedQty": 0,
           "locked": false
         },
@@ -4267,9 +3900,8 @@
           "modelName": "Z45 OSC",
           "partNo": "1272701",
           "weekStartDate": "2026-08-03",
-          "qty": 16,
-          "planQty": 16,
-          "shipped": false,
+          "qty": 26,
+          "planQty": 26,
           "confirmedQty": 0,
           "locked": false
         },
@@ -4278,9 +3910,8 @@
           "modelName": "Z45 OSC",
           "partNo": "1272701",
           "weekStartDate": "2026-08-10",
-          "qty": 16,
-          "planQty": 16,
-          "shipped": false,
+          "qty": 26,
+          "planQty": 26,
           "confirmedQty": 0,
           "locked": false
         },
@@ -4289,9 +3920,8 @@
           "modelName": "Z45 OSC",
           "partNo": "1272701",
           "weekStartDate": "2026-08-17",
-          "qty": 16,
-          "planQty": 16,
-          "shipped": false,
+          "qty": 26,
+          "planQty": 26,
           "confirmedQty": 0,
           "locked": false
         },
@@ -4300,9 +3930,8 @@
           "modelName": "Z45 OSC",
           "partNo": "1272701",
           "weekStartDate": "2026-08-24",
-          "qty": 16,
-          "planQty": 16,
-          "shipped": false,
+          "qty": 26,
+          "planQty": 26,
           "confirmedQty": 0,
           "locked": false
         },
@@ -4311,9 +3940,8 @@
           "modelName": "Z45 OSC",
           "partNo": "1272701",
           "weekStartDate": "2026-08-31",
-          "qty": 16,
-          "planQty": 16,
-          "shipped": false,
+          "qty": 26,
+          "planQty": 26,
           "confirmedQty": 0,
           "locked": false
         },
@@ -4322,9 +3950,8 @@
           "modelName": "Z45 OSC",
           "partNo": "1272701",
           "weekStartDate": "2026-09-07",
-          "qty": 9,
-          "planQty": 9,
-          "shipped": false,
+          "qty": 12,
+          "planQty": 12,
           "confirmedQty": 0,
           "locked": false
         },
@@ -4333,9 +3960,8 @@
           "modelName": "Z45 OSC",
           "partNo": "1272701",
           "weekStartDate": "2026-09-14",
-          "qty": 12,
-          "planQty": 12,
-          "shipped": false,
+          "qty": 19,
+          "planQty": 19,
           "confirmedQty": 0,
           "locked": false
         },
@@ -4344,9 +3970,8 @@
           "modelName": "Z45 OSC",
           "partNo": "1272701",
           "weekStartDate": "2026-09-21",
-          "qty": 12,
-          "planQty": 12,
-          "shipped": false,
+          "qty": 19,
+          "planQty": 19,
           "confirmedQty": 0,
           "locked": false
         },
@@ -4355,9 +3980,8 @@
           "modelName": "Z45 OSC",
           "partNo": "1272701",
           "weekStartDate": "2026-09-28",
-          "qty": 12,
-          "planQty": 12,
-          "shipped": false,
+          "qty": 19,
+          "planQty": 19,
           "confirmedQty": 0,
           "locked": false
         },
@@ -4366,9 +3990,8 @@
           "modelName": "Z45 OSC",
           "partNo": "1272701",
           "weekStartDate": "2026-10-05",
-          "qty": 12,
-          "planQty": 12,
-          "shipped": false,
+          "qty": 14,
+          "planQty": 14,
           "confirmedQty": 0,
           "locked": false
         },
@@ -4377,9 +4000,8 @@
           "modelName": "Z45 OSC",
           "partNo": "1272701",
           "weekStartDate": "2026-10-12",
-          "qty": 12,
-          "planQty": 12,
-          "shipped": false,
+          "qty": 14,
+          "planQty": 14,
           "confirmedQty": 0,
           "locked": false
         },
@@ -4388,9 +4010,8 @@
           "modelName": "Z45 OSC",
           "partNo": "1272701",
           "weekStartDate": "2026-10-19",
-          "qty": 12,
-          "planQty": 12,
-          "shipped": false,
+          "qty": 14,
+          "planQty": 14,
           "confirmedQty": 0,
           "locked": false
         },
@@ -4399,9 +4020,8 @@
           "modelName": "Z45 OSC",
           "partNo": "1272701",
           "weekStartDate": "2026-10-26",
-          "qty": 12,
-          "planQty": 12,
-          "shipped": false,
+          "qty": 14,
+          "planQty": 14,
           "confirmedQty": 0,
           "locked": false
         },
@@ -4412,8 +4032,7 @@
           "weekStartDate": "2026-06-01",
           "qty": 8,
           "planQty": 8,
-          "shipped": false,
-          "confirmedQty": 0,
+          "confirmedQty": 8,
           "locked": false
         },
         {
@@ -4423,8 +4042,7 @@
           "weekStartDate": "2026-06-08",
           "qty": 1,
           "planQty": 1,
-          "shipped": false,
-          "confirmedQty": 0,
+          "confirmedQty": 1,
           "locked": false
         },
         {
@@ -4434,7 +4052,846 @@
           "weekStartDate": "2026-06-08",
           "qty": 34,
           "planQty": 34,
-          "shipped": false,
+          "confirmedQty": 34,
+          "locked": false
+        },
+        {
+          "id": "plan-f75f8153-87ed-4050-a7ab-fc9863d801a5",
+          "modelName": "GS1930E",
+          "partNo": "1303742",
+          "weekStartDate": "2026-11-02",
+          "qty": 76,
+          "planQty": 76,
+          "confirmedQty": 0,
+          "locked": false
+        },
+        {
+          "id": "plan-bfea5e17-de8d-47d7-be3e-526b295bb474",
+          "modelName": "GS1930E",
+          "partNo": "1303742",
+          "weekStartDate": "2026-11-09",
+          "qty": 76,
+          "planQty": 76,
+          "confirmedQty": 0,
+          "locked": false
+        },
+        {
+          "id": "plan-3e793dd9-4b4c-4420-ab73-8cade7486ca0",
+          "modelName": "GS1930E",
+          "partNo": "1303742",
+          "weekStartDate": "2026-11-16",
+          "qty": 76,
+          "planQty": 76,
+          "confirmedQty": 0,
+          "locked": false
+        },
+        {
+          "id": "plan-8abbd931-95f7-4077-b8b4-c71cb07bed4b",
+          "modelName": "GS1930E",
+          "partNo": "1303742",
+          "weekStartDate": "2026-11-23",
+          "qty": 57,
+          "planQty": 57,
+          "confirmedQty": 0,
+          "locked": false
+        },
+        {
+          "id": "plan-2f786e0b-154f-4e3c-926c-9f606ec93e74",
+          "modelName": "GS1930E",
+          "partNo": "1303742",
+          "weekStartDate": "2026-11-30",
+          "qty": 76,
+          "planQty": 76,
+          "confirmedQty": 0,
+          "locked": false
+        },
+        {
+          "id": "plan-7c641ed9-f890-4309-9088-6d9925a4a1a5",
+          "modelName": "GS1930E",
+          "partNo": "1303742",
+          "weekStartDate": "2026-12-07",
+          "qty": 76,
+          "planQty": 76,
+          "confirmedQty": 0,
+          "locked": false
+        },
+        {
+          "id": "plan-7d68700c-62a6-4871-ba6c-a0bdf3bac043",
+          "modelName": "GS1930E",
+          "partNo": "1303742",
+          "weekStartDate": "2026-12-14",
+          "qty": 76,
+          "planQty": 76,
+          "confirmedQty": 0,
+          "locked": false
+        },
+        {
+          "id": "plan-b43cbb90-b03c-4efe-b30f-0c96afb4f7aa",
+          "modelName": "GS4655",
+          "partNo": "1287153",
+          "weekStartDate": "2026-11-02",
+          "qty": 8,
+          "planQty": 8,
+          "confirmedQty": 0,
+          "locked": false
+        },
+        {
+          "id": "plan-79c94d79-cffe-4c0a-ad46-d76fdbd6dc6b",
+          "modelName": "GS4655",
+          "partNo": "1287153",
+          "weekStartDate": "2026-11-09",
+          "qty": 8,
+          "planQty": 8,
+          "confirmedQty": 0,
+          "locked": false
+        },
+        {
+          "id": "plan-b1ec13ef-782f-4aab-9fc4-c01511eec25c",
+          "modelName": "GS4655",
+          "partNo": "1287153",
+          "weekStartDate": "2026-11-16",
+          "qty": 8,
+          "planQty": 8,
+          "confirmedQty": 0,
+          "locked": false
+        },
+        {
+          "id": "plan-a87dae88-06a3-4954-97be-fb46bb89b5af",
+          "modelName": "GS4655",
+          "partNo": "1287153",
+          "weekStartDate": "2026-11-23",
+          "qty": 6,
+          "planQty": 6,
+          "confirmedQty": 0,
+          "locked": false
+        },
+        {
+          "id": "plan-981582b6-6c1f-4ecc-9434-8e76fcacee34",
+          "modelName": "GS4655",
+          "partNo": "1287153",
+          "weekStartDate": "2026-11-30",
+          "qty": 8,
+          "planQty": 8,
+          "confirmedQty": 0,
+          "locked": false
+        },
+        {
+          "id": "plan-e12ff4fe-8a21-4ce9-9c47-0a51c5d9c6a3",
+          "modelName": "GS4655",
+          "partNo": "1287153",
+          "weekStartDate": "2026-12-07",
+          "qty": 8,
+          "planQty": 8,
+          "confirmedQty": 0,
+          "locked": false
+        },
+        {
+          "id": "plan-0b1bd87a-a529-4bfb-850b-3e47fbffcd25",
+          "modelName": "GS4655",
+          "partNo": "1287153",
+          "weekStartDate": "2026-12-14",
+          "qty": 8,
+          "planQty": 8,
+          "confirmedQty": 0,
+          "locked": false
+        },
+        {
+          "id": "plan-d8faba91-17d2-47ff-ba69-b79f890190bd",
+          "modelName": "GS4655",
+          "partNo": "1289380",
+          "weekStartDate": "2026-11-02",
+          "qty": 8,
+          "planQty": 8,
+          "confirmedQty": 0,
+          "locked": false
+        },
+        {
+          "id": "plan-b677b1b4-e53d-445c-9281-c7369be85fda",
+          "modelName": "GS4655",
+          "partNo": "1289380",
+          "weekStartDate": "2026-11-09",
+          "qty": 8,
+          "planQty": 8,
+          "confirmedQty": 0,
+          "locked": false
+        },
+        {
+          "id": "plan-dd9facb9-c039-4faf-841a-7b1c03bbb7f5",
+          "modelName": "GS4655",
+          "partNo": "1289380",
+          "weekStartDate": "2026-11-16",
+          "qty": 8,
+          "planQty": 8,
+          "confirmedQty": 0,
+          "locked": false
+        },
+        {
+          "id": "plan-93c49b43-96f1-4666-a90d-5e42dc0f3ece",
+          "modelName": "GS4655",
+          "partNo": "1289380",
+          "weekStartDate": "2026-11-23",
+          "qty": 6,
+          "planQty": 6,
+          "confirmedQty": 0,
+          "locked": false
+        },
+        {
+          "id": "plan-4e6ff694-8d32-4a6b-84d3-1861d99e57f7",
+          "modelName": "GS4655",
+          "partNo": "1289380",
+          "weekStartDate": "2026-11-30",
+          "qty": 8,
+          "planQty": 8,
+          "confirmedQty": 0,
+          "locked": false
+        },
+        {
+          "id": "plan-5ad6acf9-8d8a-4156-80b2-7193f3f64471",
+          "modelName": "GS4655",
+          "partNo": "1289380",
+          "weekStartDate": "2026-12-07",
+          "qty": 8,
+          "planQty": 8,
+          "confirmedQty": 0,
+          "locked": false
+        },
+        {
+          "id": "plan-135490c2-2b1e-48a3-91cc-c7be031b5083",
+          "modelName": "GS4655",
+          "partNo": "1289380",
+          "weekStartDate": "2026-12-14",
+          "qty": 8,
+          "planQty": 8,
+          "confirmedQty": 0,
+          "locked": false
+        },
+        {
+          "id": "plan-ca27ae95-ebd4-4af1-ac86-ace2a0752943",
+          "modelName": "GS4655",
+          "partNo": "1292085",
+          "weekStartDate": "2026-11-02",
+          "qty": 8,
+          "planQty": 8,
+          "confirmedQty": 0,
+          "locked": false
+        },
+        {
+          "id": "plan-90d76f9c-47a2-4245-8181-601be7ac42a0",
+          "modelName": "GS4655",
+          "partNo": "1292085",
+          "weekStartDate": "2026-11-09",
+          "qty": 8,
+          "planQty": 8,
+          "confirmedQty": 0,
+          "locked": false
+        },
+        {
+          "id": "plan-4a28357d-201c-4b98-868c-c1901aa9fd4a",
+          "modelName": "GS4655",
+          "partNo": "1292085",
+          "weekStartDate": "2026-11-16",
+          "qty": 8,
+          "planQty": 8,
+          "confirmedQty": 0,
+          "locked": false
+        },
+        {
+          "id": "plan-b57bca57-9635-412e-98c9-60c2e307334a",
+          "modelName": "GS4655",
+          "partNo": "1292085",
+          "weekStartDate": "2026-11-23",
+          "qty": 6,
+          "planQty": 6,
+          "confirmedQty": 0,
+          "locked": false
+        },
+        {
+          "id": "plan-08b9974a-b47b-44f2-8134-1957285b522d",
+          "modelName": "GS4655",
+          "partNo": "1292085",
+          "weekStartDate": "2026-11-30",
+          "qty": 8,
+          "planQty": 8,
+          "confirmedQty": 0,
+          "locked": false
+        },
+        {
+          "id": "plan-1c882bc6-73cf-4b71-947b-b7ab8bd89b45",
+          "modelName": "GS4655",
+          "partNo": "1292085",
+          "weekStartDate": "2026-12-07",
+          "qty": 8,
+          "planQty": 8,
+          "confirmedQty": 0,
+          "locked": false
+        },
+        {
+          "id": "plan-e17e19e6-d43f-432b-9f11-206732214716",
+          "modelName": "GS4655",
+          "partNo": "1292085",
+          "weekStartDate": "2026-12-14",
+          "qty": 8,
+          "planQty": 8,
+          "confirmedQty": 0,
+          "locked": false
+        },
+        {
+          "id": "plan-b8683ce9-b352-49c5-84c9-397eefd12c06",
+          "modelName": "S45XC",
+          "partNo": "1290073",
+          "weekStartDate": "2026-11-02",
+          "qty": 25,
+          "planQty": 25,
+          "confirmedQty": 0,
+          "locked": false
+        },
+        {
+          "id": "plan-28305207-91ee-4c07-9488-ec7f7e02e050",
+          "modelName": "S45XC",
+          "partNo": "1290073",
+          "weekStartDate": "2026-11-09",
+          "qty": 25,
+          "planQty": 25,
+          "confirmedQty": 0,
+          "locked": false
+        },
+        {
+          "id": "plan-0128e450-1bb1-459e-988d-8691d5bf3d50",
+          "modelName": "S45XC",
+          "partNo": "1290073",
+          "weekStartDate": "2026-11-16",
+          "qty": 25,
+          "planQty": 25,
+          "confirmedQty": 0,
+          "locked": false
+        },
+        {
+          "id": "plan-ce638fcc-5cfa-45ee-9e54-f8f5a41a3ef0",
+          "modelName": "S45XC",
+          "partNo": "1290073",
+          "weekStartDate": "2026-11-23",
+          "qty": 19,
+          "planQty": 19,
+          "confirmedQty": 0,
+          "locked": false
+        },
+        {
+          "id": "plan-10306ee1-4baa-4565-b640-deb9fd257c27",
+          "modelName": "S45XC",
+          "partNo": "1290073",
+          "weekStartDate": "2026-11-30",
+          "qty": 25,
+          "planQty": 25,
+          "confirmedQty": 0,
+          "locked": false
+        },
+        {
+          "id": "plan-e44155cc-b9c1-4298-86b8-01fbb0da46b7",
+          "modelName": "S45XC",
+          "partNo": "1290073",
+          "weekStartDate": "2026-12-07",
+          "qty": 25,
+          "planQty": 25,
+          "confirmedQty": 0,
+          "locked": false
+        },
+        {
+          "id": "plan-d867194c-36d8-447e-85c2-9b8c18c6fca9",
+          "modelName": "S45XC",
+          "partNo": "1290073",
+          "weekStartDate": "2026-12-14",
+          "qty": 25,
+          "planQty": 25,
+          "confirmedQty": 0,
+          "locked": false
+        },
+        {
+          "id": "plan-a6ce0585-322c-406b-9361-a5ca7426a31f",
+          "modelName": "Z80",
+          "partNo": "230980",
+          "weekStartDate": "2026-11-02",
+          "qty": 10,
+          "planQty": 10,
+          "confirmedQty": 0,
+          "locked": false
+        },
+        {
+          "id": "plan-a3d2ae15-11c9-49f3-9887-a0a3287a3527",
+          "modelName": "Z80",
+          "partNo": "230980",
+          "weekStartDate": "2026-11-09",
+          "qty": 10,
+          "planQty": 10,
+          "confirmedQty": 0,
+          "locked": false
+        },
+        {
+          "id": "plan-2f6dae0b-ee22-451a-94c2-528ca0e64016",
+          "modelName": "Z80",
+          "partNo": "230980",
+          "weekStartDate": "2026-11-16",
+          "qty": 10,
+          "planQty": 10,
+          "confirmedQty": 0,
+          "locked": false
+        },
+        {
+          "id": "plan-d845f2fb-f1ef-4553-b4d8-80c34f8d85ae",
+          "modelName": "Z80",
+          "partNo": "230980",
+          "weekStartDate": "2026-11-23",
+          "qty": 7,
+          "planQty": 7,
+          "confirmedQty": 0,
+          "locked": false
+        },
+        {
+          "id": "plan-38a7e7f8-e4ad-48d6-b3e3-b9ce9e073277",
+          "modelName": "Z80",
+          "partNo": "230980",
+          "weekStartDate": "2026-11-30",
+          "qty": 9,
+          "planQty": 9,
+          "confirmedQty": 0,
+          "locked": false
+        },
+        {
+          "id": "plan-d4979d74-232b-4d52-a5c3-560e813d6d07",
+          "modelName": "Z80",
+          "partNo": "230980",
+          "weekStartDate": "2026-12-07",
+          "qty": 9,
+          "planQty": 9,
+          "confirmedQty": 0,
+          "locked": false
+        },
+        {
+          "id": "plan-bf4f3cc0-cf74-4607-b2f1-a4da3cb30bf1",
+          "modelName": "Z80",
+          "partNo": "230980",
+          "weekStartDate": "2026-12-14",
+          "qty": 9,
+          "planQty": 9,
+          "confirmedQty": 0,
+          "locked": false
+        },
+        {
+          "id": "plan-c13cc3a0-4f7a-478b-8507-3f023f4f4530",
+          "modelName": "Z80",
+          "partNo": "230989",
+          "weekStartDate": "2026-11-02",
+          "qty": 9,
+          "planQty": 9,
+          "confirmedQty": 0,
+          "locked": false
+        },
+        {
+          "id": "plan-a796c33c-661e-456c-94d5-eda3e68f7a1c",
+          "modelName": "Z80",
+          "partNo": "230989",
+          "weekStartDate": "2026-11-09",
+          "qty": 9,
+          "planQty": 9,
+          "confirmedQty": 0,
+          "locked": false
+        },
+        {
+          "id": "plan-edbc3312-b993-45b3-b9eb-3cd3943c2ef9",
+          "modelName": "Z80",
+          "partNo": "230989",
+          "weekStartDate": "2026-11-16",
+          "qty": 9,
+          "planQty": 9,
+          "confirmedQty": 0,
+          "locked": false
+        },
+        {
+          "id": "plan-6a439b69-fc47-45e2-b612-d37e5026a648",
+          "modelName": "Z80",
+          "partNo": "230989",
+          "weekStartDate": "2026-11-23",
+          "qty": 6,
+          "planQty": 6,
+          "confirmedQty": 0,
+          "locked": false
+        },
+        {
+          "id": "plan-a01e6709-5f50-4fdf-93b6-2ad00196b41e",
+          "modelName": "Z80",
+          "partNo": "230989",
+          "weekStartDate": "2026-11-30",
+          "qty": 8,
+          "planQty": 8,
+          "confirmedQty": 0,
+          "locked": false
+        },
+        {
+          "id": "plan-7e0a53d1-e7ce-4d73-b6b5-9b5dbf69a86a",
+          "modelName": "Z80",
+          "partNo": "230989",
+          "weekStartDate": "2026-12-07",
+          "qty": 8,
+          "planQty": 8,
+          "confirmedQty": 0,
+          "locked": false
+        },
+        {
+          "id": "plan-95c89942-d7e7-4e5d-bf05-c234a475c5b9",
+          "modelName": "Z80",
+          "partNo": "230989",
+          "weekStartDate": "2026-12-14",
+          "qty": 8,
+          "planQty": 8,
+          "confirmedQty": 0,
+          "locked": false
+        },
+        {
+          "id": "plan-e9bc9a64-6f17-49b5-b7a0-f84acbae7f97",
+          "modelName": "S85XC",
+          "partNo": "1268562",
+          "weekStartDate": "2026-11-02",
+          "qty": 22,
+          "planQty": 22,
+          "confirmedQty": 0,
+          "locked": false
+        },
+        {
+          "id": "plan-421de186-46c1-4b89-afc2-9ca49882b6b2",
+          "modelName": "S85XC",
+          "partNo": "1268562",
+          "weekStartDate": "2026-11-09",
+          "qty": 22,
+          "planQty": 22,
+          "confirmedQty": 0,
+          "locked": false
+        },
+        {
+          "id": "plan-daeb0812-ed44-426c-a927-29a7e47266d2",
+          "modelName": "S85XC",
+          "partNo": "1268562",
+          "weekStartDate": "2026-11-16",
+          "qty": 22,
+          "planQty": 22,
+          "confirmedQty": 0,
+          "locked": false
+        },
+        {
+          "id": "plan-a5888ae9-7d6a-48e4-8d6d-63991f422520",
+          "modelName": "S85XC",
+          "partNo": "1268562",
+          "weekStartDate": "2026-11-23",
+          "qty": 15,
+          "planQty": 15,
+          "confirmedQty": 0,
+          "locked": false
+        },
+        {
+          "id": "plan-c353211f-57bf-4cea-8c2a-5b40f06d5b7b",
+          "modelName": "S85XC",
+          "partNo": "1268562",
+          "weekStartDate": "2026-11-30",
+          "qty": 20,
+          "planQty": 20,
+          "confirmedQty": 0,
+          "locked": false
+        },
+        {
+          "id": "plan-a7fbbe1c-be2c-4f04-934c-7646de4f9093",
+          "modelName": "S85XC",
+          "partNo": "1268562",
+          "weekStartDate": "2026-12-07",
+          "qty": 20,
+          "planQty": 20,
+          "confirmedQty": 0,
+          "locked": false
+        },
+        {
+          "id": "plan-8d8b75b7-55b5-4de8-b8a1-e37f04ccd6eb",
+          "modelName": "S85XC",
+          "partNo": "1268562",
+          "weekStartDate": "2026-12-14",
+          "qty": 20,
+          "planQty": 20,
+          "confirmedQty": 0,
+          "locked": false
+        },
+        {
+          "id": "plan-b1359080-42da-4a0c-b36d-46eafc177b8f",
+          "modelName": "Z80",
+          "partNo": "237329",
+          "weekStartDate": "2026-11-02",
+          "qty": 10,
+          "planQty": 10,
+          "confirmedQty": 0,
+          "locked": false
+        },
+        {
+          "id": "plan-9ae527ee-7c4e-43e7-8822-6b7e98629e22",
+          "modelName": "Z80",
+          "partNo": "237329",
+          "weekStartDate": "2026-11-09",
+          "qty": 10,
+          "planQty": 10,
+          "confirmedQty": 0,
+          "locked": false
+        },
+        {
+          "id": "plan-1143faa9-efc0-4c87-b120-37e5cba9a81b",
+          "modelName": "Z80",
+          "partNo": "237329",
+          "weekStartDate": "2026-11-16",
+          "qty": 10,
+          "planQty": 10,
+          "confirmedQty": 0,
+          "locked": false
+        },
+        {
+          "id": "plan-aafae0ad-e005-4d35-aa7c-8b7a572c2f16",
+          "modelName": "Z80",
+          "partNo": "237329",
+          "weekStartDate": "2026-11-23",
+          "qty": 7,
+          "planQty": 7,
+          "confirmedQty": 0,
+          "locked": false
+        },
+        {
+          "id": "plan-0d6f4d16-c567-4b7e-93a4-61a0a0052575",
+          "modelName": "Z80",
+          "partNo": "237329",
+          "weekStartDate": "2026-11-30",
+          "qty": 9,
+          "planQty": 9,
+          "confirmedQty": 0,
+          "locked": false
+        },
+        {
+          "id": "plan-5edd04c4-1ea9-4137-a775-26ae5ec2e8bb",
+          "modelName": "Z80",
+          "partNo": "237329",
+          "weekStartDate": "2026-12-07",
+          "qty": 9,
+          "planQty": 9,
+          "confirmedQty": 0,
+          "locked": false
+        },
+        {
+          "id": "plan-b39f48d2-a969-4c8b-9359-5d2c7a7711b7",
+          "modelName": "Z80",
+          "partNo": "237329",
+          "weekStartDate": "2026-12-14",
+          "qty": 9,
+          "planQty": 9,
+          "confirmedQty": 0,
+          "locked": false
+        },
+        {
+          "id": "plan-be4350d2-d145-40ea-a875-5fd5a40873f9",
+          "modelName": "Z45 OSC",
+          "partNo": "1272701",
+          "weekStartDate": "2026-11-02",
+          "qty": 12,
+          "planQty": 12,
+          "confirmedQty": 0,
+          "locked": false
+        },
+        {
+          "id": "plan-59e1ff64-fb8b-4174-b1e6-5ad1703a8a18",
+          "modelName": "Z45 OSC",
+          "partNo": "1272701",
+          "weekStartDate": "2026-11-09",
+          "qty": 12,
+          "planQty": 12,
+          "confirmedQty": 0,
+          "locked": false
+        },
+        {
+          "id": "plan-8a6cb5b1-7370-4dfe-8e0c-6fa129262a35",
+          "modelName": "Z45 OSC",
+          "partNo": "1272701",
+          "weekStartDate": "2026-11-16",
+          "qty": 12,
+          "planQty": 12,
+          "confirmedQty": 0,
+          "locked": false
+        },
+        {
+          "id": "plan-3b72709e-34e5-409e-b12d-2e4a6a585ee0",
+          "modelName": "Z45 OSC",
+          "partNo": "1272701",
+          "weekStartDate": "2026-11-23",
+          "qty": 9,
+          "planQty": 9,
+          "confirmedQty": 0,
+          "locked": false
+        },
+        {
+          "id": "plan-d734f0f6-8f2a-4d47-82f6-896c97f60677",
+          "modelName": "Z45 OSC",
+          "partNo": "1272701",
+          "weekStartDate": "2026-11-30",
+          "qty": 12,
+          "planQty": 12,
+          "confirmedQty": 0,
+          "locked": false
+        },
+        {
+          "id": "plan-e99d4d40-ffbd-4003-909f-4919fce0c598",
+          "modelName": "Z45 OSC",
+          "partNo": "1272701",
+          "weekStartDate": "2026-12-07",
+          "qty": 12,
+          "planQty": 12,
+          "confirmedQty": 0,
+          "locked": false
+        },
+        {
+          "id": "plan-e2a5011c-c804-4b5c-8bf2-a4b42b6c1fd1",
+          "modelName": "Z45 OSC",
+          "partNo": "1272701",
+          "weekStartDate": "2026-12-14",
+          "qty": 12,
+          "planQty": 12,
+          "confirmedQty": 0,
+          "locked": false
+        },
+        {
+          "id": "plan-403944c6-b0b3-424b-821b-6ce0afff00bf",
+          "modelName": "Z45 DC",
+          "partNo": "229306",
+          "weekStartDate": "2026-11-02",
+          "qty": 12,
+          "planQty": 12,
+          "confirmedQty": 0,
+          "locked": false
+        },
+        {
+          "id": "plan-cb96707e-fcae-4488-8aad-68821cd625bc",
+          "modelName": "Z45 DC",
+          "partNo": "229306",
+          "weekStartDate": "2026-11-09",
+          "qty": 12,
+          "planQty": 12,
+          "confirmedQty": 0,
+          "locked": false
+        },
+        {
+          "id": "plan-6b64a82e-3b31-471a-88e1-4341bf3c01b9",
+          "modelName": "Z45 DC",
+          "partNo": "229306",
+          "weekStartDate": "2026-11-16",
+          "qty": 12,
+          "planQty": 12,
+          "confirmedQty": 0,
+          "locked": false
+        },
+        {
+          "id": "plan-dffec16f-83de-4c5a-85bb-ac6271004c16",
+          "modelName": "Z45 DC",
+          "partNo": "229306",
+          "weekStartDate": "2026-11-23",
+          "qty": 9,
+          "planQty": 9,
+          "confirmedQty": 0,
+          "locked": false
+        },
+        {
+          "id": "plan-330dc183-61a9-44f9-982a-22d0ab219812",
+          "modelName": "Z45 DC",
+          "partNo": "229306",
+          "weekStartDate": "2026-11-30",
+          "qty": 12,
+          "planQty": 12,
+          "confirmedQty": 0,
+          "locked": false
+        },
+        {
+          "id": "plan-3acc4190-a658-40b8-91b7-897dff5956af",
+          "modelName": "Z45 DC",
+          "partNo": "229306",
+          "weekStartDate": "2026-12-07",
+          "qty": 12,
+          "planQty": 12,
+          "confirmedQty": 0,
+          "locked": false
+        },
+        {
+          "id": "plan-42bfaca1-b4e9-435b-9b77-deecfc426773",
+          "modelName": "Z45 DC",
+          "partNo": "229306",
+          "weekStartDate": "2026-12-14",
+          "qty": 12,
+          "planQty": 12,
+          "confirmedQty": 0,
+          "locked": false
+        },
+        {
+          "id": "plan-a35d7275-b5e2-4fbe-8544-5d3aa0eba2a5",
+          "modelName": "Z40",
+          "partNo": "110545",
+          "weekStartDate": "2026-11-02",
+          "qty": 9,
+          "planQty": 9,
+          "confirmedQty": 0,
+          "locked": false
+        },
+        {
+          "id": "plan-5d49907b-5e98-4e77-a170-cb300659dde0",
+          "modelName": "Z40",
+          "partNo": "110545",
+          "weekStartDate": "2026-11-09",
+          "qty": 9,
+          "planQty": 9,
+          "confirmedQty": 0,
+          "locked": false
+        },
+        {
+          "id": "plan-c2c74fda-fa3e-4721-95f3-a59459979ecd",
+          "modelName": "Z40",
+          "partNo": "110545",
+          "weekStartDate": "2026-11-16",
+          "qty": 9,
+          "planQty": 9,
+          "confirmedQty": 0,
+          "locked": false
+        },
+        {
+          "id": "plan-eafed49d-b31c-4908-8614-49f3e4ba07df",
+          "modelName": "Z40",
+          "partNo": "110545",
+          "weekStartDate": "2026-11-23",
+          "qty": 7,
+          "planQty": 7,
+          "confirmedQty": 0,
+          "locked": false
+        },
+        {
+          "id": "plan-b634f3e6-f2d7-470d-8e7b-00a82e7e8e3a",
+          "modelName": "Z40",
+          "partNo": "110545",
+          "weekStartDate": "2026-11-30",
+          "qty": 9,
+          "planQty": 9,
+          "confirmedQty": 0,
+          "locked": false
+        },
+        {
+          "id": "plan-b4619e63-a202-4ff8-b53e-1adfb6a14483",
+          "modelName": "Z40",
+          "partNo": "110545",
+          "weekStartDate": "2026-12-07",
+          "qty": 9,
+          "planQty": 9,
+          "confirmedQty": 0,
+          "locked": false
+        },
+        {
+          "id": "plan-0bf38eef-534d-46b6-9590-27afeaccb732",
+          "modelName": "Z40",
+          "partNo": "110545",
+          "weekStartDate": "2026-12-14",
+          "qty": 9,
+          "planQty": 9,
           "confirmedQty": 0,
           "locked": false
         }
@@ -4446,111 +4903,6 @@
       }
     },
     "tc-inv-in-transit": [
-      {
-        "id": "tr-9e354a37-5360-49c9-9eed-4a546f043820",
-        "containerNo": "TCNU6234418",
-        "modelName": "GS4655",
-        "partNo": "1292085",
-        "qty": 3,
-        "etdTcTech": "2026-05-06",
-        "etdPort": "2026-05-13",
-        "etaPort": "2026-06-08",
-        "etaWh": "",
-        "deliveryLocation": "Redmond, USA",
-        "remark": "",
-        "arrived": false,
-        "tcTechNo": "TCG-6082",
-        "transitStatus": "운송중",
-        "receiptDate": "",
-        "receivedBy": "",
-        "receivedAtIso": "",
-        "forwarder": "",
-        "hbl": ""
-      },
-      {
-        "id": "tr-e22e97a2-ebf6-475a-910c-47677b1891e3",
-        "containerNo": "TCNU6234418",
-        "modelName": "GS4655",
-        "partNo": "1287153",
-        "qty": 6,
-        "etdTcTech": "2026-05-06",
-        "etdPort": "2026-05-13",
-        "etaPort": "2026-06-08",
-        "etaWh": "",
-        "deliveryLocation": "Redmond, USA",
-        "remark": "",
-        "arrived": false,
-        "tcTechNo": "TCG-6082",
-        "transitStatus": "운송중",
-        "receiptDate": "",
-        "receivedBy": "",
-        "receivedAtIso": "",
-        "forwarder": "",
-        "hbl": ""
-      },
-      {
-        "id": "tr-2cf8bf09-5104-45fb-8843-77de28149aed",
-        "containerNo": "TCNU6234418",
-        "modelName": "GS4655",
-        "partNo": "1289380",
-        "qty": 6,
-        "etdTcTech": "2026-05-06",
-        "etdPort": "2026-05-13",
-        "etaPort": "2026-06-08",
-        "etaWh": "",
-        "deliveryLocation": "Redmond, USA",
-        "remark": "",
-        "arrived": false,
-        "tcTechNo": "TCG-6082",
-        "transitStatus": "운송중",
-        "receiptDate": "",
-        "receivedBy": "",
-        "receivedAtIso": "",
-        "forwarder": "",
-        "hbl": ""
-      },
-      {
-        "id": "tr-31c9f5fc-2e4c-439e-815c-41a4c22f2de9",
-        "containerNo": "TCNU6234418",
-        "modelName": "GS1930E",
-        "partNo": "1303742",
-        "qty": 12,
-        "etdTcTech": "2026-05-06",
-        "etdPort": "2026-05-13",
-        "etaPort": "2026-06-08",
-        "etaWh": "",
-        "deliveryLocation": "Redmond, USA",
-        "remark": "",
-        "arrived": false,
-        "tcTechNo": "TCG-6082",
-        "transitStatus": "운송중",
-        "receiptDate": "",
-        "receivedBy": "",
-        "receivedAtIso": "",
-        "forwarder": "",
-        "hbl": ""
-      },
-      {
-        "id": "tr-053c044b-af22-47e3-b862-0bfaa93fab70",
-        "containerNo": "BMOU6327836",
-        "modelName": "S85XC",
-        "partNo": "1268562",
-        "qty": 6,
-        "etdTcTech": "2026-05-08",
-        "etdPort": "2026-05-21",
-        "etaPort": "2026-06-03",
-        "etaWh": "",
-        "deliveryLocation": "Moseslake, USA",
-        "remark": "",
-        "arrived": false,
-        "tcTechNo": "TCG-6099",
-        "transitStatus": "운송중",
-        "receiptDate": "",
-        "receivedBy": "",
-        "receivedAtIso": "",
-        "forwarder": "",
-        "hbl": ""
-      },
       {
         "id": "tr-f895faff-813b-4563-91c1-d33150634c82",
         "containerNo": "SEGU6452727",
@@ -4594,69 +4946,6 @@
         "hbl": ""
       },
       {
-        "id": "tr-31b9cd81-4a6d-4024-b154-874f3a0d7d9f",
-        "containerNo": "BEAU4304863",
-        "modelName": "S85XC",
-        "partNo": "1268562",
-        "qty": 6,
-        "etdTcTech": "2026-05-15",
-        "etdPort": "2026-05-21",
-        "etaPort": "2026-06-03",
-        "etaWh": "",
-        "deliveryLocation": "Moseslake, USA",
-        "remark": "",
-        "arrived": false,
-        "tcTechNo": "TCG-6110",
-        "transitStatus": "운송중",
-        "receiptDate": "",
-        "receivedBy": "",
-        "receivedAtIso": "",
-        "forwarder": "",
-        "hbl": ""
-      },
-      {
-        "id": "tr-f5c12516-beed-47a5-a9fa-752b82d967d4",
-        "containerNo": "MSDU7408632",
-        "modelName": "S85XC",
-        "partNo": "1268562",
-        "qty": 6,
-        "etdTcTech": "2026-05-15",
-        "etdPort": "2026-05-22",
-        "etaPort": "2026-06-02",
-        "etaWh": "",
-        "deliveryLocation": "Moseslake, USA",
-        "remark": "",
-        "arrived": false,
-        "tcTechNo": "TCG-6111",
-        "transitStatus": "운송중",
-        "receiptDate": "",
-        "receivedBy": "",
-        "receivedAtIso": "",
-        "forwarder": "",
-        "hbl": ""
-      },
-      {
-        "id": "tr-bef0e228-f0ab-48c6-b268-5f90896551fc",
-        "containerNo": "MSMU8454290",
-        "modelName": "S85XC",
-        "partNo": "1268562",
-        "qty": 6,
-        "etdTcTech": "2026-05-15",
-        "etdPort": "2026-05-22",
-        "etaPort": "2026-06-02",
-        "etaWh": "",
-        "deliveryLocation": "Moseslake, USA",
-        "remark": "",
-        "arrived": false,
-        "tcTechNo": "TCG-6112",
-        "transitStatus": "운송중",
-        "receiptDate": "",
-        "receivedBy": "",
-        "receivedAtIso": "",
-        "forwarder": "",
-        "hbl": ""
-      },
-      {
         "id": "tr-6581b502-2a43-4199-a536-04e0af771e4a",
         "containerNo": "TIIU4178612",
         "modelName": "S85XC",
@@ -4691,90 +4980,6 @@
         "remark": "",
         "arrived": false,
         "tcTechNo": "TCG-6114",
-        "transitStatus": "운송중",
-        "receiptDate": "",
-        "receivedBy": "",
-        "receivedAtIso": "",
-        "forwarder": "",
-        "hbl": ""
-      },
-      {
-        "id": "tr-8249ced1-1953-4ba6-aaf8-0a1e5e525b26",
-        "containerNo": "BMOU6220703",
-        "modelName": "GS4655",
-        "partNo": "1292085",
-        "qty": 3,
-        "etdTcTech": "2026-05-21",
-        "etdPort": "2026-05-26",
-        "etaPort": "2026-06-08",
-        "etaWh": "",
-        "deliveryLocation": "Redmond, USA",
-        "remark": "",
-        "arrived": false,
-        "tcTechNo": "TCG-6115",
-        "transitStatus": "운송중",
-        "receiptDate": "",
-        "receivedBy": "",
-        "receivedAtIso": "",
-        "forwarder": "",
-        "hbl": ""
-      },
-      {
-        "id": "tr-cfbdcf0d-6aac-4989-9406-db1a733dcd44",
-        "containerNo": "BMOU6220703",
-        "modelName": "GS4655",
-        "partNo": "1287153",
-        "qty": 6,
-        "etdTcTech": "2026-05-21",
-        "etdPort": "2026-05-26",
-        "etaPort": "2026-06-08",
-        "etaWh": "",
-        "deliveryLocation": "Redmond, USA",
-        "remark": "",
-        "arrived": false,
-        "tcTechNo": "TCG-6115",
-        "transitStatus": "운송중",
-        "receiptDate": "",
-        "receivedBy": "",
-        "receivedAtIso": "",
-        "forwarder": "",
-        "hbl": ""
-      },
-      {
-        "id": "tr-edd0a9e3-af16-4283-941f-075f5bb5bc4d",
-        "containerNo": "BMOU6220703",
-        "modelName": "GS4655",
-        "partNo": "1289380",
-        "qty": 6,
-        "etdTcTech": "2026-05-21",
-        "etdPort": "2026-05-26",
-        "etaPort": "2026-06-08",
-        "etaWh": "",
-        "deliveryLocation": "Redmond, USA",
-        "remark": "",
-        "arrived": false,
-        "tcTechNo": "TCG-6115",
-        "transitStatus": "운송중",
-        "receiptDate": "",
-        "receivedBy": "",
-        "receivedAtIso": "",
-        "forwarder": "",
-        "hbl": ""
-      },
-      {
-        "id": "tr-1e049833-4431-447c-b76f-14c0ac8b1759",
-        "containerNo": "BMOU6220703",
-        "modelName": "GS1930E",
-        "partNo": "1303742",
-        "qty": 12,
-        "etdTcTech": "2026-05-21",
-        "etdPort": "2026-05-26",
-        "etaPort": "2026-06-08",
-        "etaWh": "",
-        "deliveryLocation": "Redmond, USA",
-        "remark": "",
-        "arrived": false,
-        "tcTechNo": "TCG-6115",
         "transitStatus": "운송중",
         "receiptDate": "",
         "receivedBy": "",
@@ -6543,6 +6748,258 @@
         "receiptDate": "",
         "receivedBy": "",
         "receivedAtIso": "",
+        "forwarder": "",
+        "hbl": ""
+      },
+      {
+        "id": "tr-8249ced1-1953-4ba6-aaf8-0a1e5e525b26",
+        "containerNo": "BMOU6220703",
+        "modelName": "GS4655",
+        "partNo": "1292085",
+        "qty": 3,
+        "etdTcTech": "2026-05-21",
+        "etdPort": "2026-05-26",
+        "etaPort": "2026-06-08",
+        "etaWh": "2026-06-15",
+        "deliveryLocation": "Redmond, USA",
+        "remark": "",
+        "arrived": true,
+        "tcTechNo": "TCG-6115",
+        "transitStatus": "입고완료",
+        "receiptDate": "2026-06-15",
+        "receivedBy": "Administrator",
+        "receivedAtIso": "2026-06-16T00:32:05.836Z",
+        "forwarder": "",
+        "hbl": ""
+      },
+      {
+        "id": "tr-cfbdcf0d-6aac-4989-9406-db1a733dcd44",
+        "containerNo": "BMOU6220703",
+        "modelName": "GS4655",
+        "partNo": "1287153",
+        "qty": 6,
+        "etdTcTech": "2026-05-21",
+        "etdPort": "2026-05-26",
+        "etaPort": "2026-06-08",
+        "etaWh": "2026-06-15",
+        "deliveryLocation": "Redmond, USA",
+        "remark": "",
+        "arrived": true,
+        "tcTechNo": "TCG-6115",
+        "transitStatus": "입고완료",
+        "receiptDate": "2026-06-15",
+        "receivedBy": "Administrator",
+        "receivedAtIso": "2026-06-16T00:32:05.836Z",
+        "forwarder": "",
+        "hbl": ""
+      },
+      {
+        "id": "tr-edd0a9e3-af16-4283-941f-075f5bb5bc4d",
+        "containerNo": "BMOU6220703",
+        "modelName": "GS4655",
+        "partNo": "1289380",
+        "qty": 6,
+        "etdTcTech": "2026-05-21",
+        "etdPort": "2026-05-26",
+        "etaPort": "2026-06-08",
+        "etaWh": "2026-06-15",
+        "deliveryLocation": "Redmond, USA",
+        "remark": "",
+        "arrived": true,
+        "tcTechNo": "TCG-6115",
+        "transitStatus": "입고완료",
+        "receiptDate": "2026-06-15",
+        "receivedBy": "Administrator",
+        "receivedAtIso": "2026-06-16T00:32:05.836Z",
+        "forwarder": "",
+        "hbl": ""
+      },
+      {
+        "id": "tr-1e049833-4431-447c-b76f-14c0ac8b1759",
+        "containerNo": "BMOU6220703",
+        "modelName": "GS1930E",
+        "partNo": "1303742",
+        "qty": 12,
+        "etdTcTech": "2026-05-21",
+        "etdPort": "2026-05-26",
+        "etaPort": "2026-06-08",
+        "etaWh": "2026-06-15",
+        "deliveryLocation": "Redmond, USA",
+        "remark": "",
+        "arrived": true,
+        "tcTechNo": "TCG-6115",
+        "transitStatus": "입고완료",
+        "receiptDate": "2026-06-15",
+        "receivedBy": "Administrator",
+        "receivedAtIso": "2026-06-16T00:32:05.836Z",
+        "forwarder": "",
+        "hbl": ""
+      },
+      {
+        "id": "tr-bef0e228-f0ab-48c6-b268-5f90896551fc",
+        "containerNo": "MSMU8454290",
+        "modelName": "S85XC",
+        "partNo": "1268562",
+        "qty": 6,
+        "etdTcTech": "2026-05-15",
+        "etdPort": "2026-05-22",
+        "etaPort": "2026-06-02",
+        "etaWh": "2026-06-15",
+        "deliveryLocation": "Moseslake, USA",
+        "remark": "",
+        "arrived": true,
+        "tcTechNo": "TCG-6112",
+        "transitStatus": "입고완료",
+        "receiptDate": "2026-06-15",
+        "receivedBy": "Administrator",
+        "receivedAtIso": "2026-06-16T00:31:52.548Z",
+        "forwarder": "",
+        "hbl": ""
+      },
+      {
+        "id": "tr-f5c12516-beed-47a5-a9fa-752b82d967d4",
+        "containerNo": "MSDU7408632",
+        "modelName": "S85XC",
+        "partNo": "1268562",
+        "qty": 6,
+        "etdTcTech": "2026-05-15",
+        "etdPort": "2026-05-22",
+        "etaPort": "2026-06-02",
+        "etaWh": "2026-06-15",
+        "deliveryLocation": "Moseslake, USA",
+        "remark": "",
+        "arrived": true,
+        "tcTechNo": "TCG-6111",
+        "transitStatus": "입고완료",
+        "receiptDate": "2026-06-15",
+        "receivedBy": "Administrator",
+        "receivedAtIso": "2026-06-16T00:31:45.597Z",
+        "forwarder": "",
+        "hbl": ""
+      },
+      {
+        "id": "tr-31b9cd81-4a6d-4024-b154-874f3a0d7d9f",
+        "containerNo": "BEAU4304863",
+        "modelName": "S85XC",
+        "partNo": "1268562",
+        "qty": 6,
+        "etdTcTech": "2026-05-15",
+        "etdPort": "2026-05-21",
+        "etaPort": "2026-06-03",
+        "etaWh": "2026-06-15",
+        "deliveryLocation": "Moseslake, USA",
+        "remark": "",
+        "arrived": true,
+        "tcTechNo": "TCG-6110",
+        "transitStatus": "입고완료",
+        "receiptDate": "2026-06-15",
+        "receivedBy": "Administrator",
+        "receivedAtIso": "2026-06-16T00:31:37.932Z",
+        "forwarder": "",
+        "hbl": ""
+      },
+      {
+        "id": "tr-053c044b-af22-47e3-b862-0bfaa93fab70",
+        "containerNo": "BMOU6327836",
+        "modelName": "S85XC",
+        "partNo": "1268562",
+        "qty": 6,
+        "etdTcTech": "2026-05-08",
+        "etdPort": "2026-05-21",
+        "etaPort": "2026-06-03",
+        "etaWh": "2026-06-15",
+        "deliveryLocation": "Moseslake, USA",
+        "remark": "",
+        "arrived": true,
+        "tcTechNo": "TCG-6099",
+        "transitStatus": "입고완료",
+        "receiptDate": "2026-06-15",
+        "receivedBy": "Administrator",
+        "receivedAtIso": "2026-06-16T00:31:29.780Z",
+        "forwarder": "",
+        "hbl": ""
+      },
+      {
+        "id": "tr-9e354a37-5360-49c9-9eed-4a546f043820",
+        "containerNo": "TCNU6234418",
+        "modelName": "GS4655",
+        "partNo": "1292085",
+        "qty": 3,
+        "etdTcTech": "2026-05-06",
+        "etdPort": "2026-05-13",
+        "etaPort": "2026-06-08",
+        "etaWh": "2026-06-15",
+        "deliveryLocation": "Redmond, USA",
+        "remark": "",
+        "arrived": true,
+        "tcTechNo": "TCG-6082",
+        "transitStatus": "입고완료",
+        "receiptDate": "2026-06-15",
+        "receivedBy": "Administrator",
+        "receivedAtIso": "2026-06-16T00:31:21.612Z",
+        "forwarder": "",
+        "hbl": ""
+      },
+      {
+        "id": "tr-e22e97a2-ebf6-475a-910c-47677b1891e3",
+        "containerNo": "TCNU6234418",
+        "modelName": "GS4655",
+        "partNo": "1287153",
+        "qty": 6,
+        "etdTcTech": "2026-05-06",
+        "etdPort": "2026-05-13",
+        "etaPort": "2026-06-08",
+        "etaWh": "2026-06-15",
+        "deliveryLocation": "Redmond, USA",
+        "remark": "",
+        "arrived": true,
+        "tcTechNo": "TCG-6082",
+        "transitStatus": "입고완료",
+        "receiptDate": "2026-06-15",
+        "receivedBy": "Administrator",
+        "receivedAtIso": "2026-06-16T00:31:21.612Z",
+        "forwarder": "",
+        "hbl": ""
+      },
+      {
+        "id": "tr-2cf8bf09-5104-45fb-8843-77de28149aed",
+        "containerNo": "TCNU6234418",
+        "modelName": "GS4655",
+        "partNo": "1289380",
+        "qty": 6,
+        "etdTcTech": "2026-05-06",
+        "etdPort": "2026-05-13",
+        "etaPort": "2026-06-08",
+        "etaWh": "2026-06-15",
+        "deliveryLocation": "Redmond, USA",
+        "remark": "",
+        "arrived": true,
+        "tcTechNo": "TCG-6082",
+        "transitStatus": "입고완료",
+        "receiptDate": "2026-06-15",
+        "receivedBy": "Administrator",
+        "receivedAtIso": "2026-06-16T00:31:21.612Z",
+        "forwarder": "",
+        "hbl": ""
+      },
+      {
+        "id": "tr-31c9f5fc-2e4c-439e-815c-41a4c22f2de9",
+        "containerNo": "TCNU6234418",
+        "modelName": "GS1930E",
+        "partNo": "1303742",
+        "qty": 12,
+        "etdTcTech": "2026-05-06",
+        "etdPort": "2026-05-13",
+        "etaPort": "2026-06-08",
+        "etaWh": "2026-06-15",
+        "deliveryLocation": "Redmond, USA",
+        "remark": "",
+        "arrived": true,
+        "tcTechNo": "TCG-6082",
+        "transitStatus": "입고완료",
+        "receiptDate": "2026-06-15",
+        "receivedBy": "Administrator",
+        "receivedAtIso": "2026-06-16T00:31:21.612Z",
         "forwarder": "",
         "hbl": ""
       },
@@ -8561,6 +9018,102 @@
         "qty": 6,
         "receivedAt": "2026-06-10",
         "sourceTransitId": "tr-7e298547-94fb-46b4-b600-0302180bf909"
+      },
+      {
+        "id": "arr-365da617-69f9-4842-9631-00e9df4fc89f",
+        "modelName": "GS4655",
+        "partNo": "1292085",
+        "qty": 3,
+        "receivedAt": "2026-06-15",
+        "sourceTransitId": "tr-9e354a37-5360-49c9-9eed-4a546f043820"
+      },
+      {
+        "id": "arr-3150d052-a8f0-4533-9236-66393b36e015",
+        "modelName": "GS4655",
+        "partNo": "1287153",
+        "qty": 6,
+        "receivedAt": "2026-06-15",
+        "sourceTransitId": "tr-e22e97a2-ebf6-475a-910c-47677b1891e3"
+      },
+      {
+        "id": "arr-7df6f91f-988c-46e4-8164-6c9cfb9226dc",
+        "modelName": "GS4655",
+        "partNo": "1289380",
+        "qty": 6,
+        "receivedAt": "2026-06-15",
+        "sourceTransitId": "tr-2cf8bf09-5104-45fb-8843-77de28149aed"
+      },
+      {
+        "id": "arr-8f27636e-81f3-4e00-a265-692dc8c18939",
+        "modelName": "GS1930E",
+        "partNo": "1303742",
+        "qty": 12,
+        "receivedAt": "2026-06-15",
+        "sourceTransitId": "tr-31c9f5fc-2e4c-439e-815c-41a4c22f2de9"
+      },
+      {
+        "id": "arr-69686e68-ab98-4472-8df9-3c1ef774e378",
+        "modelName": "S85XC",
+        "partNo": "1268562",
+        "qty": 6,
+        "receivedAt": "2026-06-15",
+        "sourceTransitId": "tr-053c044b-af22-47e3-b862-0bfaa93fab70"
+      },
+      {
+        "id": "arr-049e3f14-647f-4ee5-b903-1a0c80c7f68e",
+        "modelName": "S85XC",
+        "partNo": "1268562",
+        "qty": 6,
+        "receivedAt": "2026-06-15",
+        "sourceTransitId": "tr-31b9cd81-4a6d-4024-b154-874f3a0d7d9f"
+      },
+      {
+        "id": "arr-5804e509-bcc5-4e7d-8b09-7f9a3067b0b2",
+        "modelName": "S85XC",
+        "partNo": "1268562",
+        "qty": 6,
+        "receivedAt": "2026-06-15",
+        "sourceTransitId": "tr-f5c12516-beed-47a5-a9fa-752b82d967d4"
+      },
+      {
+        "id": "arr-285e83b5-6960-4f9f-9d4b-e3f73f424699",
+        "modelName": "S85XC",
+        "partNo": "1268562",
+        "qty": 6,
+        "receivedAt": "2026-06-15",
+        "sourceTransitId": "tr-bef0e228-f0ab-48c6-b268-5f90896551fc"
+      },
+      {
+        "id": "arr-1c1f71a2-c3ca-40a7-82f7-309057afc93f",
+        "modelName": "GS4655",
+        "partNo": "1292085",
+        "qty": 3,
+        "receivedAt": "2026-06-15",
+        "sourceTransitId": "tr-8249ced1-1953-4ba6-aaf8-0a1e5e525b26"
+      },
+      {
+        "id": "arr-e04c37f2-fdfb-4152-a108-055fe065829d",
+        "modelName": "GS4655",
+        "partNo": "1287153",
+        "qty": 6,
+        "receivedAt": "2026-06-15",
+        "sourceTransitId": "tr-cfbdcf0d-6aac-4989-9406-db1a733dcd44"
+      },
+      {
+        "id": "arr-a65b7325-9e87-4dc2-92e5-b709fcdfc853",
+        "modelName": "GS4655",
+        "partNo": "1289380",
+        "qty": 6,
+        "receivedAt": "2026-06-15",
+        "sourceTransitId": "tr-edd0a9e3-af16-4283-941f-075f5bb5bc4d"
+      },
+      {
+        "id": "arr-7cd23286-6c4e-4042-9d51-e92d8f41eb72",
+        "modelName": "GS1930E",
+        "partNo": "1303742",
+        "qty": 12,
+        "receivedAt": "2026-06-15",
+        "sourceTransitId": "tr-1e049833-4431-447c-b76f-14c0ac8b1759"
       }
     ],
     "tc-inv-receipt-cancel-ledger": [
