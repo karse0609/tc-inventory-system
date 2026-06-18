@@ -1,7 +1,7 @@
 {
   "tcInvExportVersion": 1,
-  "deployedRevision": 13,
-  "exportedAt": "2026-06-16T00:41:49.976Z",
+  "deployedRevision": 14,
+  "exportedAt": "2026-06-18T06:29:19.373Z",
   "app": "tc-inventory-system",
   "payload": {
     "tc-inv-master-items": [
@@ -10,7 +10,7 @@
         "modelName": "Z45 OSC",
         "partNo": "1272701",
         "description": "Drive Chasiss",
-        "currentStock": 65,
+        "currentStock": 47,
         "unitPrice": 650,
         "weeklyDemand": 26,
         "safetyStockWeeks": 4,
@@ -22,7 +22,7 @@
         "modelName": "Z45 DC",
         "partNo": "229306",
         "description": "Drive Chasiss",
-        "currentStock": 67,
+        "currentStock": 37,
         "unitPrice": 55,
         "weeklyDemand": 22,
         "safetyStockWeeks": 4,
@@ -34,7 +34,7 @@
         "modelName": "Z40",
         "partNo": "110545",
         "description": "Drive Chasiss",
-        "currentStock": 106,
+        "currentStock": 92,
         "unitPrice": 120,
         "weeklyDemand": 12,
         "safetyStockWeeks": 4,
@@ -46,7 +46,7 @@
         "modelName": "GS1930E",
         "partNo": "1303742",
         "description": "Drive Chasiss",
-        "currentStock": 276,
+        "currentStock": 200,
         "unitPrice": 0,
         "weeklyDemand": 81,
         "safetyStockWeeks": 4,
@@ -58,7 +58,7 @@
         "modelName": "GS4655",
         "partNo": "1287153",
         "description": "Main Deck",
-        "currentStock": 27,
+        "currentStock": 25,
         "unitPrice": 0,
         "weeklyDemand": 4,
         "safetyStockWeeks": 4,
@@ -70,7 +70,7 @@
         "modelName": "GS4655",
         "partNo": "1289380",
         "description": "Extension Deck",
-        "currentStock": 27,
+        "currentStock": 25,
         "unitPrice": 0,
         "weeklyDemand": 4,
         "safetyStockWeeks": 4,
@@ -94,7 +94,7 @@
         "modelName": "S45XC",
         "partNo": "1290073",
         "description": "Drive Chasiss",
-        "currentStock": 123,
+        "currentStock": 96,
         "unitPrice": 0,
         "weeklyDemand": 28,
         "safetyStockWeeks": 4,
@@ -106,7 +106,7 @@
         "modelName": "Z80",
         "partNo": "230980",
         "description": "Steer Axle",
-        "currentStock": 61,
+        "currentStock": 49,
         "unitPrice": 0,
         "weeklyDemand": 8,
         "safetyStockWeeks": 4,
@@ -118,7 +118,7 @@
         "modelName": "Z80",
         "partNo": "230989",
         "description": "Rear Axle",
-        "currentStock": 42,
+        "currentStock": 40,
         "unitPrice": 0,
         "weeklyDemand": 8,
         "safetyStockWeeks": 4,
@@ -130,7 +130,7 @@
         "modelName": "Z80",
         "partNo": "237329",
         "description": "Drive Chasiss",
-        "currentStock": 58,
+        "currentStock": 50,
         "unitPrice": 0,
         "weeklyDemand": 8,
         "safetyStockWeeks": 4,
@@ -142,7 +142,7 @@
         "modelName": "S85XC",
         "partNo": "1268562",
         "description": "Drive Chasiss",
-        "currentStock": 111,
+        "currentStock": 91,
         "unitPrice": 0,
         "weeklyDemand": 24,
         "safetyStockWeeks": 4,
@@ -154,7 +154,7 @@
         "modelName": "S60J",
         "partNo": "1269428",
         "description": "Drive Chasiss",
-        "currentStock": 46,
+        "currentStock": 44,
         "unitPrice": 0,
         "weeklyDemand": 3,
         "safetyStockWeeks": 4,
@@ -190,7 +190,7 @@
         "modelName": "S60J",
         "partNo": "1270505",
         "description": "Swing Chassis",
-        "currentStock": 52,
+        "currentStock": 50,
         "unitPrice": 0,
         "weeklyDemand": 3,
         "safetyStockWeeks": 4,
@@ -202,7 +202,7 @@
         "modelName": "S60J",
         "partNo": "1271010",
         "description": "Backlash, Machined",
-        "currentStock": 53,
+        "currentStock": 49,
         "unitPrice": 0,
         "weeklyDemand": 3,
         "safetyStockWeeks": 4,
@@ -292,7 +292,7 @@
           "weekStartDate": "2026-06-15",
           "qty": 76,
           "planQty": 76,
-          "confirmedQty": 0,
+          "confirmedQty": 76,
           "locked": false
         },
         {
@@ -530,9 +530,9 @@
           "modelName": "GS4655",
           "partNo": "1287153",
           "weekStartDate": "2026-06-15",
-          "qty": 4,
-          "planQty": 4,
-          "confirmedQty": 0,
+          "qty": 2,
+          "planQty": 2,
+          "confirmedQty": 2,
           "locked": false
         },
         {
@@ -780,9 +780,9 @@
           "modelName": "GS4655",
           "partNo": "1289380",
           "weekStartDate": "2026-06-15",
-          "qty": 4,
-          "planQty": 4,
-          "confirmedQty": 0,
+          "qty": 2,
+          "planQty": 2,
+          "confirmedQty": 2,
           "locked": false
         },
         {
@@ -1003,16 +1003,6 @@
           "qty": 1,
           "planQty": 1,
           "confirmedQty": 1,
-          "locked": false
-        },
-        {
-          "id": "plan-f7d3e840-87c4-4159-bebc-53917bd744ce",
-          "modelName": "GS4655",
-          "partNo": "1292085",
-          "weekStartDate": "2026-06-15",
-          "qty": 4,
-          "planQty": 4,
-          "confirmedQty": 0,
           "locked": false
         },
         {
@@ -1260,9 +1250,9 @@
           "modelName": "Z45 DC",
           "partNo": "229306",
           "weekStartDate": "2026-06-15",
-          "qty": 22,
-          "planQty": 22,
-          "confirmedQty": 0,
+          "qty": 30,
+          "planQty": 30,
+          "confirmedQty": 30,
           "locked": false
         },
         {
@@ -1510,9 +1500,9 @@
           "modelName": "Z40",
           "partNo": "110545",
           "weekStartDate": "2026-06-15",
-          "qty": 10,
-          "planQty": 10,
-          "confirmedQty": 0,
+          "qty": 14,
+          "planQty": 14,
+          "confirmedQty": 14,
           "locked": false
         },
         {
@@ -1750,9 +1740,9 @@
           "modelName": "S60J",
           "partNo": "1271010",
           "weekStartDate": "2026-06-15",
-          "qty": 3,
-          "planQty": 3,
-          "confirmedQty": 0,
+          "qty": 4,
+          "planQty": 4,
+          "confirmedQty": 4,
           "locked": false
         },
         {
@@ -1900,9 +1890,9 @@
           "modelName": "S60J",
           "partNo": "1270505",
           "weekStartDate": "2026-06-15",
-          "qty": 3,
-          "planQty": 3,
-          "confirmedQty": 0,
+          "qty": 2,
+          "planQty": 2,
+          "confirmedQty": 2,
           "locked": false
         },
         {
@@ -2036,16 +2026,6 @@
           "locked": false
         },
         {
-          "id": "plan-30d971bc-fb9a-4ccb-b7d8-d8bea2d1ee10",
-          "modelName": "S60J",
-          "partNo": "1280381",
-          "weekStartDate": "2026-06-15",
-          "qty": 3,
-          "planQty": 3,
-          "confirmedQty": 0,
-          "locked": false
-        },
-        {
           "id": "plan-04ffe896-13d6-40d9-8a06-6b03a0301404",
           "modelName": "S60J",
           "partNo": "1280381",
@@ -2173,16 +2153,6 @@
           "qty": 4,
           "planQty": 4,
           "confirmedQty": 4,
-          "locked": false
-        },
-        {
-          "id": "plan-aa08fa40-f2b5-402f-ba9d-cddd3413844f",
-          "modelName": "S60J",
-          "partNo": "1280382",
-          "weekStartDate": "2026-06-15",
-          "qty": 3,
-          "planQty": 3,
-          "confirmedQty": 0,
           "locked": false
         },
         {
@@ -2330,9 +2300,9 @@
           "modelName": "S60J",
           "partNo": "1269428",
           "weekStartDate": "2026-06-15",
-          "qty": 3,
-          "planQty": 3,
-          "confirmedQty": 0,
+          "qty": 2,
+          "planQty": 2,
+          "confirmedQty": 2,
           "locked": false
         },
         {
@@ -2453,16 +2423,6 @@
           "qty": 4,
           "planQty": 4,
           "confirmedQty": 4,
-          "locked": false
-        },
-        {
-          "id": "plan-cc217610-8b4d-475e-9af4-636fb1b2cb99",
-          "modelName": "S80J",
-          "partNo": "1276600",
-          "weekStartDate": "2026-06-15",
-          "qty": 1,
-          "planQty": 1,
-          "confirmedQty": 0,
           "locked": false
         },
         {
@@ -2592,7 +2552,7 @@
           "weekStartDate": "2026-06-15",
           "qty": 27,
           "planQty": 27,
-          "confirmedQty": 0,
+          "confirmedQty": 27,
           "locked": false
         },
         {
@@ -2832,7 +2792,7 @@
           "weekStartDate": "2026-06-15",
           "qty": 12,
           "planQty": 12,
-          "confirmedQty": 0,
+          "confirmedQty": 12,
           "locked": false
         },
         {
@@ -3080,9 +3040,9 @@
           "modelName": "Z80",
           "partNo": "230989",
           "weekStartDate": "2026-06-15",
-          "qty": 6,
-          "planQty": 6,
-          "confirmedQty": 0,
+          "qty": 2,
+          "planQty": 2,
+          "confirmedQty": 2,
           "locked": false
         },
         {
@@ -3330,9 +3290,9 @@
           "modelName": "S85XC",
           "partNo": "1268562",
           "weekStartDate": "2026-06-15",
-          "qty": 23,
-          "planQty": 23,
-          "confirmedQty": 0,
+          "qty": 20,
+          "planQty": 20,
+          "confirmedQty": 20,
           "locked": false
         },
         {
@@ -3580,9 +3540,9 @@
           "modelName": "Z80",
           "partNo": "237329",
           "weekStartDate": "2026-06-15",
-          "qty": 6,
-          "planQty": 6,
-          "confirmedQty": 0,
+          "qty": 8,
+          "planQty": 8,
+          "confirmedQty": 8,
           "locked": false
         },
         {
@@ -3830,9 +3790,9 @@
           "modelName": "Z45 OSC",
           "partNo": "1272701",
           "weekStartDate": "2026-06-15",
-          "qty": 26,
-          "planQty": 26,
-          "confirmedQty": 0,
+          "qty": 18,
+          "planQty": 18,
+          "confirmedQty": 18,
           "locked": false
         },
         {
@@ -4899,7 +4859,8 @@
       "weekConfirmations": {
         "2026-05-25": true,
         "2026-06-01": true,
-        "2026-06-08": true
+        "2026-06-08": true,
+        "2026-06-15": true
       }
     },
     "tc-inv-in-transit": [
@@ -8374,7 +8335,7 @@
     "tc-inv-operations-meta": {
       "title": "TC TECH 실시간 해외 물류·재고 관리",
       "subtitle": "Overseas Inventory & Logistics Operations Dashboard",
-      "asOfDate": "2026-06-15",
+      "asOfDate": "2026-06-18",
       "timezone": "Asia/Seoul",
       "timezoneLabel": "KST (Asia/Seoul)",
       "unit": "EA",
