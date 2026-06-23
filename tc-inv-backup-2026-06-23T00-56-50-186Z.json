@@ -1,6 +1,6 @@
 {
   "tcInvExportVersion": 1,
-  "exportedAt": "2026-06-23T00:27:31.513Z",
+  "exportedAt": "2026-06-23T00:56:50.183Z",
   "app": "tc-inventory-system",
   "payload": {
     "tc-inv-master-items": [
@@ -5383,9 +5383,9 @@
         "arrived": false,
         "tcTechNo": "TCG-6131",
         "transitStatus": "운송중",
-        "receiptDate": null,
+        "receiptDate": "",
         "receivedBy": "",
-        "receivedAtIso": null,
+        "receivedAtIso": "",
         "forwarder": "",
         "hbl": ""
       },
