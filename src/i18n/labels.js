@@ -516,6 +516,10 @@ export const L = {
     en:
       'Server sync is on — changes merge into the shared snapshot shortly. After “Push to server now”, use “Pull from server now” on another device to match exactly.',
   },
+  deployedSnapshotAppliedNotice: {
+    ko: '최신 재고 데이터가 적용되었습니다.',
+    en: 'Latest inventory data has been applied.',
+  },
   settingsRemotePull: { ko: '서버에서 지금 불러오기', en: 'Pull from server now' },
   settingsRemotePush: { ko: '지금 서버로 보내기', en: 'Push to server now' },
   settingsRemoteBusy: { ko: '처리 중…', en: 'Working…' },

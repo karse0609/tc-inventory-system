@@ -84,6 +84,11 @@
   border-bottom-color: rgba(52, 211, 153, 0.35);
 }
 
+.deployed-snapshot-banner {
+  background: rgba(52, 211, 153, 0.14);
+  border-bottom-color: rgba(52, 211, 153, 0.45);
+}
+
 .remote-sync-banner__text {
   flex: 1 1 12rem;
   word-break: break-word;

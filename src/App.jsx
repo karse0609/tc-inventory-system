@@ -44,6 +44,7 @@ import {
   writeRemoteMeta,
 } from './utils/inventoryRemoteSync'
 import { logRemoteSync, REMOTE_SYNC_LOG_PREFIX } from './utils/remoteSyncDebug'
+import { consumeDeployedSnapshotAppliedNotice } from './utils/deployedInventoryBootstrap'
 import BilingualLabel from './components/BilingualLabel'
 import LoginPage from './components/auth/LoginPage.jsx'
 import PwaInstallHint from './components/PwaInstallHint.jsx'
@@ -85,6 +86,9 @@ function App() {
   const [view, setView] = useState('dashboard')
   /** ≤700px 전용 하단 4탭 (PC 네비와 별개) */
   const [mobileSection, setMobileSection] = useState('dashboard')
+  const [deployedSnapshotNotice, setDeployedSnapshotNotice] = useState(() =>
+    consumeDeployedSnapshotAppliedNotice(),
+  )
 
   const authUser = useMemo(() => {
     if (!loggedInUserId) return null
@@ -257,6 +261,12 @@ function App() {
     },
     [authUser],
   )
+
+  useEffect(() => {
+    if (!deployedSnapshotNotice) return undefined
+    const timer = window.setTimeout(() => setDeployedSnapshotNotice(false), 8000)
+    return () => window.clearTimeout(timer)
+  }, [deployedSnapshotNotice])
 
   useEffect(() => {
     saveUsersToStorage(users)
@@ -945,6 +955,24 @@ function App() {
 
   return (
     <div className={`app${isMobileWarehouseNav ? ' app--mobile-shell' : ''}`}>
+      {deployedSnapshotNotice ? (
+        <div
+          className="remote-sync-banner deployed-snapshot-banner"
+          role="status"
+          aria-live="polite"
+        >
+          <span className="remote-sync-banner__text">
+            <BilingualLabel label={L.deployedSnapshotAppliedNotice} as="span" />
+          </span>
+          <button
+            type="button"
+            className="btn btn--ghost"
+            onClick={() => setDeployedSnapshotNotice(false)}
+          >
+            OK
+          </button>
+        </div>
+      ) : null}
       {!isMobileWarehouseNav && isAdminUser(authUser) && !inventoryRemoteSyncEnabled() ? (
         <div className="remote-sync-banner remote-sync-banner--off" role="status">
           <span className="remote-sync-banner__text">
