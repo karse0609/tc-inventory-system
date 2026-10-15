@@ -35,7 +35,16 @@ export function collectOperationalModelNames(sources = {}) {
     if (isOperationalModelName(name)) set.add(name)
   }
 
-  return [...set].sort((a, b) => a.localeCompare(b, 'en', { sensitivity: 'base' }))
+  // 대시보드 모델 선택 목록에서 제외할 모델
+  const hiddenModels = new Set([
+    'ML 12',
+    'Z45OSC',
+    'Z45DC',
+  ])
+
+  return [...set]
+    .filter((name) => !hiddenModels.has(name))
+    .sort((a, b) => a.localeCompare(b, 'en', { sensitivity: 'base' }))
 }
 
 export { normalizeModel } from './modelName'
