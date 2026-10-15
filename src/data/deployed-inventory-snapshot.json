@@ -1,7 +1,7 @@
 {
   "tcInvExportVersion": 1,
-  "deployedRevision": 2,
-  "exportedAt": "2026-10-15T07:06:40.517Z",
+  "deployedRevision": 3,
+  "exportedAt": "2026-10-15T07:08:27.579Z",
   "app": "tc-inventory-system",
   "payload": {
     "tc-inv-master-items": [
